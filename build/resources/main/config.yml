@@ -1,0 +1,6 @@
+# Configuration file for PluginTemplate
+# Add your custom settings below
+
+settings:
+  debug: false
+

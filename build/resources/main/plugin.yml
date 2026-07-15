@@ -1,0 +1,7 @@
+name: PluginTemplate
+version: '1.0.0-SNAPSHOT'
+main: com.example.plugin.TemplatePlugin
+api-version: '26.2'
+author: Antigravity
+description: A clean Minecraft plugin template.
+
