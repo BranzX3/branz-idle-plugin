@@ -1,0 +1,21 @@
+# Branz.Idle Gacha Pools
+
+coin_pool_basic:
+  currency_type: "COINS"
+  cost_per_pull: 1000.0
+  rewards:
+    - worker_template: "miner_common_1"
+      weight: 35
+    - worker_template: "lumberjack_common_1"
+      weight: 35
+    - worker_template: "fisher_common_1"
+      weight: 30
+
+diamond_pool_premium:
+  currency_type: "DIAMONDS"
+  cost_per_pull: 100.0
+  rewards:
+    - worker_template: "miner_epic_1"
+      weight: 50
+    - worker_template: "fisher_legendary_1"
+      weight: 50

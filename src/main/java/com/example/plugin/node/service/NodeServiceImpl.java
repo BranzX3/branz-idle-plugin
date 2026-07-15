@@ -1,0 +1,211 @@
+package com.example.plugin.node.service;
+
+import com.example.plugin.config.NodeRegistry;
+import com.example.plugin.config.RegistryManager;
+import com.example.plugin.database.SaveQueueService;
+import com.example.plugin.economy.service.EconomyService;
+import com.example.plugin.node.model.NodeType;
+import com.example.plugin.node.model.ProductionNode;
+import com.example.plugin.node.repository.NodeRepository;
+import com.example.plugin.territory.model.ChunkClaim;
+import com.example.plugin.territory.model.ChunkType;
+import com.example.plugin.territory.service.TerritoryService;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Implementation of NodeService using ConcurrentHashMap caching and async persistence.
+ */
+public class NodeServiceImpl implements NodeService {
+
+    private final JavaPlugin plugin;
+    private final NodeRepository repository;
+    private final SaveQueueService saveQueue;
+    private final RegistryManager registryManager;
+    private final EconomyService economyService;
+    private final TerritoryService territoryService;
+    private final Map<UUID, ProductionNode> nodeCache = new ConcurrentHashMap<>();
+
+    public NodeServiceImpl(
+        JavaPlugin plugin,
+        NodeRepository repository,
+        SaveQueueService saveQueue,
+        RegistryManager registryManager,
+        EconomyService economyService,
+        TerritoryService territoryService
+    ) {
+        this.plugin = plugin;
+        this.repository = repository;
+        this.saveQueue = saveQueue;
+        this.registryManager = registryManager;
+        this.economyService = economyService;
+        this.territoryService = territoryService;
+    }
+
+    @Override
+    public void initialize() {
+        nodeCache.clear();
+        for (ProductionNode n : repository.loadAll()) {
+            nodeCache.put(n.getNodeId(), n);
+        }
+        plugin.getLogger().info("[NodeService] Cached " + nodeCache.size() + " production nodes.");
+    }
+
+    @Override
+    public Optional<ProductionNode> getNode(UUID nodeId) {
+        return Optional.ofNullable(nodeCache.get(nodeId));
+    }
+
+    @Override
+    public List<ProductionNode> getPlayerNodes(UUID ownerId) {
+        List<ProductionNode> list = new ArrayList<>();
+        for (ProductionNode n : nodeCache.values()) {
+            if (n.getOwnerId().equals(ownerId)) {
+                list.add(n);
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public List<ProductionNode> getAllNodes() {
+        return new ArrayList<>(nodeCache.values());
+    }
+
+    @Override
+    public ProductionNode createNode(UUID ownerId, NodeType type, int originChunkX, int originChunkZ) {
+        UUID nodeId = UUID.randomUUID();
+        long now = System.currentTimeMillis();
+        ProductionNode node = new ProductionNode(nodeId, ownerId, type, 1, 1, "default", now, now);
+
+        nodeCache.put(nodeId, node);
+        saveQueue.queueTask(() -> repository.save(node));
+
+        Optional<ChunkClaim> claimOpt = territoryService.getClaim(originChunkX, originChunkZ);
+        if (claimOpt.isPresent()) {
+            ChunkClaim claim = claimOpt.get();
+            claim.setNodeId(nodeId);
+            claim.setChunkType(ChunkType.PRODUCTION);
+            territoryService.updateClaim(claim);
+        }
+
+        return node;
+    }
+
+    @Override
+    public boolean upgradeNode(Player player, UUID nodeId) {
+        ProductionNode node = nodeCache.get(nodeId);
+        if (node == null) {
+            player.sendMessage("§cProduction node not found!");
+            return false;
+        }
+
+        if (!node.getOwnerId().equals(player.getUniqueId()) && !player.hasPermission("branzidle.admin")) {
+            player.sendMessage("§cYou do not own this production node!");
+            return false;
+        }
+
+        int nextLevel = node.getLevel() + 1;
+        String tierKey = node.getNodeType().name().toLowerCase() + "_lv" + nextLevel;
+        Optional<NodeRegistry.NodeDefinition> defOpt = registryManager.getNodeRegistry().getNodeDefinition(tierKey);
+
+        if (defOpt.isEmpty()) {
+            player.sendMessage("§cThis node has reached its maximum level tier!");
+            return false;
+        }
+
+        NodeRegistry.NodeDefinition def = defOpt.get();
+        Map<String, Long> costs = def.upgradeCost();
+
+        // Check economy coin/diamond requirements
+        long requiredCoins = costs.getOrDefault("coins", 0L);
+        long requiredDiamonds = costs.getOrDefault("diamonds", 0L);
+
+        if (requiredCoins > 0 && economyService.getProfile(player.getUniqueId()).map(p -> p.getCoins() < requiredCoins).orElse(true)) {
+            player.sendMessage("§cInsufficient Coins to upgrade node! Need: " + requiredCoins);
+            return false;
+        }
+        if (requiredDiamonds > 0 && economyService.getProfile(player.getUniqueId()).map(p -> p.getDiamonds() < requiredDiamonds).orElse(true)) {
+            player.sendMessage("§cInsufficient Diamonds to upgrade node! Need: " + requiredDiamonds);
+            return false;
+        }
+
+        // Handle spatial expansion if tier requires 4 chunks (2x2) vs 1 chunk
+        if (def.sizeChunks() == 4 && node.getSizeChunks() == 1) {
+            // Find origin chunk
+            ChunkClaim originClaim = null;
+            for (ChunkClaim c : territoryService.getPlayerClaims(player.getUniqueId())) {
+                if (nodeId.equals(c.getNodeId())) {
+                    originClaim = c;
+                    break;
+                }
+            }
+
+            if (originClaim != null) {
+                int ox = originClaim.getChunkX();
+                int oz = originClaim.getChunkZ();
+                // Ensure origin, (ox+1, oz), (ox, oz+1), (ox+1, oz+1) are either owned by player or available
+                if (!territoryService.is2x2AreaAvailable(ox, oz)) {
+                    // Check if player owns them all
+                    boolean allOwnedByMe = check2x2Ownership(player.getUniqueId(), ox, oz);
+                    if (!allOwnedByMe) {
+                        player.sendMessage("§cCannot expand node to 2x2! Adjacent chunks East and South are obstructed or owned by other players.");
+                        return false;
+                    }
+                } else {
+                    // Automatically claim the remaining 3 chunks as PRODUCTION
+                    territoryService.claimChunkInternal(player.getUniqueId(), ox + 1, oz, ChunkType.PRODUCTION);
+                    territoryService.claimChunkInternal(player.getUniqueId(), ox, oz + 1, ChunkType.PRODUCTION);
+                    territoryService.claimChunkInternal(player.getUniqueId(), ox + 1, oz + 1, ChunkType.PRODUCTION);
+                }
+            }
+        }
+
+        // Deduct currency
+        if (requiredCoins > 0) economyService.removeCoins(player.getUniqueId(), requiredCoins);
+        if (requiredDiamonds > 0) economyService.removeDiamonds(player.getUniqueId(), requiredDiamonds);
+
+        // Apply level up
+        node.setLevel(nextLevel);
+        if (def.sizeChunks() > node.getSizeChunks()) {
+            node.setSizeChunks(def.sizeChunks());
+        }
+        updateNode(node);
+
+        player.sendMessage("§aSuccessfully upgraded production node to Level " + nextLevel + "!");
+        return true;
+    }
+
+    @Override
+    public void updateNode(ProductionNode node) {
+        if (node != null) {
+            nodeCache.put(node.getNodeId(), node);
+            saveQueue.queueTask(() -> repository.save(node));
+        }
+    }
+
+    @Override
+    public void deleteNode(UUID nodeId) {
+        nodeCache.remove(nodeId);
+        saveQueue.queueTask(() -> repository.deleteById(nodeId));
+    }
+
+    private boolean check2x2Ownership(UUID playerId, int ox, int oz) {
+        for (int dx = 0; dx < 2; dx++) {
+            for (int dz = 0; dz < 2; dz++) {
+                Optional<ChunkClaim> c = territoryService.getClaim(ox + dx, oz + dz);
+                if (c.isEmpty() || !c.get().getOwnerId().equals(playerId)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+}

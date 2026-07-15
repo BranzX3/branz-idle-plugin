@@ -1,638 +1,116 @@
 # 05 - Domain Model.md
 
-# Branz.Idle Domain Model
-
-> Defines the core gameplay entities, relationships, and ownership boundaries inside Branz.Idle.
+# Branz.Idle Core Domain Model
 
 ---
 
-# Purpose
+# 1. Domain Architecture Overview
 
-This document defines the fundamental objects that exist within the Branz.Idle world.
-
-A Domain Model represents gameplay concepts, not database tables.
-
-The goal is to ensure that every system has a clear ownership of data and responsibilities.
-
----
-
-# Domain Overview
-
-The main gameplay domains are:
+The Branz.Idle engine models gameplay entities around a clear hierarchy of ownership, location, and functional state:
 
 ```text
-Player
-
-│
-
-├── Territory
-│
-│   └── Chunk
-│
-│       └── Node
-│
-│           ├── Worker
-│           │
-│           ├── Production
-│           │
-│           └── Storage
-│
-└── Progression
+Player (Account & Virtual Wallet)
+ └── Territory (Claimed Chunks in idle_world)
+      ├── Residential Chunk (Hub / Decoration / No Production)
+      └── Production Node (Mining / Lumber / Fishing Facility)
+           ├── Node Size & Expansion (1 Chunk at Lv1 -> 2x2 Chunks at Lv5+)
+           ├── Node Storage (Local buffer for produced resources)
+           ├── Node Exploration (Per-Node tier & zone unlock state)
+           └── Assigned Workers (WorkerInstance list)
 ```
 
 ---
 
-# Player
+# 2. Core Entities
 
-## Description
-
-Represents a player account inside Branz.Idle.
-
-A player owns territory, workers, progression, and economy.
-
----
-
-## Responsibilities
-
-Player owns:
-
-* Claimed chunks
-* Workers
-* Currency
-* Progression
-* Exploration progress
+## 2.1 PlayerDomain (`PlayerProfile`)
+Represents the player's overarching profile inside the idle engine.
+* **`playerId`** (`UUID`): Unique Minecraft player UUID.
+* **`coins`** (`double`): Standard in-game earned currency used for basic upgrades and regular Gacha.
+* **`diamonds`** (`long`): Premium or rare currency used for speedups and special Gacha pools.
+* **`wallet`** (`PlayerResourceWallet`): Virtual inventory containing all collected resources across all nodes.
+* **`onboardingCompleted`** (`boolean`): Flag indicating whether the player has completed the initial RTP + Starter Pack claim flow.
 
 ---
 
-## Does Not Own
-
-Player does not directly own:
-
-* Production calculation
-* Node logic
-* Visual entities
-
----
-
-# Territory
-
-## Description
-
-Represents the player's controlled world area.
-
-Territory is the foundation of Branz.Idle expansion.
+## 2.2 Territory & Claimed Chunks (`ChunkClaim`)
+Represents a single 16x16 block area inside the dedicated `idle_world`.
+* **`chunkX`**, **`chunkZ`** (`int`): Minecraft chunk coordinates.
+* **`ownerId`** (`UUID`): ID of the player who owns this chunk.
+* **`chunkType`** (`ChunkType`): Enum (`RESIDENTIAL`, `PRODUCTION`).
+  * `RESIDENTIAL`: Base area for player decoration, central hub, or buffer space. Produces no resources.
+  * `PRODUCTION`: Dedicated to a specific `ProductionNode`.
+* **`protectionFlags`** (`ProtectionFlags`): Self-contained permissions (block break/place, mob spawning, explosions).
 
 ---
 
-## Rules
-
-* Players start with a predefined number of chunks.
-* New chunks must connect to existing territory.
-* Territory expansion requires cost.
-* Territory cannot overlap with other players.
-
----
-
-# Chunk
-
-## Description
-
-A Chunk is the smallest ownership unit in Branz.Idle.
-
-A chunk represents one controllable area.
+## 2.3 Production Node (`ProductionNode`)
+Represents an active resource-producing facility placed on claimed chunks.
+* **`nodeId`** (`UUID`): Unique node instance ID.
+* **`ownerId`** (`UUID`): Player who owns this facility.
+* **`nodeType`** (`NodeType`): Profession type (`MINING`, `LUMBER`, `FISHING`, etc.).
+* **`level`** (`int`): Current facility level (1 to 100).
+* **`sizeChunks`** (`NodeSize`): Physical footprint inside the world.
+  * **Lv 1 to 4 (`SINGLE_1X1`)**: Occupies exactly 1 chunk (`16x16`).
+  * **Lv 5+ (`MULTI_2X2`)**: Expands to occupy a `2x2` grid of chunks (`32x32`), requiring 3 adjacent owned residential chunks to merge.
+* **`nodeStyleId`** (`String`): Reference to the active WorldEdit schematic definition (`mining_t1_rustic`, etc.).
+* **`storage`** (`NodeStorage`): Local buffer storing generated resources until the player collects them.
+* **`explorationLevel`** (`int`): **Per-Node** exploration progression determining deeper zone drops (e.g., surface vs deep cave).
+* **`assignedWorkerIds`** (`List<UUID>`): List of active worker UUIDs operating inside this facility.
 
 ---
 
-## Core Rule
-
-```text
-1 Chunk = 1 Node
-```
-
-A claimed chunk can become a production node.
-
----
-
-## Chunk States
-
-Example:
-
-```text
-UNCLAIMED
-
-↓
-
-CLAIMED
-
-↓
-
-NODE_ASSIGNED
-
-↓
-
-ACTIVE
-```
+## 2.4 Worker Instance (`WorkerInstance`)
+Represents an individual worker owned by a player.
+* **`workerId`** (`UUID`): Unique instance ID.
+* **`ownerId`** (`UUID`): Owner UUID.
+* **`templateId`** (`String`): Reference to the YAML registry template (`miner_common_1`).
+* **`assignedNodeId`** (`UUID`): Nullable reference to the node currently assigned to.
+* **`level`** (`int`): Current worker level (`1` to `100`).
+* **`experience`** (`long`): Current XP accumulated toward the next level.
+* **`stats`** (`WorkerStats`): Calculated runtime attributes:
+  * `productionSpeedBonus` (`double`): Multiplier reducing node tick intervals.
+  * `resourceYieldBonus` (`double`): Multiplier increasing base output quantity.
+  * `rareDropBonus` (`double`): Multiplier improving the chance of rolling rare exploration table drops.
 
 ---
 
-## Responsibilities
+## 2.5 Storage Buffers & Virtual Wallet
 
-Chunk manages:
+### Node Storage (`NodeStorage`)
+A local buffer attached to a specific `ProductionNode`.
+* **`nodeId`** (`UUID`): Parent node.
+* **`resourceBuffer`** (`Map<String, Long>`): Map of resource key (`iron_ore`, `oak_log`) to quantity stored.
+* **`maxCapacity`** (`long`): Maximum storage limit scaled by node level and assigned worker stats.
+* **`lastCalculatedTime`** (`long`): Epoch timestamp in milliseconds of the last production tick or offline catch-up.
 
-* Owner
-* Location
-* Node assignment
-* Visual boundaries
-
----
-
-# Node
-
-## Description
-
-A Node represents a specialized production area.
-
-Examples:
-
-* Mining Node
-* Lumber Node
-* Fishing Node
-* Farming Node
-* Ranch Node
+### Player Resource Wallet (`PlayerResourceWallet`)
+The player's centralized virtual wallet (backed by `player_resource` database table).
+* **`playerId`** (`UUID`): Wallet owner.
+* **`resources`** (`Map<String, Long>`): Total accumulated resources collected from all node storages.
+* **Purpose**: Prevents Minecraft physical inventory clutter (`64 stack limits`) and serves as the primary currency/material source for node upgrades and structure crafting.
 
 ---
 
-## Node Responsibilities
-
-A Node manages:
-
-* Production type
-* Assigned workers
-* Node level
-* Style
-* Storage
-* Production state
+## 2.6 Onboarding Starter Pack (`StarterPack`)
+Defines the initial assets granted to a player upon first chunk claim (`/base` after RTP):
+* **`freeChunksGranted`** (`int`): Exactly 4 chunks (1 Residential Hub + 3 basic Nodes: Mining, Lumber, Fishing).
+* **`starterWorkers`** (`List<String>`): 3 randomly selected Tier-1 worker template keys added directly to the player's collection.
+* **`starterCoins`** (`double`): 1,000 Coins to kickstart early level upgrades.
 
 ---
 
-## Node Does Not Manage
+# 3. Domain Relationships & Integrity Rules
 
-Node does not directly control:
-
-* NPC rendering
-* GUI
-* Database saving
-
----
-
-# Node Progression
-
-Node progression is based on infrastructure growth.
-
-Primary progression:
-
-* Worker capacity
-* Visual upgrade
-* Storage improvement
-* Production efficiency
+1. **One Node per Chunk Area**: A `1x1` node owns 1 `ChunkClaim`. A `2x2` node owns 4 `ChunkClaim` records (`chunkX/chunkZ`). Two nodes cannot overlap.
+2. **Adjacent Territory Expansion**: A player cannot claim a disconnected chunk across the world. All territory claims must share at least one edge (`North`, `South`, `East`, `West`) with an existing claim belonging to that player.
+3. **Worker Assignment Constraint**: A `WorkerInstance` can only be assigned to (`assignedNodeId`) **one** `ProductionNode` at any given time. The node must belong to the same `ownerId`.
+4. **Per-Node Exploration**: Exploration depth (`explorationLevel`) belongs strictly to the `ProductionNode` instance (`node_exploration`), encouraging players to develop unique specialized mines or forests rather than unlocking everything globally.
 
 ---
 
-## Node Level Philosophy
+# Document References
 
-Node levels should represent visible growth.
+Next document:
 
-Example:
-
-```text
-Level 1
-
-Basic Structure
-
-↓
-
-Level 5
-
-Improved Facility
-
-↓
-
-Level 10
-
-Advanced Facility
-```
-
----
-
-# Worker
-
-## Description
-
-A Worker is a collectible gameplay unit assigned to production.
-
-Workers are the main progression and optimization system.
-
----
-
-## Worker Data
-
-A Worker contains:
-
-* Unique ID
-* Tier
-* Level
-* Experience
-* Stats
-* Assignment
-
----
-
-## Worker Does Not Represent
-
-Worker is not a Minecraft Entity.
-
-Worker is gameplay data.
-
----
-
-# Worker Visual
-
-## Description
-
-Visual representation of a Worker inside Minecraft.
-
-Possible implementations:
-
-* Citizens NPC
-* Display Entity
-* Future providers
-
----
-
-## Rule
-
-Worker Data and Worker Visual are separated.
-
-Example:
-
-```text
-Worker
-
-├── Worker Data
-
-└── Worker Visual
-```
-
----
-
-# Worker Level
-
-## Maximum Level
-
-```text
-Level 100
-```
-
----
-
-## Experience Source
-
-Workers gain experience from:
-
-* Completing production
-* Exploration tasks
-* Special rewards
-
----
-
-## Level Growth
-
-Each level increases worker effectiveness.
-
-Stats are determined through:
-
-* Worker tier
-* Random stat growth
-* Level progression
-
----
-
-# Worker Stats
-
-Workers do not have classes.
-
-Each worker is differentiated through stats.
-
-Examples:
-
-* Production Speed
-* Resource Bonus
-* Rare Drop Chance
-* Exploration Efficiency
-* Storage Efficiency
-
----
-
-# Production
-
-## Description
-
-Production is the process of converting worker activity into resources.
-
----
-
-## Production Model
-
-```text
-Worker
-
-+
-
-Node
-
-+
-
-Production Rules
-
-↓
-
-Resource Output
-```
-
----
-
-# Production Tick
-
-Production should support:
-
-* Online production
-* Offline production
-* Catch-up calculation
-
----
-
-## Offline Philosophy
-
-Offline players receive progress.
-
-However:
-
-Offline efficiency may be limited compared to active gameplay.
-
----
-
-# Storage
-
-## Description
-
-Each Node has independent storage.
-
----
-
-## Storage Model
-
-```text
-Node
-
-↓
-
-Storage
-
-↓
-
-Resources
-```
-
----
-
-## Rules
-
-Players can manage storage from GUI.
-
-Players do not need to physically visit every node.
-
----
-
-# Resource
-
-## Description
-
-Resources are production outputs used for progression and economy.
-
-Examples:
-
-* Wood
-* Ore
-* Fish
-* Crops
-* Rare Materials
-
----
-
-## Resource Usage
-
-Resources may be used for:
-
-* Upgrades
-* Crafting
-* Economy
-* Future MMO systems
-
----
-
-# Exploration
-
-## Description
-
-Exploration represents progression depth within a profession.
-
----
-
-## Examples
-
-Mining:
-
-```text
-Surface Mine
-
-↓
-
-Deep Cave
-
-↓
-
-Ancient Mine
-
-↓
-
-Rare Resource Zone
-```
-
----
-
-## Rules
-
-Exploration progression is separated by Node type.
-
-Example:
-
-Mining exploration does not affect Fishing.
-
----
-
-# Economy
-
-## Currency Types
-
-Initial design:
-
-## Coin
-
-Obtained through gameplay.
-
-Used for:
-
-* Basic upgrades
-* Worker gacha
-* Trading
-
----
-
-## Diamond
-
-Premium currency.
-
-Used for:
-
-* Premium worker gacha
-* Territory expansion shortcuts
-* Special systems
-
----
-
-# Gacha Worker System
-
-Workers are obtained through gacha.
-
-Sources:
-
-* Coin Gacha
-* Diamond Gacha
-
----
-
-## Worker Lifecycle
-
-```text
-Acquire
-
-↓
-
-Train
-
-↓
-
-Assign
-
-↓
-
-Level
-
-↓
-
-Trade / Convert
-```
-
----
-
-# Worker Removal
-
-Unused workers may:
-
-Option A:
-
-Sell to another player.
-
-Option B:
-
-Convert into Worker EXP material.
-
-Option C:
-
-Convert into currency.
-
-Final balancing decision is handled later.
-
----
-
-# Domain Relationships
-
-```text
-Player
-
-1 ─── N
-
-Chunk
-
-
-Chunk
-
-1 ─── 1
-
-Node
-
-
-Node
-
-1 ─── N
-
-Worker
-
-
-Node
-
-1 ─── 1
-
-Storage
-
-
-Worker + Node
-
-↓
-
-Production
-```
-
----
-
-# Design Rules
-
-The Domain Model follows these rules:
-
-* Gameplay objects are independent from visuals.
-* Data ownership must be clear.
-* Production must work without loaded chunks.
-* GUI must not own gameplay state.
-* External plugins must not define domain behavior.
-
----
-
-# Summary
-
-The Branz.Idle Domain Model creates a foundation for an expandable idle MMORPG system.
-
-Future systems such as:
-
-* Guilds
-* Trading
-* Dungeons
-* Bosses
-* Seasonal Events
-
-should integrate into this model without rewriting existing gameplay systems.
-
----
-
-# Next Document
-
-06-Database.md
+**06Database.md**

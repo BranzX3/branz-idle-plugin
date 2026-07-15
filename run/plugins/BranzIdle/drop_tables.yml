@@ -1,0 +1,77 @@
+# Branz.Idle Exploration Drop Tables
+
+mining_surface_drops:
+  min_exploration_level: 1
+  entries:
+    - resource_key: "iron_ore"
+      min_qty: 10
+      max_qty: 30
+      weight: 100
+    - resource_key: "coal"
+      min_qty: 15
+      max_qty: 40
+      weight: 80
+
+mining_deep_drops:
+  min_exploration_level: 50
+  entries:
+    - resource_key: "iron_ore"
+      min_qty: 50
+      max_qty: 150
+      weight: 100
+    - resource_key: "mithril_crystal"
+      min_qty: 1
+      max_qty: 5
+      weight: 15
+    - resource_key: "adamantite_core"
+      min_qty: 1
+      max_qty: 1
+      weight: 2
+
+lumber_surface_drops:
+  min_exploration_level: 1
+  entries:
+    - resource_key: "oak_log"
+      min_qty: 10
+      max_qty: 30
+      weight: 100
+    - resource_key: "hardwood"
+      min_qty: 2
+      max_qty: 8
+      weight: 25
+
+lumber_deep_drops:
+  min_exploration_level: 50
+  entries:
+    - resource_key: "oak_log"
+      min_qty: 50
+      max_qty: 150
+      weight: 100
+    - resource_key: "ancient_bark"
+      min_qty: 1
+      max_qty: 5
+      weight: 15
+
+fishing_surface_drops:
+  min_exploration_level: 1
+  entries:
+    - resource_key: "golden_fish"
+      min_qty: 10
+      max_qty: 30
+      weight: 100
+    - resource_key: "pearl"
+      min_qty: 1
+      max_qty: 3
+      weight: 20
+
+fishing_deep_drops:
+  min_exploration_level: 50
+  entries:
+    - resource_key: "golden_fish"
+      min_qty: 50
+      max_qty: 150
+      weight: 100
+    - resource_key: "sunken_relic"
+      min_qty: 1
+      max_qty: 2
+      weight: 5

@@ -1,8 +1,8 @@
-0# 00 - Vision.md
+# 00 - Vision.md
 
 # Branz.Idle
 
-> A production-ready Minecraft Idle MMORPG framework focused on autonomous progression, modular game systems, and long-term maintainability.
+> A production-ready Minecraft Idle MMORPG framework focused on autonomous progression, modular game systems, territory protection, and long-term maintainability.
 
 ---
 
@@ -10,19 +10,18 @@
 
 **Branz.Idle** is not designed as a traditional Minecraft plugin.
 
-It is designed as a complete **Idle MMORPG Engine** running inside Minecraft, where players continuously expand their territory, build autonomous production zones, develop workers, and progress through long-term strategic decisions.
+It is designed as a complete **Idle MMORPG Engine** running inside a dedicated Minecraft world, where players continuously claim and protect territory, build autonomous production zones, develop collectible workers, and progress through long-term strategic decisions.
 
-The project aims to provide a living world that combines:
+The project aims to provide a living world inside a **Dedicated World** (`idle_world`) that combines:
 
-* Survival
-* Idle Progression
-* MMORPG Systems
-* Player Economy
-* Worker Collection
-* Territory Expansion
-* Long-term Character Growth
+* Survival & Exploration
+* Idle Progression & Offline Resource Generation
+* MMORPG Systems & Economy
+* Player Territory & Self-Contained Protection
+* Worker Collection & Optimization
+* Long-term Character & Empire Growth
 
-Every system should support years of future expansion without requiring fundamental architectural redesign.
+Every system is engineered to support years of future expansion without requiring fundamental architectural redesign.
 
 ---
 
@@ -34,9 +33,9 @@ Branz.Idle follows several core principles.
 
 Player progression continues even while offline.
 
-Offline production is a core gameplay mechanic rather than an optional feature.
+Offline production is a core gameplay mechanic rather than an optional feature. Players generate resources continuously based on elapsed time and stored calculation states.
 
-Players should always feel rewarded for long-term progression.
+Players should always feel rewarded for long-term progression and planning.
 
 ---
 
@@ -46,30 +45,24 @@ Automation exists to reduce repetitive gameplay—not to remove player decisions
 
 Players are responsible for:
 
-* Expanding territory
-* Creating production nodes
-* Assigning workers
-* Managing resources
-* Upgrading infrastructure
-* Optimizing production
+* Claiming and protecting territory
+* Selecting and creating specialized production nodes
+* Assigning and optimizing workers
+* Managing resource storage and economy
+* Upgrading infrastructure and node capacity
+* Exploring deeper production tiers
 
-Idle systems should reward planning rather than repetitive interaction.
+Idle systems reward strategic placement and management rather than repetitive manual clicking.
 
 ---
 
-## 3. A Living Base
+## 3. A Living & Protected Base
 
-Every player base should feel alive.
+Every player base inside the dedicated world should feel alive and safe.
 
-Workers travel.
+Workers travel to visual work locations. Buildings and structures evolve with node levels. Production areas become larger as infrastructure expands. Structures visually represent progression.
 
-Buildings evolve.
-
-Production areas become larger.
-
-Structures visually represent progression.
-
-The world itself should communicate player growth without relying entirely on GUI interfaces.
+At the same time, all claimed territory is protected by a self-contained protection engine, ensuring that player structures, workers, and resources are safe from griefing, block breaking, and environmental damage.
 
 ---
 
@@ -77,141 +70,118 @@ The world itself should communicate player growth without relying entirely on GU
 
 The engine should never depend on specific gameplay content.
 
-Mining, Lumber, Fishing, Farming, Ranching, and all future professions are considered independent content modules built on top of the core engine.
+Mining, Lumber, Fishing, Farming, Ranching, and all future professions are considered independent content modules defined via external configuration files and registered into the core engine at runtime.
 
 ---
 
 ## 5. Data-Driven Design
 
-Game content should be configurable without modifying source code.
+Game content must be configurable without modifying source code.
 
 Examples include:
 
-* Drop tables
-* Worker tiers
-* Gacha rates
-* Production rewards
-* Exploration rewards
-* Upgrade costs
-* Node styles
+* Node definitions and upgrade costs
+* Drop tables and resource rarities
+* Worker templates, tiers, and growth rates
+* Gacha pools and probabilities
+* Exploration rewards and zone unlocks
+* Structure styles and schematic mappings
 
-The engine should remain stable while content evolves.
+The core engine remains stable and compiled while game balancing and content evolve dynamically.
 
 ---
 
 ## 6. Modular Architecture
 
-Every gameplay component should be replaceable.
+Every gameplay component is built as a feature-oriented module.
 
 This includes:
 
-* Database providers
-* Worker providers
-* Animation systems
-* GUI implementations
-* Content modules
+* Territory & Protection systems
+* Node & Worker management
+* Production & Storage calculators
+* Economy & Gacha engines
+* Presentation & GUI controllers
+* External integrations (Citizens, WorldEdit/FAWE, Vault)
 
-The core engine should never directly depend on third-party plugins.
+The core engine communicates cleanly via service interfaces and events, ensuring soft dependencies on third-party visualization or schematic tools.
 
 ---
 
-# Gameplay Loop
+# Gameplay Loop & Onboarding
 
-The intended gameplay loop is:
+## New Player Onboarding (Starter Flow)
 
-Claim Territory
+To ensure an engaging first impression without tedious early grinding, new players enter through a structured onboarding flow:
 
-↓
+1. **Random Teleport (RTP)**: Players enter the dedicated `idle_world` and are teleported to a clean, available location.
+2. **First Claim & Starter Pack**: Upon claiming their first chunk via `/base`, players receive a **Starter Pack**:
+   * **4 Free Claimed Chunks**: Arranged as a contiguous starting base (1 Residential/Central Chunk + 1 Mining Node + 1 Lumber Node + 1 Fishing Node).
+   * **3 Random Starter Workers**: Instantly added to the player's collection to begin assigning immediately.
+   * **Starter Coins**: Initial currency to facilitate early GUI interactions and basic upgrades.
 
-Create Production Nodes
+## Continuous Gameplay Loop
 
-↓
-
-Assign Workers
-
-↓
-
-Generate Resources
-
-↓
-
-Upgrade Infrastructure
-
-↓
-
-Expand Territory
-
-↓
-
-Collect Better Workers
-
-↓
-
-Unlock New Resources
-
-↓
-
-Strengthen Economy
-
-↓
-
-Repeat
+```text
+Claim Adjacent Territory & Expand Base
+                ↓
+Create & Customize Production Nodes
+                ↓
+Assign & Optimize Workers from Gacha
+                ↓
+Generate Resources (Online & Offline)
+                ↓
+Collect Resources into Virtual Wallet
+                ↓
+Sell / Trade / Upgrade Infrastructure
+                ↓
+Explore Deeper Zones for Rare Materials
+                ↓
+Repeat & Scale Production Empire
+```
 
 ---
 
 # Core Progression
 
-Player progression consists of several independent systems.
+Player progression consists of several interconnected, feature-based systems.
 
-## Territory
+## Territory & Protection
 
-Expand the player's land.
-
-Unlock additional production nodes.
+* Claim contiguous 16x16 Minecraft chunks in the dedicated world.
+* Expand land automatically or via currency.
+* Full self-contained protection against unauthorized block breaking, placing, explosions, and mob griefing.
 
 ---
 
-## Infrastructure
+## Infrastructure & Node Expansion
 
-Upgrade production nodes.
-
-Increase worker capacity.
-
-Unlock new visual stages.
+* Upgrade production nodes from basic Lv1 facilities (1 chunk, 16x16) up to advanced Lv5+ multi-chunk complexes (2x2 chunks, 32x32).
+* Increase worker slot capacity and storage limits.
+* Unlock and paste new architectural styles via WorldEdit/FAWE schematics.
 
 ---
 
 ## Workers
 
-Collect.
-
-Train.
-
-Level up.
-
-Optimize.
+* Collect unique workers via Coin and Diamond Gacha pools.
+* Train and level up workers (Max Level 100) through active production and exploration.
+* Optimize production speed, resource bonuses, and rare drop chances.
 
 ---
 
 ## Exploration
 
-Unlock deeper production areas.
-
-Discover rare resources.
-
-Expand production possibilities.
+* Each node maintains independent exploration progression.
+* Discover deeper zones (e.g., Surface Mine → Deep Cave → Ancient Mine).
+* Unlock rare materials and high-tier drop tables.
 
 ---
 
-## Economy
+## Economy & Storage
 
-Trade.
-
-Invest.
-
-Upgrade.
-
-Expand.
+* Virtual Resource Wallet: All collected node resources are safely stored in a virtual wallet (`player_resource`) rather than cluttering physical inventory.
+* Dual Currency: Coins (gameplay earned) for basic upgrades and gacha; Diamonds (premium/rare rewards) for acceleration and rare gacha pools.
 
 ---
 
@@ -219,76 +189,50 @@ Expand.
 
 Branz.Idle is intentionally **not** designed to become:
 
-* A Skyblock server
-* A technical factory simulator
-* A clicker game
-* A fully AFK experience
+* A traditional Skyblock or Factions server
+* A complex technical factory simulator requiring redstone/pipes
+* A mindless clicker game
+* An unprotected free-for-all building world
 
-Players should always make meaningful strategic decisions.
+Players should always make meaningful strategic decisions within a secure, autonomous environment.
 
 ---
 
 # Engineering Principles
 
-The project follows these engineering principles.
-
 ## Engine First
 
-Core systems are implemented before gameplay content.
+Core simulation and state management are implemented cleanly before visual or content modules.
 
 ---
 
-## Data-Driven
+## Data-Driven & Configurable
 
-Content belongs in configuration.
-
-Logic belongs in the engine.
+All templates (`worker_template`, `resource`, `drop_table`, `node_style`, `gacha_pool`) reside in YAML files and runtime registries—never hardcoded or stored in relational database tables.
 
 ---
 
-## Composition Over Inheritance
+## Feature-Based Modular Packaging
 
-Favor composition whenever possible to improve flexibility and maintainability.
+Code is organized by business domain (`territory`, `node`, `worker`, `production`, `protection`, `onboarding`, etc.) to ensure clear ownership and seamless scalability.
 
 ---
 
-## Loose Coupling
+## Loose Coupling via Services & Events
 
-Systems communicate through services and events.
-
-Direct dependencies between gameplay modules should be avoided.
+Systems communicate through a centralized `ServiceRegistry` and Bukkit/Paper event publishing. Direct cross-module database or GUI calls are strictly prohibited.
 
 ---
 
 ## Asynchronous by Default
 
-Heavy tasks should never block the Minecraft main thread.
-
-Database operations, production calculations, and background processing should be asynchronous whenever possible.
+Database persistence, production catch-up calculations, and schematic pastes execute on background threads to ensure the Minecraft server main thread remains lightweight and lag-free at 20 TPS.
 
 ---
 
 ## Logic and Presentation Separation
 
-Gameplay simulation is independent from visual presentation.
-
-Workers, structures, animations, and particles exist solely to improve immersion and should never directly control gameplay logic.
-
----
-
-# Long-Term Goal
-
-Branz.Idle is designed to support:
-
-* Hundreds of node styles
-* Thousands of collectible workers
-* Multiple professions
-* Community-created structures
-* Live balance updates
-* Seasonal content
-* Future MMORPG systems
-
-without requiring major architectural redesign.
+Gameplay simulation runs completely independent of visual entities. If Citizens NPCs or WorldEdit schematics are missing or unloaded, production and worker progression continue without interruption.
 
 ---
 

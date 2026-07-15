@@ -1,0 +1,70 @@
+# Branz.Idle Production Node Schematics & Upgrade Tiers
+
+mining_lv1:
+  node_type: MINING
+  size_chunks: 1
+  schematic: "mining_t1_default.schem"
+  upgrade_cost:
+    coins: 1000
+    iron_ore: 50
+  worker_slots: 2
+  max_storage_capacity: 5000
+  base_tick_seconds: 60
+
+mining_lv5:
+  node_type: MINING
+  size_chunks: 4
+  schematic: "mining_t2_complex.schem"
+  upgrade_cost:
+    coins: 25000
+    diamonds: 50
+    iron_ore: 2000
+  worker_slots: 5
+  max_storage_capacity: 50000
+  base_tick_seconds: 40
+
+lumber_lv1:
+  node_type: LUMBER
+  size_chunks: 1
+  schematic: "lumber_t1_default.schem"
+  upgrade_cost:
+    coins: 1000
+    oak_log: 50
+  worker_slots: 2
+  max_storage_capacity: 5000
+  base_tick_seconds: 60
+
+lumber_lv5:
+  node_type: LUMBER
+  size_chunks: 4
+  schematic: "lumber_t2_complex.schem"
+  upgrade_cost:
+    coins: 25000
+    diamonds: 50
+    oak_log: 2000
+  worker_slots: 5
+  max_storage_capacity: 50000
+  base_tick_seconds: 40
+
+fishing_lv1:
+  node_type: FISHING
+  size_chunks: 1
+  schematic: "fishing_t1_default.schem"
+  upgrade_cost:
+    coins: 1000
+    golden_fish: 20
+  worker_slots: 2
+  max_storage_capacity: 5000
+  base_tick_seconds: 60
+
+fishing_lv5:
+  node_type: FISHING
+  size_chunks: 4
+  schematic: "fishing_t2_complex.schem"
+  upgrade_cost:
+    coins: 25000
+    diamonds: 50
+    golden_fish: 1000
+  worker_slots: 5
+  max_storage_capacity: 50000
+  base_tick_seconds: 40

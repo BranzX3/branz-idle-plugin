@@ -1,412 +1,162 @@
 # 01 - Architecture.md
 
-# Branz.Idle Architecture
-
-> Defines the software architecture, module boundaries, dependency rules, and engineering principles used throughout the project.
+# Branz.Idle Architecture Specification
 
 ---
 
-# Overview
+# 1. Architectural Philosophy
 
-Branz.Idle is designed as a modular game engine rather than a monolithic Minecraft plugin.
+Branz.Idle is engineered as a **Feature-Based Modular Engine** that operates inside Minecraft (Paper API).
 
-The architecture separates **gameplay logic**, **content**, **presentation**, and **external integrations** into independent layers.
+The system strictly enforces separation between four primary layers:
 
-This approach improves maintainability, scalability, testing, and future expansion.
-
----
-
-# Architecture Goals
-
-The architecture is designed to achieve the following goals:
-
-* High maintainability
-* Low coupling
-* High cohesion
-* Modular content
-* Data-driven gameplay
-* Extensible systems
-* Plugin independence
-* Performance-oriented execution
+1. **Bootstrap Layer** – Plugin lifecycle, ServiceRegistry initialization, and provider detection.
+2. **Feature & Core Modules Layer** – Independent domain modules containing Models, Services, and Repositories.
+3. **Infrastructure Layer** – Database persistence, YAML configuration loading, and external integrations.
+4. **Presentation Layer** – Inventories (GUIs), Holograms, Visual Entities (Citizens), and Schematics (WorldEdit/FAWE).
 
 ---
 
-# High-Level Architecture
+# 2. High-Level Architecture Diagram
 
-```
-                   Minecraft Server
-                           │
-                    Bukkit / Paper API
-                           │
-                    Bootstrap Layer
-                           │
-          ┌─────────────────────────────────┐
-          │          Core Engine            │
-          └─────────────────────────────────┘
-                           │
-      ┌──────────────┬──────────────┬──────────────┐
-      │              │              │              │
- Gameplay       Content       Presentation     Infrastructure
-      │              │              │              │
-      │              │              │              │
- Nodes        Config Files      GUI System      Database
- Workers      Styles            Worker Visual      Scheduler
- Economy      Drop Tables       Animation       Registry
- Production   Exploration       Structures      Storage
+```text
++-------------------------------------------------------------------------+
+|                            BOOTSTRAP LAYER                              |
+|           Plugin Main | ServiceRegistry | Provider Detection            |
++-------------------------------------------------------------------------+
+                                     |
+                                     v
++-------------------------------------------------------------------------+
+|                      FEATURE & CORE MODULES LAYER                       |
+|                                                                         |
+|  [Territory]    [Protection]    [Node]        [Worker]    [Production]  |
+|  [Storage]      [Exploration]   [Economy]     [Gacha]     [Onboarding]  |
+|                                                                         |
+|  * Each module encapsulates its own Models, Services & Repositories     |
+|  * Inter-module communication strictly via Service Interfaces & Events  |
++-------------------------------------------------------------------------+
+            |                                             |
+            v                                             v
++---------------------------------------+ +-------------------------------+
+|         INFRASTRUCTURE LAYER          | |      PRESENTATION LAYER       |
+|                                       | |                               |
+| * Database (SQLite / MySQL JDBC)      | | * Inventory GUI Controllers   |
+| * YAML Config & Registries            | | * Visual Provider (Citizens)  |
+| * Async Save Queue & Thread Pool      | | * Structure Provider (FAWE)   |
+| * External Bridges (Vault Optional)   | | * Command System              |
++---------------------------------------+ +-------------------------------+
 ```
 
-The Core Engine owns all gameplay rules.
+---
 
-Every other module exists to support the engine.
+# 3. Core Systems (Feature Modules)
+
+Every gameplay system is encapsulated inside its own feature module (`com.example.plugin.<feature>`):
+
+* **Territory Module (`territory`)**: Manages chunk claims inside the dedicated world (`idle_world`), expansion bounds, and ownership tracking.
+* **Protection Module (`protection`)**: Self-contained event listeners ensuring blocks, entities, and structures inside claimed chunks cannot be broken or grieved by others.
+* **Node Module (`node`)**: Manages production facilities, node levels, multi-chunk expansion (e.g., 2x2 chunks at Lv5+), and structure styles.
+* **Worker Module (`worker`)**: Manages worker instances, leveling (Max Lv 100), stats, assignments, and visual spawning conditions (owner-only visibility).
+* **Production Module (`production`)**: Handles time-based resource generation calculation for both online ticks and offline catch-up delta calculation.
+* **Storage & Wallet Module (`storage`)**: Manages node storage buffers and the player's Virtual Resource Wallet (`player_resource`).
+* **Exploration Module (`exploration`)**: Tracks per-node exploration levels and unlocks rare drop tables.
+* **Economy & Gacha Module (`economy`)**: Handles Coin/Diamond currencies, transaction auditing, and worker gacha pool mechanics.
+* **Onboarding Module (`onboarding`)**: Manages RTP spawn, starter pack distribution (4 free chunks + 3 workers + starter coins), and tutorial flow.
 
 ---
 
-# Layer Responsibilities
+# 4. Core Design Patterns
 
-## Bootstrap Layer
+## 4.1 Feature-Based Modular Packaging
 
-Responsible for:
+Instead of grouping classes horizontally by layer across the entire plugin (`core.services.*`, `core.models.*`), code is organized by feature domain (`node.model`, `node.service`, `node.repository`).
 
-* Plugin initialization
-* Dependency validation
-* Command registration
-* Event registration
-* Service registration
-* Configuration loading
-
-Contains no gameplay logic.
+This guarantees:
+* Clear boundaries and ownership per gameplay mechanic.
+* Easy horizontal scaling when new systems are added.
+* Reduced merge conflicts and tight encapsulation.
 
 ---
 
-## Core Layer
+## 4.2 Manual ServiceRegistry Pattern
 
-The heart of the project.
+To avoid external heavy Dependency Injection frameworks while maintaining decoupling, the engine utilizes a centralized **`ServiceRegistry`**:
 
-Responsible for:
-
-* Chunk System
-* Node System
-* Worker System
-* Production
-* Storage
-* Exploration
-* Economy
-* Progression
-
-The Core Layer must never depend directly on:
-
-* Citizens
-* WorldEdit
-* PlaceholderAPI
-* Database implementations
+* Services are instantiated and registered during plugin startup (`onEnable`).
+* Modules retrieve dependency interfaces via `ServiceRegistry.get(WorkerService.class)`.
+* Guarantees deterministic initialization ordering and simple mock injection during unit testing.
 
 ---
 
-## Content Layer
+## 4.3 Provider Pattern (External Soft-Dependencies)
 
-Contains game content only.
+Presentation elements depend on third-party plugins that may not always be present or loaded. The engine abstracts them using Provider interfaces:
 
-Examples:
+### Visual Provider (Citizens Soft-Depend)
+* `VisualProvider` interface abstracts NPC spawning and navigation.
+* If Citizens is installed, `CitizensVisualProvider` spawns workers visually when the owner is online and nearby.
+* If Citizens is missing, a `NoOpVisualProvider` is used—production and worker logic run seamlessly without crashes.
 
-* Node definitions
-* Drop tables
-* Gacha pools
-* Worker tiers
-* Upgrade costs
-* Exploration rewards
-* Node styles
-
-No gameplay logic exists here.
+### Structure Provider (WorldEdit/FAWE Soft-Depend)
+* `StructureProvider` interface abstracts pasting architectural schematics `.schem`.
+* If WorldEdit / FastAsyncWorldEdit (FAWE) is installed, `FAWEStructureProvider` pastes node upgrades asynchronously.
+* If missing, `NoOpStructureProvider` logs a warning or places simple marker blocks without breaking domain logic.
 
 ---
 
-## Presentation Layer
+## 4.4 Data-Driven Registry Pattern
 
-Responsible for displaying gameplay.
-
-Examples:
-
-* Inventory GUI
-* Worker visuals
-* Structure generation
-* Particle effects
-* Sound effects
-* Animations
-
-Presentation must never modify gameplay state directly.
+All content definitions (`worker_template`, `resource`, `drop_table`, `node_style`, `gacha_pool`) are loaded from YAML configuration files into memory-cached `Registries` (`ResourceRegistry`, `WorkerRegistry`, etc.).
+The relational database stores **only player instance data and state**.
 
 ---
 
-## Infrastructure Layer
+# 5. Threading & Concurrency Model
 
-Provides technical implementations.
+Minecraft Server runs on a single main thread at 20 TPS. Heavy operations must never block the main thread.
 
-Examples:
-
-* SQLite
-* MySQL
-* YAML
-* JSON
-* Scheduler
-* Cache
-* Repository implementations
-
----
-
-# Dependency Rules
-
-Dependencies always flow downward.
-
-```
-Bootstrap
-    ↓
-Core
-    ↓
-Service
-    ↓
-Repository
+```text
++-----------------------------------------------------------------------+
+|                         BUKKIT MAIN THREAD                            |
+|                                                                       |
+| * Inventory GUI Clicks & Updates                                      |
+| * Entity Spawning & Navigation (Visual NPCs)                          |
+| * Block Updates & Marker Placements                                   |
+| * Command Handling                                                    |
+| * Lightweight Production Ticker (Interval trigger)                    |
++-----------------------------------------------------------------------+
+                                   |
+              (Async Dispatch)     |    (Sync Callback / Event)
+                                   v
++-----------------------------------------------------------------------+
+|                      ASYNC THREAD POOL & WORKERS                      |
+|                                                                       |
+| * SQLite / MySQL Database Queries & Save Queue Batching               |
+| * Heavy Offline Catch-up Production Calculations                      |
+| * YAML Configuration Loading & Registry Parsing                       |
+| * Schematic File Reading & FAWE Async Pasting                         |
++-----------------------------------------------------------------------+
 ```
 
-Presentation communicates with gameplay through Services only.
-
-Infrastructure never contains business logic.
-
-Content never accesses the database.
-
----
-
-# Core Systems
-
-The engine consists of independent systems.
-
-* Chunk System
-* Node System
-* Worker System
-* Production System
-* Storage System
-* Exploration System
-* Economy System
-* Animation System
-* Style System
-* GUI System
-
-Each system owns a single responsibility.
+## Rules of Concurrency
+1. **Never touch Bukkit API from an Async thread.** (No opening GUIs, spawning entities, or altering blocks directly outside FAWE async API).
+2. **Never execute SQL queries synchronously on the Main thread.** All database reads and writes must pass through the `Async Save Queue` or background thread pool.
+3. **Caffeine Cache layer bridges Sync and Async.** Hot player and node states are cached in memory using Caffeine (`PlayerCache`, `NodeCache`) for instant synchronous reads on the main thread, with async write-behind persistence.
 
 ---
 
-# Service-Oriented Design
+# 6. Inter-Module Communication
 
-All gameplay interactions occur through Services.
+When a module needs to notify others of state changes, it publishes Bukkit events or custom domain events rather than direct cross-calling where appropriate:
 
-Examples:
-
-* ChunkService
-* NodeService
-* WorkerService
-* ProductionService
-* StorageService
-* ExplorationService
-* StyleService
-* AnimationService
-
-Services own business logic.
-
-Repositories only store data.
+* `TerritoryClaimedEvent` -> triggers `OnboardingService` and `ProtectionListener`.
+* `NodeLevelUpEvent` -> triggers `StructureProvider` (FAWE paste) and `ExplorationService`.
+* `WorkerAssignedEvent` -> triggers `VisualProvider` (Citizens NPC spawn) and `ProductionService` recalculation.
 
 ---
 
-# Event-Driven Architecture
+# Document References
 
-Systems communicate through events whenever possible.
+Next document:
 
-Example flow:
-
-```
-Worker Assigned
-        ↓
-WorkerAssignedEvent
-        ↓
-Animation System
-        ↓
-Spawn Worker
-```
-
-Example events:
-
-* ChunkClaimedEvent
-* NodeCreatedEvent
-* NodeUpgradedEvent
-* WorkerAssignedEvent
-* WorkerLevelUpEvent
-* ProductionCompletedEvent
-* StorageFullEvent
-* ExplorationLevelUpEvent
-
-This minimizes coupling between systems.
-
----
-
-# Data-Driven Design
-
-Gameplay data should never be hardcoded.
-
-Configurable content includes:
-
-* Node definitions
-* Worker tiers
-* Production values
-* Drop tables
-* Gacha rates
-* Upgrade costs
-* Style definitions
-* Exploration rewards
-
-Adding new gameplay content should require little or no code changes.
-
----
-
-# Provider Pattern
-
-External plugins are accessed through Providers.
-
-Example:
-
-```
-Worker Visual
-        │
-        ▼
-WorkerVisualProvider
-        │
-   ┌────┴────┐
-   │         │
-Citizens   Future Provider
-```
-
-The Core Engine never depends directly on external plugin APIs.
-
-This allows implementations to be replaced without changing gameplay logic.
-
----
-
-# Registry System
-
-Runtime registries manage dynamic content.
-
-Examples:
-
-* NodeRegistry
-* StyleRegistry
-* WorkerRegistry
-* AnimationRegistry
-* DropTableRegistry
-
-Registries become the single source of truth for loaded content.
-
----
-
-# Separation of Logic and Presentation
-
-Gameplay exists independently from Minecraft entities.
-
-Example:
-
-```
-Worker
-│
-├── WorkerData
-└── WorkerVisual
-```
-
-WorkerData always exists.
-
-WorkerVisual only exists while the relevant area is loaded.
-
-Production continues even if visual entities are unloaded.
-
----
-
-# Threading Model
-
-Minecraft Main Thread
-
-Responsible for:
-
-* Block updates
-* GUI
-* Worker spawning
-* Entity movement
-
-Background Threads
-
-Responsible for:
-
-* Database operations
-* Production calculations
-* Save queue
-* Cache updates
-
-Heavy operations must never block the server thread.
-
----
-
-# Content Expansion
-
-New gameplay content should be added through configuration and content modules.
-
-Example:
-
-```
-Mining
-
-↓
-
-Duplicate Configuration
-
-↓
-
-Modify Content
-
-↓
-
-Register
-
-↓
-
-Ready
-```
-
-The engine should not require modification to introduce a new profession.
-
----
-
-# Architecture Principles
-
-Branz.Idle follows these principles:
-
-* Single Responsibility Principle
-* Composition over Inheritance
-* Dependency Inversion
-* Event-Driven Communication
-* Data-Driven Gameplay
-* Engine before Content
-* Separation of Logic and Presentation
-* Asynchronous Processing
-* Extensibility by Design
-
----
-
-# Summary
-
-The Branz.Idle architecture is designed to remain stable while gameplay content continuously evolves.
-
-The Core Engine should change rarely.
-
-Content should change frequently.
-
-This separation ensures long-term maintainability and sustainable development.
-
----
-
-# Next Document
-
-02-Development-Guideline.md
+**02Development-Guideline.md**

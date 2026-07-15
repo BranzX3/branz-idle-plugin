@@ -1,6 +1,34 @@
-# Configuration file for PluginTemplate
-# Add your custom settings below
+# Branz.Idle Main Configuration File
 
-settings:
-  debug: false
+database:
+  type: "sqlite" # sqlite or mysql
+  sqlite:
+    file: "branz_idle.db"
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "branz_idle"
+    username: "root"
+    password: "password"
+    pool_size: 10
 
+territory:
+  dedicated_world_name: "idle_world"
+  allow_wilderness_building: false
+  worker_visual_distance: 64
+
+production:
+  ticker_interval_seconds: 5
+  offline_max_hours: 24
+
+onboarding:
+  starter_coins: 1000.0
+  free_chunks: 4
+  starter_worker_templates:
+    - "miner_common_1"
+    - "lumberjack_common_1"
+    - "fisher_common_1"
+
+economy:
+  vault_sync: true
+  currency_name: "Coins"

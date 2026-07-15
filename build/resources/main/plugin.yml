@@ -1,7 +1,25 @@
-name: PluginTemplate
+name: BranzIdle
 version: '1.0.0-SNAPSHOT'
-main: com.example.plugin.TemplatePlugin
+main: com.example.plugin.bootstrap.BranzIdlePlugin
 api-version: '26.2'
 author: Antigravity
-description: A clean Minecraft plugin template.
+description: A production-ready Minecraft Idle MMORPG framework.
+softdepend:
+  - Citizens
+  - FastAsyncWorldEdit
+  - WorldEdit
+  - Vault
 
+commands:
+  idle:
+    description: Main Branz.Idle MMORPG player and administrative command.
+    permission: branzidle.player
+    aliases: [bi, base, idlebase, mybase]
+
+permissions:
+  branzidle.player:
+    description: Allows access to player gameplay menus and territory claiming.
+    default: true
+  branzidle.admin:
+    description: Allows access to administrative /idle reload and management commands.
+    default: op

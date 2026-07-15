@@ -1,0 +1,57 @@
+# Branz.Idle Worker Templates
+# Professions: MINING, LUMBER, FISHING
+
+miner_common_1:
+  display_name: "&aApprentice Miner"
+  profession: MINING
+  rarity: COMMON
+  citizens_skin: "MinerSteve"
+  base_stats:
+    speed_bonus: 0.10
+    yield_bonus: 0.15
+    rare_drop_bonus: 0.05
+  growth_per_level: 0.05
+
+lumberjack_common_1:
+  display_name: "&aNovice Lumberjack"
+  profession: LUMBER
+  rarity: COMMON
+  citizens_skin: "LumberPaul"
+  base_stats:
+    speed_bonus: 0.10
+    yield_bonus: 0.15
+    rare_drop_bonus: 0.05
+  growth_per_level: 0.05
+
+fisher_common_1:
+  display_name: "&aDockhand Fisher"
+  profession: FISHING
+  rarity: COMMON
+  citizens_skin: "FisherSam"
+  base_stats:
+    speed_bonus: 0.10
+    yield_bonus: 0.15
+    rare_drop_bonus: 0.05
+  growth_per_level: 0.05
+
+miner_epic_1:
+  display_name: "&dDeep Earth Excavator"
+  profession: MINING
+  rarity: EPIC
+  citizens_skin: "DwarvenKing"
+  base_stats:
+    speed_bonus: 0.50
+    yield_bonus: 0.75
+    rare_drop_bonus: 0.40
+  growth_per_level: 0.10
+
+fisher_legendary_1:
+  display_name: "&6Abyssal Leviathan Tamer"
+  profession: FISHING
+  rarity: LEGENDARY
+  citizens_skin: "PoseidonGuard"
+  base_stats:
+    speed_bonus: 1.00
+    yield_bonus: 1.50
+    rare_drop_bonus: 1.00
+  growth_per_level: 0.15

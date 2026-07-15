@@ -1,461 +1,133 @@
 # 02 - Development Guideline.md
 
-# Branz.Idle Development Guideline
-
-> Defines the coding standards, architectural rules, naming conventions, and development practices for the Branz.Idle project.
+# Branz.Idle Development & Coding Guidelines
 
 ---
 
-# Purpose
+# 1. Package Structure & Modular Boundaries
 
-This document ensures that every component of the project follows the same engineering standards.
+To ensure strict modular encapsulation and maintainability, Branz.Idle follows a **Feature-Based Modular Package Structure**.
 
-Regardless of who writes the code—human or AI—the resulting architecture should remain consistent, maintainable, and scalable.
+Developers must NOT organize classes horizontally across the entire plugin (`core.services`, `core.models`). Instead, classes must be grouped inside their respective feature module.
 
----
-
-# General Principles
-
-Every implementation should follow these principles:
-
-* Readability over cleverness
-* Maintainability over optimization
-* Composition over inheritance
-* Explicit over implicit
-* Engine before content
-* Data-driven whenever possible
-
----
-
-# Package Structure
-
-All source code must follow the predefined package structure.
+## 1.1 Root Package
 
 ```text
-com.branz.idle
-│
-├── api
-├── bootstrap
-├── common
-├── content
-├── core
-├── database
-├── gui
-└── integration
+com.example.plugin
 ```
 
-No classes should exist outside these root packages.
-
----
-
-# Package Responsibilities
-
-## api
-
-Public interfaces intended for cross-module communication.
-
-Never contains implementation.
-
----
-
-## bootstrap
-
-Plugin entry point.
-
-Responsible only for initialization and registration.
-
-No gameplay logic is allowed.
-
----
-
-## common
-
-Shared utilities, constants, helper classes, exceptions, and reusable components.
-
----
-
-## content
-
-Game definitions.
-
-Examples:
-
-* Node definitions
-* Drop tables
-* Worker tiers
-* Upgrade costs
-* Styles
-
-No business logic.
-
----
-
-## core
-
-Business logic.
-
-Contains every gameplay system.
-
----
-
-## database
-
-Persistence layer.
-
-Repositories and database providers only.
-
----
-
-## gui
-
-Presentation layer.
-
-Contains inventory menus and GUI controllers.
-
-Never performs business logic directly.
-
----
-
-## integration
-
-Adapters for external plugins.
-
-Examples:
-
-* Citizens
-* PlaceholderAPI
-* Vault
-
-Core systems must never directly depend on external plugins.
-
----
-
-# Naming Conventions
-
-## Classes
-
-Use PascalCase.
-
-Examples:
+## 1.2 Module Overview
 
 ```text
-NodeService
-WorkerRepository
-ChunkManager
-ProductionScheduler
+com.example.plugin
+├── bootstrap       # Plugin entry point, lifecycle, and ServiceRegistry
+├── config          # YAML configuration loaders and registries
+├── database        # Database connection pool (HikariCP) and base JDBC utilities
+├── territory       # Chunk claiming, bounds, and ownership mechanics
+├── protection      # Self-contained territory & structure protection listeners
+├── node            # Production facilities, structure styles, and expansion logic
+├── worker          # Worker instances, leveling, stats, and assignment
+├── production      # Online ticker and offline delta calculation engine
+├── storage         # Node storage buffers and player Virtual Resource Wallet
+├── exploration     # Per-node exploration levels and rare drop unlocking
+├── economy         # Coin/Diamond currencies, transaction auditing, and Gacha
+├── onboarding      # RTP spawn, starter pack distribution, and tutorial flow
+├── gui             # Inventory GUI controllers, builders, and pagination
+├── visual          # Citizens NPC visual provider and navigation controllers
+└── integration     # WorldEdit/FAWE structure provider and optional Vault bridge
 ```
 
----
+## 1.3 Inside a Feature Module
 
-## Interfaces
-
-Do not prefix with "I".
-
-Good:
+Every feature module (e.g., `com.example.plugin.worker`) follows a consistent internal structure:
 
 ```text
-WorkerRepository
-VisualProvider
+com.example.plugin.worker
+├── model           # Domain entities (WorkerInstance, WorkerStats)
+├── service         # Service interface & implementation (WorkerService, WorkerServiceImpl)
+├── repository      # Data access layer (WorkerRepository, WorkerRepositoryImpl)
+└── event           # Custom Bukkit events published by this module (WorkerAssignedEvent)
 ```
 
-Bad:
+* **Interface vs Implementation**: Service interfaces (e.g., `WorkerService`) are exposed directly inside the `service` package so other modules can consume them via `ServiceRegistry`. Implementations (`WorkerServiceImpl`) are package-private or hidden behind the registry.
 
-```text
-IWorkerRepository
+---
+
+# 2. Dependency Injection & Wiring Rules
+
+1. **Use `ServiceRegistry` exclusively.** Do not use static singletons (`WorkerService.getInstance()`) or third-party DI frameworks (`Guice`/`Dagger`).
+2. **Register during `onEnable` inside `bootstrap`:**
+   ```java
+   ServiceRegistry.register(WorkerService.class, new WorkerServiceImpl(workerRepository));
+   ```
+3. **Consume via `ServiceRegistry.get`:**
+   ```java
+   WorkerService workerService = ServiceRegistry.get(WorkerService.class);
+   ```
+
+---
+
+# 3. Concurrency & Async Rules
+
+## 3.1 Database Access
+* **NEVER** run `SELECT`, `INSERT`, `UPDATE`, or `DELETE` synchronously on the Bukkit main thread.
+* All reads from the database must occur inside an `CompletableFuture.supplyAsync(...)` or background thread pool.
+* All writes to the database must pass through the async save queue (`SaveQueueService`).
+
+## 3.2 Cache First
+* Use **Caffeine Cache** (`PlayerCache`, `NodeCache`) to hold active player state.
+* When a player joins (`PlayerJoinEvent`), load their data asynchronously into the cache.
+* While online, all gameplay systems read synchronously from the Caffeine cache in `O(1)` time.
+* When data mutates, update the in-memory cache synchronously and submit a save task to the async save queue.
+
+## 3.3 Bukkit API Thread Safety
+* Only touch Bukkit API (`Player`, `World`, `Inventory`, `Entity`) on the main thread.
+* If an async calculation finishes and needs to update a GUI or spawn a particle, transition back to the main thread:
+   ```java
+   Bukkit.getScheduler().runTask(plugin, () -> {
+       player.openInventory(gui.build());
+   });
+   ```
+
+---
+
+# 4. Data-Driven Development Rules
+
+1. **No Hardcoded Numbers**: Costs, production rates, gacha odds, worker tiers, and item requirements MUST be read from YAML config files (`config.yml`, `workers.yml`, `nodes.yml`).
+2. **Runtime Registries**: Upon plugin start (`or reload`), YAML definitions are parsed and loaded into immutable objects inside registries (`WorkerRegistry`, `NodeStyleRegistry`).
+3. **String Key References**: Database tables store references to definitions via string keys (`worker_template_id = 'miner_t1'`), NOT hardcoded IDs or serialized config blobs.
+
+---
+
+# 5. External Integration Standards (Provider Pattern)
+
+When interacting with external plugins (Citizens, WorldEdit/FAWE, Vault), always use a defensive check and fallback via Provider interfaces:
+
+```java
+public interface VisualProvider {
+    void spawnWorkerVisual(WorkerInstance worker, Location target);
+    void removeWorkerVisual(UUID workerId);
+}
 ```
 
----
-
-## Methods
-
-Use camelCase.
-
-Examples:
-
-```text
-createNode()
-assignWorker()
-collectStorage()
-calculateProduction()
-```
-
-Methods should describe actions.
+* During `onEnable`, check `Bukkit.getPluginManager().getPlugin("Citizens")`. If present and enabled, register `CitizensVisualProvider`. Otherwise, register `NoOpVisualProvider`.
+* This guarantees the plugin **never throws ClassNotFoundException or NoClassDefFoundError** if optional dependencies are missing.
 
 ---
 
-## Variables
+# 6. Error Handling & Logging
 
-Use meaningful names.
-
-Good:
-
-```text
-assignedWorker
-productionSpeed
-storageCapacity
-```
-
-Bad:
-
-```text
-data
-value
-temp
-obj
-```
+1. **Log Meaningful Context**: Always include Player ID, Node ID, or Worker ID in warning/error logs:
+   ```java
+   plugin.getLogger().warning("[Storage] Failed to add resource for Player " + playerId + ": Wallet capacity exceeded.");
+   ```
+2. **Never Swallow Exceptions**: If a database query fails inside an async thread, catch `SQLException`, log the stack trace, and notify administrators or retry gracefully.
+3. **Player-Facing Error Messages**: User-facing errors (e.g., "Not enough coins", "Chunk already claimed") must be configurable via `messages.yml` and formatted cleanly in chat or sound effects.
 
 ---
 
-## Constants
+# Document References
 
-Use UPPER_SNAKE_CASE.
+Next document:
 
-Example:
-
-```text
-MAX_WORKER_LEVEL
-DEFAULT_STORAGE_SIZE
-SAVE_INTERVAL
-```
-
----
-
-# Class Responsibilities
-
-Every class should have one reason to change.
-
-Examples:
-
-NodeService
-
-Responsible for node operations only.
-
-Not responsible for:
-
-* Database
-* GUI
-* Animation
-
----
-
-# Service Rules
-
-Business logic belongs inside Services.
-
-Services may communicate with:
-
-* Repositories
-* Other Services
-* Event System
-
-Services must not communicate directly with:
-
-* Inventory GUI
-* Citizens API
-* SQL Statements
-
----
-
-# Repository Rules
-
-Repositories only store and retrieve data.
-
-Repositories never contain gameplay calculations.
-
-Good:
-
-```text
-saveWorker()
-
-findWorker()
-
-deleteWorker()
-```
-
-Bad:
-
-```text
-calculateWorkerLevel()
-
-upgradeNode()
-
-produceItems()
-```
-
----
-
-# GUI Rules
-
-GUI classes are controllers.
-
-Responsibilities:
-
-* Display data
-* Receive player input
-* Forward requests to Services
-
-GUI never changes gameplay directly.
-
----
-
-# Event Rules
-
-Events describe something that has already happened.
-
-Examples:
-
-```text
-NodeCreatedEvent
-WorkerAssignedEvent
-StorageFullEvent
-```
-
-Avoid command-like events such as:
-
-```text
-CreateNodeEvent
-UpgradeNodeEvent
-```
-
----
-
-# Configuration Rules
-
-Gameplay values belong in configuration files.
-
-Never hardcode:
-
-* Production values
-* Drop rates
-* Upgrade costs
-* Gacha probabilities
-* Exploration rewards
-
-The engine should remain independent from balancing.
-
----
-
-# Threading Rules
-
-Main Thread
-
-Allowed:
-
-* GUI
-* Entities
-* Blocks
-* Players
-
-Background Threads
-
-Allowed:
-
-* Database
-* Production calculation
-* Cache
-* Save queue
-
-Never access Bukkit API from asynchronous threads unless explicitly supported.
-
----
-
-# Error Handling
-
-Recover whenever possible.
-
-Log meaningful information.
-
-Never silently ignore exceptions.
-
-Avoid catching generic Exception unless absolutely necessary.
-
----
-
-# Logging
-
-Use structured logging.
-
-Every important operation should provide enough context for debugging.
-
-Examples:
-
-* Player UUID
-* Node ID
-* Worker ID
-* Chunk Position
-
-Avoid unnecessary console spam.
-
----
-
-# Dependency Rules
-
-Allowed flow:
-
-```text
-GUI
-    ↓
-Service
-    ↓
-Repository
-```
-
-Never reverse dependencies.
-
-Repositories should never call Services.
-
----
-
-# Performance Guidelines
-
-Avoid unnecessary object allocation inside repeating tasks.
-
-Cache frequently used data.
-
-Load content once during startup.
-
-Use asynchronous saving.
-
-Keep main-thread operations lightweight.
-
----
-
-# Documentation
-
-Every public API should include JavaDoc.
-
-Complex algorithms should explain **why**, not **what**.
-
-Code should be self-explanatory whenever possible.
-
----
-
-# Code Review Checklist
-
-Before merging any feature, verify:
-
-* Single Responsibility Principle
-* No duplicated logic
-* No hardcoded gameplay values
-* Proper service separation
-* Async safety
-* Configuration support
-* Event usage where appropriate
-* Naming consistency
-* Documentation completed
-
----
-
-# Summary
-
-Consistency is more valuable than individual coding style.
-
-A well-defined standard enables faster development, easier maintenance, better AI-assisted generation, and long-term scalability.
-
-Every contributor should follow this guideline before implementing new features.
-
----
-
-# Next Document
-
-03techstack.md
+**03TechStack.md**
