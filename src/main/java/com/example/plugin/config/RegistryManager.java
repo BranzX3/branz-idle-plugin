@@ -16,6 +16,7 @@ public class RegistryManager {
     private volatile NodeRegistry nodeRegistry = new NodeRegistry();
     private volatile DropTableRegistry dropTableRegistry = new DropTableRegistry();
     private volatile GachaRegistry gachaRegistry = new GachaRegistry();
+    private volatile EventDropRegistry eventDropRegistry = new EventDropRegistry();
 
     public RegistryManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -40,12 +41,14 @@ public class RegistryManager {
             NodeRegistry newNodes = new NodeRegistry();
             DropTableRegistry newDropTables = new DropTableRegistry();
             GachaRegistry newGacha = new GachaRegistry();
+            EventDropRegistry newEventDrops = new EventDropRegistry();
 
             newResources.load(loadYaml("resources.yml"));
             newWorkers.load(loadYaml("workers.yml"));
             newNodes.load(loadYaml("nodes.yml"));
             newDropTables.load(loadYaml("drop_tables.yml"));
             newGacha.load(loadYaml("gacha.yml"));
+            newEventDrops.load(loadYaml("event_drops.yml"));
 
             // Atomic reference swap
             this.resourceRegistry = newResources;
@@ -53,8 +56,9 @@ public class RegistryManager {
             this.nodeRegistry = newNodes;
             this.dropTableRegistry = newDropTables;
             this.gachaRegistry = newGacha;
+            this.eventDropRegistry = newEventDrops;
 
-            plugin.getLogger().info("[RegistryManager] Successfully loaded/reloaded all 5 data registries.");
+            plugin.getLogger().info("[RegistryManager] Successfully loaded/reloaded all 6 data registries.");
             return true;
         } catch (Exception e) {
             plugin.getLogger().severe("[RegistryManager] Failed to reload registries: " + e.getMessage());
@@ -72,7 +76,7 @@ public class RegistryManager {
     }
 
     private void saveDefaultFiles() {
-        String[] files = {"config.yml", "resources.yml", "workers.yml", "nodes.yml", "drop_tables.yml", "gacha.yml"};
+        String[] files = {"config.yml", "resources.yml", "workers.yml", "nodes.yml", "drop_tables.yml", "gacha.yml", "event_drops.yml"};
         for (String f : files) {
             File dest = new File(plugin.getDataFolder(), f);
             if (!dest.exists()) {
@@ -99,5 +103,9 @@ public class RegistryManager {
 
     public GachaRegistry getGachaRegistry() {
         return gachaRegistry;
+    }
+
+    public EventDropRegistry getEventDropRegistry() {
+        return eventDropRegistry;
     }
 }

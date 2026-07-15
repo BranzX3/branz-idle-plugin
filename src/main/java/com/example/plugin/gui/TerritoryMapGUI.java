@@ -1,10 +1,13 @@
 package com.example.plugin.gui;
 
+import com.example.plugin.config.RegistryManager;
+import com.example.plugin.economy.service.EconomyService;
 import com.example.plugin.gui.item.ItemBuilder;
-import com.example.plugin.territory.model.ChunkCoord;
 import com.example.plugin.node.service.NodeService;
-import com.example.plugin.worker.service.WorkerService;
+import com.example.plugin.onboarding.service.OnboardingService;
+import com.example.plugin.storage.service.StorageService;
 import com.example.plugin.territory.service.TerritoryService;
+import com.example.plugin.worker.service.WorkerService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
@@ -13,11 +16,13 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Interactive GUI mapping surrounding chunk territory ownership in a grid.
+ * Navigates back to MainHubGUI via Back to Hub button.
  */
 public class TerritoryMapGUI implements InventoryProvider {
 
@@ -25,14 +30,31 @@ public class TerritoryMapGUI implements InventoryProvider {
     private final TerritoryService territoryService;
     private final NodeService nodeService;
     private final WorkerService workerService;
+    private final StorageService storageService;
+    private final EconomyService economyService;
+    private final OnboardingService onboardingService;
+    private final RegistryManager registryManager;
     private final Inventory inventory;
     private final Chunk centerChunk;
 
-    public TerritoryMapGUI(Player player, TerritoryService territoryService, NodeService nodeService, WorkerService workerService) {
+    public TerritoryMapGUI(
+        Player player,
+        TerritoryService territoryService,
+        NodeService nodeService,
+        WorkerService workerService,
+        StorageService storageService,
+        EconomyService economyService,
+        OnboardingService onboardingService,
+        RegistryManager registryManager
+    ) {
         this.player = player;
         this.territoryService = territoryService;
         this.nodeService = nodeService;
         this.workerService = workerService;
+        this.storageService = storageService;
+        this.economyService = economyService;
+        this.onboardingService = onboardingService;
+        this.registryManager = registryManager;
         this.centerChunk = player.getLocation().getChunk();
         this.inventory = Bukkit.createInventory(this, 54, "§8Surrounding Chunk Map");
         populate();
@@ -105,9 +127,13 @@ public class TerritoryMapGUI implements InventoryProvider {
             }
         }
 
-        // Bottom row legend & close
+        // Bottom row legend & navigation
         ItemStack border = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).name("§r").build();
         for (int i = 45; i < 54; i++) inventory.setItem(i, border);
+
+        // Slot 45: Back to Hub
+        inventory.setItem(45, new ItemBuilder(Material.ARROW)
+            .name("§c§lBack to Hub").build());
 
         inventory.setItem(48, new ItemBuilder(Material.PAPER)
             .name("§e§lMap Legend")
@@ -124,6 +150,13 @@ public class TerritoryMapGUI implements InventoryProvider {
     public void onClick(InventoryClickEvent event) {
         event.setCancelled(true);
         int slot = event.getRawSlot();
+
+        if (slot == 45) {
+            // Back to Hub
+            player.openInventory(new MainHubGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
+            return;
+        }
+
         if (slot == 49) {
             player.closeInventory();
             return;
@@ -142,30 +175,54 @@ public class TerritoryMapGUI implements InventoryProvider {
             Optional<com.example.plugin.territory.model.ChunkClaim> claimOpt = territoryService.getClaim(targetX, targetZ);
             if (claimOpt.isPresent()) {
                 com.example.plugin.territory.model.ChunkClaim claim = claimOpt.get();
-                if (claim.getOwnerId().equals(player.getUniqueId())) {
+                if (claim.getOwnerId().equals(player.getUniqueId()) || player.hasPermission("branzidle.admin")) {
+                    // Unclaim — show confirmation
+                    UUID nodeId = claim.getNodeId();
+                    int workerCount = nodeId != null ? workerService.getNodeWorkers(nodeId).size() : 0;
+
+                    List<String> loreLines = new java.util.ArrayList<>();
+                    loreLines.add("§7Chunk: §e(" + targetX + ", " + targetZ + ")");
                     if (claim.getChunkType() == com.example.plugin.territory.model.ChunkType.RESIDENTIAL) {
-                        player.sendMessage("§cYou cannot unclaim your Residential Base Hub!");
+                        loreLines.add("§cUnclaiming your Residential Base Hub!");
+                        loreLines.add("§7You will need to onboard again to claim a new base.");
                     } else {
-                        // Unclaim and release node & workers
-                        UUID nodeId = claim.getNodeId();
-                        if (nodeId != null) {
-                            // Unassign workers
-                            for (com.example.plugin.worker.model.WorkerInstance w : workerService.getNodeWorkers(nodeId)) {
-                                w.setAssignedNodeId(null);
-                                workerService.updateWorker(w);
-                            }
-                            // Delete node
-                            nodeService.deleteNode(nodeId);
-                        }
-                        territoryService.unclaimChunk(player, targetX, targetZ);
-                        populate();
+                        loreLines.add("§7This will remove the production node");
+                        loreLines.add("§7and unassign §c" + workerCount + " worker(s)§7.");
                     }
+                    loreLines.add("");
+                    loreLines.add("§cThis action cannot be undone!");
+
+                    player.openInventory(new ConfirmationGUI(
+                        player,
+                        "Unclaim Chunk",
+                        loreLines,
+                        () -> {
+                            // Execute unclaim logic
+                            if (nodeId != null) {
+                                for (com.example.plugin.worker.model.WorkerInstance w : workerService.getNodeWorkers(nodeId)) {
+                                    w.setAssignedNodeId(null);
+                                    workerService.updateWorker(w);
+                                }
+                                nodeService.deleteNode(nodeId);
+                            }
+                            territoryService.unclaimChunk(player, targetX, targetZ);
+
+                            // If they unclaimed their residential chunk, reset onboarding status
+                            if (claim.getChunkType() == com.example.plugin.territory.model.ChunkType.RESIDENTIAL) {
+                                economyService.setOnboardingCompleted(player.getUniqueId(), false);
+                                player.sendMessage("§eYour Residential Base Hub has been unclaimed. Onboarding reset.");
+                            }
+
+                            player.openInventory(new TerritoryMapGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
+                        },
+                        () -> player.openInventory(new TerritoryMapGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory())
+                    ).getInventory());
                 } else {
                     player.sendMessage("§cYou do not own this territory chunk!");
                 }
             } else {
                 // Wilderness: Open NodeType selection
-                player.openInventory(new NodeClaimSelectionGUI(player, targetX, targetZ, territoryService, nodeService, workerService).getInventory());
+                player.openInventory(new NodeClaimSelectionGUI(player, targetX, targetZ, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
             }
         }
     }

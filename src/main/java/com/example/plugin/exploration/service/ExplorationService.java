@@ -30,6 +30,11 @@ public interface ExplorationService {
     boolean addExplorationExp(UUID nodeId, long amount);
 
     /**
+     * Directly forces/sets the exploration level of a node and resets its experience to 0.
+     */
+    void setExplorationLevel(UUID nodeId, int level);
+
+    /**
      * Retrieves all rare drop table entries eligible for a node's current exploration mastery level.
      */
     List<DropTableRegistry.DropEntry> getEligibleRareDrops(UUID nodeId, NodeType nodeType);

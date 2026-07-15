@@ -2,18 +2,17 @@ package com.example.plugin.command;
 
 import com.example.plugin.config.RegistryManager;
 import com.example.plugin.economy.service.EconomyService;
+import com.example.plugin.gui.AdminHubGUI;
 import com.example.plugin.gui.GachaPullGUI;
+import com.example.plugin.gui.MainHubGUI;
 import com.example.plugin.gui.MarketplaceGUI;
-import com.example.plugin.gui.NodeOverviewGUI;
-import com.example.plugin.gui.OnboardingStarterGUI;
+import com.example.plugin.gui.NodeSelectionGUI;
 import com.example.plugin.gui.TerritoryMapGUI;
-import com.example.plugin.gui.WorkerManagementGUI;
 import com.example.plugin.node.model.NodeType;
 import com.example.plugin.node.model.ProductionNode;
 import com.example.plugin.node.service.NodeService;
 import com.example.plugin.onboarding.service.OnboardingService;
 import com.example.plugin.storage.service.StorageService;
-import com.example.plugin.territory.model.ChunkCoord;
 import com.example.plugin.territory.service.TerritoryService;
 import com.example.plugin.visual.service.VisualService;
 import com.example.plugin.worker.service.WorkerService;
@@ -26,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -69,7 +67,8 @@ public class IdleCommand extends BaseCommand {
     @Override
     public boolean execute(Player player, String[] args) {
         if (args.length == 0 || args[0].equalsIgnoreCase("help") || args[0].equalsIgnoreCase("menu")) {
-            player.openInventory(new OnboardingStarterGUI(player, onboardingService).getInventory());
+            // Open Main Hub GUI as central entry point
+            player.openInventory(new MainHubGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
             return true;
         }
 
@@ -101,29 +100,22 @@ public class IdleCommand extends BaseCommand {
                 territoryService.unclaimChunk(player, chunk.getX(), chunk.getZ());
             }
             case "node" -> {
-                Chunk chunk = player.getLocation().getChunk();
-                Optional<com.example.plugin.territory.model.ChunkClaim> claimOpt = territoryService.getClaim(chunk.getX(), chunk.getZ());
-                Optional<ProductionNode> nodeOpt = Optional.empty();
-                if (claimOpt.isPresent() && claimOpt.get().getNodeId() != null) {
-                    nodeOpt = nodeService.getNode(claimOpt.get().getNodeId());
-                }
-                if (nodeOpt.isPresent()) {
-                    player.openInventory(new NodeOverviewGUI(player, nodeOpt.get(), nodeService, workerService, storageService, economyService, registryManager).getInventory());
-                } else {
-                    player.sendMessage("§cNo production node exists at your current location! Use §6/idle claim §cto build one.");
-                }
+                // Open Node Selection GUI (Overview mode) — player picks which node to view
+                player.openInventory(new NodeSelectionGUI(player, NodeSelectionGUI.Mode.OVERVIEW, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
             }
             case "worker" -> {
-                List<ProductionNode> nodes = nodeService.getPlayerNodes(player.getUniqueId());
-                if (!nodes.isEmpty()) {
-                    player.openInventory(new WorkerManagementGUI(player, nodes.get(0), workerService, registryManager).getInventory());
-                } else {
-                    player.sendMessage("§cYou must claim and establish at least one node before assigning workers!");
-                }
+                // Open Node Selection GUI (Worker mode) — player picks which node to manage workers for
+                player.openInventory(new NodeSelectionGUI(player, NodeSelectionGUI.Mode.WORKER, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
             }
-            case "gacha" -> player.openInventory(new GachaPullGUI(player, workerService, economyService, registryManager).getInventory());
-            case "map" -> player.openInventory(new TerritoryMapGUI(player, territoryService, nodeService, workerService).getInventory());
-            case "market" -> player.openInventory(new MarketplaceGUI(player, storageService, economyService).getInventory());
+            case "gacha" -> player.openInventory(new GachaPullGUI(player, workerService, economyService, registryManager, territoryService, nodeService, storageService, onboardingService).getInventory());
+            case "map" -> {
+                if (!territoryService.isDedicatedWorld(player.getWorld())) {
+                    player.sendMessage("§cYou can only view the Territory Map in the dedicated Idle world!");
+                    return true;
+                }
+                player.openInventory(new TerritoryMapGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
+            }
+            case "market" -> player.openInventory(new MarketplaceGUI(player, storageService, economyService, territoryService, nodeService, workerService, onboardingService, registryManager).getInventory());
             case "collect" -> {
                 Chunk chunk = player.getLocation().getChunk();
                 Optional<com.example.plugin.territory.model.ChunkClaim> claimOpt = territoryService.getClaim(chunk.getX(), chunk.getZ());
@@ -136,6 +128,13 @@ public class IdleCommand extends BaseCommand {
                 } else {
                     player.sendMessage("§cStand inside one of your production nodes to collect accumulated yields!");
                 }
+            }
+            case "admin" -> {
+                if (!player.hasPermission("branzidle.admin")) {
+                    player.sendMessage("§cYou do not have permission to access the admin panel!");
+                    return true;
+                }
+                player.openInventory(new AdminHubGUI(player).getInventory());
             }
             case "reload" -> {
                 if (!player.hasPermission("branzidle.admin")) {
@@ -159,6 +158,7 @@ public class IdleCommand extends BaseCommand {
             List<String> subs = new ArrayList<>(Arrays.asList("help", "menu", "claim", "unclaim", "node", "worker", "gacha", "map", "market", "collect"));
             if (player.hasPermission("branzidle.admin")) {
                 subs.add("reload");
+                subs.add("admin");
             }
             String prefix = args[0].toLowerCase();
             return subs.stream().filter(s -> s.startsWith(prefix)).collect(Collectors.toList());

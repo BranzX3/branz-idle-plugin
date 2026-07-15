@@ -1,0 +1,31 @@
+# Branz.Idle Event Drop Tables per Node Type
+# base_event_chance: base probability per tick cycle (0.01 = 1%)
+# entries: item pools for events
+
+mining:
+  base_event_chance: 0.01
+  entries:
+  - resource_key: emerald
+    weight: 30.0
+    min_qty: 1
+    max_qty: 2
+
+lumber:
+  base_event_chance: 0.01
+  entries:
+  - resource_key: golden_apple
+    weight: 20.0
+    min_qty: 1
+    max_qty: 1
+
+fishing:
+  base_event_chance: 0.01
+  entries:
+  - resource_key: pearl
+    weight: 30.0
+    min_qty: 1
+    max_qty: 2
+  - resource_key: sunken_relic
+    weight: 10.0
+    min_qty: 1
+    max_qty: 1

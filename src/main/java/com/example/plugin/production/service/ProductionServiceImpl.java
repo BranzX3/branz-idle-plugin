@@ -32,6 +32,9 @@ public class ProductionServiceImpl implements ProductionService {
     private final RegistryManager registryManager;
     private final long maxOfflineMillis;
 
+    // ThreadLocal event counter to track offline event triggers safely across calculations
+    private final ThreadLocal<Integer> offlineEventCounter = ThreadLocal.withInitial(() -> 0);
+
     public ProductionServiceImpl(
         JavaPlugin plugin,
         NodeService nodeService,
@@ -67,11 +70,17 @@ public class ProductionServiceImpl implements ProductionService {
         List<ProductionNode> nodes = nodeService.getPlayerNodes(player.getUniqueId());
         long totalResourcesProduced = 0;
 
+        offlineEventCounter.set(0);
+
         for (ProductionNode node : nodes) {
             long elapsedMillis = now - node.getLastCalculatedTime();
             if (elapsedMillis > 10_000L) { // Offline at least 10 seconds
-                long effectiveMillis = Math.min(elapsedMillis, maxOfflineMillis);
-                long seconds = effectiveMillis / 1000L;
+                if (elapsedMillis > maxOfflineMillis) {
+                    // Reset time reference to exactly maxOfflineMillis back to discard excessive offline time safely
+                    node.setLastCalculatedTime(now - maxOfflineMillis);
+                    elapsedMillis = maxOfflineMillis;
+                }
+                long seconds = elapsedMillis / 1000L;
                 if (seconds > 0) {
                     boolean produced = simulateNodeProduction(node, seconds);
                     if (produced) {
@@ -82,12 +91,20 @@ public class ProductionServiceImpl implements ProductionService {
         }
 
         if (totalResourcesProduced > 0) {
+            int totalOfflineEvents = offlineEventCounter.get();
+            offlineEventCounter.remove();
+
             player.sendMessage("§6==========================================");
             player.sendMessage("§e§lWelcome Back! Offline Progress Report:");
             player.sendMessage("§aYour assigned workers kept gathering while you were away.");
             player.sendMessage("§f+ §b" + totalResourcesProduced + " Production Nodes generated resources into their storage buffers.");
+            if (totalOfflineEvents > 0) {
+                player.sendMessage("§d§l+ §dTriggered " + totalOfflineEvents + " Node Events yielding rare drops!");
+            }
             player.sendMessage("§7Use §e/idle collect §7at your base nodes to claim your yields!");
             player.sendMessage("§6==========================================");
+        } else {
+            offlineEventCounter.remove();
         }
     }
 
@@ -147,56 +164,166 @@ public class ProductionServiceImpl implements ProductionService {
 
         List<DropTableRegistry.DropEntry> eligibleEntries = new java.util.ArrayList<>();
         double totalWeight = 0.0;
+        List<Double> modifiedWeights = new java.util.ArrayList<>();
+
         for (DropTableRegistry.DropTableDefinition tableDef : activeTables) {
             for (DropTableRegistry.DropEntry entry : tableDef.entries()) {
                 eligibleEntries.add(entry);
-                totalWeight += entry.weight();
+
+                // Fetch resource definition and rarity to modify drop weights based on worker rare drop bonuses
+                com.example.plugin.config.ResourceRegistry.Rarity rarity = registryManager.getResourceRegistry()
+                    .getResource(entry.resourceKey())
+                    .map(com.example.plugin.config.ResourceRegistry.ResourceDefinition::rarity)
+                    .orElse(com.example.plugin.config.ResourceRegistry.Rarity.COMMON);
+
+                double weight = entry.weight();
+                if (rarity != com.example.plugin.config.ResourceRegistry.Rarity.COMMON) {
+                    weight = weight * (1.0 + totalRareBonus);
+                }
+
+                modifiedWeights.add(weight);
+                totalWeight += weight;
             }
         }
+
+        long explorationXPGained = 0;
+        int triggeredEvents = 0;
 
         for (long c = 0; c < cycles; c++) {
-            if (eligibleEntries.isEmpty()) {
-                long amount = (long) Math.round(1.0 * (1.0 + totalYieldBonus));
-                if (amount > 0) {
-                    long added = storageService.addResourceToNode(node.getNodeId(), defaultItem, amount, maxCap);
-                    if (added > 0) {
-                        anyAdded = true;
+            String activeKey = node.getActiveEventKey();
+            if (activeKey != null) {
+                // Event State: Roll drops from active event entries
+                Optional<com.example.plugin.config.EventDropRegistry.EventDefinition> eventOpt = registryManager.getEventDropRegistry().getEvent(prefix, activeKey);
+                if (eventOpt.isPresent()) {
+                    com.example.plugin.config.EventDropRegistry.EventDefinition eventDef = eventOpt.get();
+                    List<com.example.plugin.config.EventDropRegistry.EventDropEntry> eventEntries = eventDef.entries();
+
+                    double totalEventWeight = 0.0;
+                    for (com.example.plugin.config.EventDropRegistry.EventDropEntry entry : eventEntries) {
+                        totalEventWeight += entry.weight();
                     }
+
+                    if (totalEventWeight > 0.0) {
+                        double rand = ThreadLocalRandom.current().nextDouble() * totalEventWeight;
+                        double accum = 0.0;
+                        com.example.plugin.config.EventDropRegistry.EventDropEntry selected = null;
+                        for (com.example.plugin.config.EventDropRegistry.EventDropEntry entry : eventEntries) {
+                            accum += entry.weight();
+                            if (rand <= accum) {
+                                selected = entry;
+                                break;
+                            }
+                        }
+                        if (selected == null && !eventEntries.isEmpty()) {
+                            selected = eventEntries.get(0);
+                        }
+
+                        if (selected != null) {
+                            long qty = ThreadLocalRandom.current().nextLong(selected.minQty(), selected.maxQty() + 1);
+                            long amount = (long) Math.round(qty * (1.0 + totalYieldBonus));
+                            if (amount > 0) {
+                                long added = storageService.addResourceToNode(node.getNodeId(), selected.resourceKey(), amount, maxCap);
+                                if (added > 0) {
+                                    anyAdded = true;
+                                }
+                            }
+                        }
+                    }
+
+                    // Decrement event progression
+                    int progressLeft = node.getEventProgress() - 1;
+                    if (progressLeft <= 0) {
+                        node.setActiveEventKey(null);
+                        node.setEventProgress(0);
+                        Player p = Bukkit.getPlayer(node.getOwnerId());
+                        if (p != null && p.isOnline()) {
+                            p.sendMessage("§d§l[EVENT] §eYour " + node.getNodeType().name().toLowerCase() + " node event §b" + eventDef.displayName() + " §ehas concluded! Returning to normal exploration.");
+                        }
+                    } else {
+                        node.setEventProgress(progressLeft);
+                    }
+                } else {
+                    // Active event config was removed, clear status safely
+                    node.setActiveEventKey(null);
+                    node.setEventProgress(0);
                 }
             } else {
-                double rand = ThreadLocalRandom.current().nextDouble() * totalWeight;
-                double accum = 0.0;
-                DropTableRegistry.DropEntry selected = null;
-                for (DropTableRegistry.DropEntry entry : eligibleEntries) {
-                    accum += entry.weight();
-                    if (rand <= accum) {
-                        selected = entry;
-                        break;
+                // Normal State: Roll drops from normal tables and award exploration XP
+                if (eligibleEntries.isEmpty()) {
+                    long amount = (long) Math.round(1.0 * (1.0 + totalYieldBonus));
+                    if (amount > 0) {
+                        long added = storageService.addResourceToNode(node.getNodeId(), defaultItem, amount, maxCap);
+                        if (added > 0) {
+                            anyAdded = true;
+                        }
+                    }
+                } else {
+                    double rand = ThreadLocalRandom.current().nextDouble() * totalWeight;
+                    double accum = 0.0;
+                    DropTableRegistry.DropEntry selected = null;
+                    for (int i = 0; i < eligibleEntries.size(); i++) {
+                        accum += modifiedWeights.get(i);
+                        if (rand <= accum) {
+                            selected = eligibleEntries.get(i);
+                            break;
+                        }
+                    }
+                    if (selected == null) {
+                        selected = eligibleEntries.get(0);
+                    }
+
+                    long baseQty = ThreadLocalRandom.current().nextLong(selected.minQty(), selected.maxQty() + 1);
+                    long amount = (long) Math.round(baseQty * (1.0 + totalYieldBonus));
+                    if (amount > 0) {
+                        long added = storageService.addResourceToNode(node.getNodeId(), selected.resourceKey(), amount, maxCap);
+                        if (added > 0) {
+                            anyAdded = true;
+                        }
                     }
                 }
-                if (selected == null) {
-                    selected = eligibleEntries.get(0);
-                }
 
-                long baseQty = ThreadLocalRandom.current().nextLong(selected.minQty(), selected.maxQty() + 1);
-                long amount = (long) Math.round(baseQty * (1.0 + totalYieldBonus));
-                if (amount > 0) {
-                    long added = storageService.addResourceToNode(node.getNodeId(), selected.resourceKey(), amount, maxCap);
-                    if (added > 0) {
-                        anyAdded = true;
+                explorationXPGained += 5L;
+
+                // Roll for special event trigger (descending level requirement first)
+                List<com.example.plugin.config.EventDropRegistry.EventDefinition> definedEvents = new java.util.ArrayList<>(registryManager.getEventDropRegistry().getEvents(prefix));
+                definedEvents.sort((a, b) -> Integer.compare(b.minExplorationLevel(), a.minExplorationLevel()));
+
+                for (com.example.plugin.config.EventDropRegistry.EventDefinition eventDef : definedEvents) {
+                    if (explorationLevel >= eventDef.minExplorationLevel()) {
+                        if (ThreadLocalRandom.current().nextDouble() < eventDef.eventChance()) {
+                            node.setActiveEventKey(eventDef.eventKey());
+                            node.setEventProgress(eventDef.durationCycles());
+                            triggeredEvents++;
+
+                            Player p = Bukkit.getPlayer(node.getOwnerId());
+                            if (p != null && p.isOnline()) {
+                                p.sendMessage("§d§l[EVENT TRIGGERED] §aA special event §e" + eventDef.displayName() + " §ahas started at your " + node.getNodeType().name().toLowerCase() + " node! Active for §b" + eventDef.durationCycles() + " §acycles.");
+                            }
+                            break; // Stop checking other events since one has triggered
+                        }
                     }
                 }
             }
         }
 
-        // 3. Award Mastery and Worker XP
-        explorationService.addExplorationExp(node.getNodeId(), cycles * 5L);
+        if (triggeredEvents > 0) {
+            Player p = Bukkit.getPlayer(node.getOwnerId());
+            if (p == null || !p.isOnline()) {
+                offlineEventCounter.set(offlineEventCounter.get() + triggeredEvents);
+            }
+        }
+
+        if (explorationXPGained > 0) {
+            explorationService.addExplorationExp(node.getNodeId(), explorationXPGained);
+        }
+
         for (WorkerInstance w : workers) {
             w.addExperience(cycles * 10L);
             workerService.updateWorker(w);
         }
 
-        node.setLastCalculatedTime(System.currentTimeMillis());
+        long simulatedMillis = (long) (cycles * effectiveInterval * 1000.0);
+        node.setLastCalculatedTime(node.getLastCalculatedTime() + simulatedMillis);
         nodeService.updateNode(node);
         return anyAdded;
     }

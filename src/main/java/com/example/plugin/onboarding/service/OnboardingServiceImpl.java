@@ -2,10 +2,15 @@ package com.example.plugin.onboarding.service;
 
 import com.example.plugin.economy.model.PlayerProfile;
 import com.example.plugin.economy.service.EconomyService;
+import com.example.plugin.node.model.ProductionNode;
+import com.example.plugin.node.service.NodeService;
 import com.example.plugin.onboarding.StarterPack;
 import com.example.plugin.onboarding.event.PlayerOnboardingCompletedEvent;
+import com.example.plugin.territory.model.ChunkClaim;
 import com.example.plugin.territory.model.ChunkType;
 import com.example.plugin.territory.service.TerritoryService;
+import com.example.plugin.worker.model.WorkerInstance;
+import com.example.plugin.worker.service.WorkerService;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,19 +20,30 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Implementation of OnboardingService coordinating economy rewards and 2x2 territory initialization.
+ * Implementation of OnboardingService coordinating economy rewards, 2x2 territory initialization,
+ * and full base reset functionality.
  */
 public class OnboardingServiceImpl implements OnboardingService {
 
     private final JavaPlugin plugin;
     private final EconomyService economyService;
     private final TerritoryService territoryService;
+    private final NodeService nodeService;
+    private final WorkerService workerService;
     private final StarterPack starterPack;
 
-    public OnboardingServiceImpl(JavaPlugin plugin, EconomyService economyService, TerritoryService territoryService) {
+    public OnboardingServiceImpl(
+        JavaPlugin plugin,
+        EconomyService economyService,
+        TerritoryService territoryService,
+        NodeService nodeService,
+        WorkerService workerService
+    ) {
         this.plugin = plugin;
         this.economyService = economyService;
         this.territoryService = territoryService;
+        this.nodeService = nodeService;
+        this.workerService = workerService;
 
         double coins = plugin.getConfig().getDouble("onboarding.starter_coins", 1000.0);
         int chunks = plugin.getConfig().getInt("onboarding.free_chunks", 4);
@@ -91,4 +107,42 @@ public class OnboardingServiceImpl implements OnboardingService {
         player.sendMessage("§6==========================================");
         return true;
     }
+
+    @Override
+    public boolean resetBase(Player player) {
+        UUID playerId = player.getUniqueId();
+
+        // 1. Unassign all workers owned by this player (keep workers, just detach from nodes)
+        List<WorkerInstance> playerWorkers = workerService.getPlayerWorkers(playerId);
+        for (WorkerInstance worker : playerWorkers) {
+            if (worker.getAssignedNodeId() != null) {
+                worker.setAssignedNodeId(null);
+                workerService.updateWorker(worker);
+            }
+        }
+
+        // 2. Delete all production nodes owned by this player
+        List<ProductionNode> playerNodes = nodeService.getPlayerNodes(playerId);
+        for (ProductionNode node : playerNodes) {
+            nodeService.deleteNode(node.getNodeId());
+        }
+
+        // 3. Unclaim all territory chunks owned by this player (including residential and production)
+        List<ChunkClaim> playerClaims = territoryService.getPlayerClaims(playerId);
+        for (ChunkClaim claim : playerClaims) {
+            territoryService.unclaimChunkInternal(claim.getChunkX(), claim.getChunkZ());
+        }
+
+        // 4. Reset onboarding flag so player can re-onboard
+        economyService.setOnboardingCompleted(playerId, false);
+
+        player.sendMessage("§6==========================================");
+        player.sendMessage("§c§lBase Reset Complete!");
+        player.sendMessage("§7All territory, nodes, and worker assignments have been cleared.");
+        player.sendMessage("§7Your workers and currency balance are preserved.");
+        player.sendMessage("§eUse §6/idle menu §eto set up a new base!");
+        player.sendMessage("§6==========================================");
+        return true;
+    }
 }
+

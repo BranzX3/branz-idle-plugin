@@ -1,0 +1,57 @@
+# Branz.Idle Event Config (Multi-Event layout)
+# Configure special progression-based events per node type (mining, lumber, fishing).
+# event_chance: probability to trigger this event per production cycle (0.05 = 5%).
+# duration_cycles: number of cycles the event remains active before returning to normal.
+
+mining:
+  events:
+    iron_vein:
+      display_name: "&f&lIron Vein Event"
+      min_exploration_level: 10
+      event_chance: 0.05
+      duration_cycles: 50
+      entries:
+        - resource_key: "iron_ore"
+          weight: 100
+          min_qty: 3
+          max_qty: 10
+    coal_seam:
+      display_name: "&8&lCoal Seam Event"
+      min_exploration_level: 5
+      event_chance: 0.08
+      duration_cycles: 40
+      entries:
+        - resource_key: "coal"
+          weight: 100
+          min_qty: 5
+          max_qty: 12
+
+lumber:
+  events:
+    rich_growth:
+      display_name: "&a&lRich Growth Event"
+      min_exploration_level: 5
+      event_chance: 0.06
+      duration_cycles: 45
+      entries:
+        - resource_key: "hardwood"
+          weight: 100
+          min_qty: 2
+          max_qty: 6
+
+fishing:
+  events:
+    treasure_shoal:
+      display_name: "&b&lTreasure Shoal Event"
+      min_exploration_level: 8
+      event_chance: 0.04
+      duration_cycles: 30
+      entries:
+        - resource_key: "pearl"
+          weight: 70
+          min_qty: 1
+          max_qty: 2
+        - resource_key: "sunken_relic"
+          weight: 30
+          min_qty: 1
+          max_qty: 1

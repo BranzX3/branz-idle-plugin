@@ -66,9 +66,17 @@ public class WorkerInstance {
         this.experience = experience;
     }
 
-    public void addExperience(long amount) {
-        if (amount > 0) {
-            this.experience += amount;
+    public synchronized boolean addExperience(long amount) {
+        if (amount <= 0) return false;
+        this.experience += amount;
+        boolean leveledUp = false;
+        long required = (long) level * 500L;
+        while (this.experience >= required) {
+            this.experience -= required;
+            this.level++;
+            leveledUp = true;
+            required = (long) level * 500L;
         }
+        return leveledUp;
     }
 }

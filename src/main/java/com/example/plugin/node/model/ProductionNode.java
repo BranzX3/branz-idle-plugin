@@ -16,6 +16,9 @@ public class ProductionNode {
     private long lastCalculatedTime;
     private final long createdAt;
 
+    private String activeEventKey;
+    private int eventProgress;
+
     public ProductionNode(
         UUID nodeId,
         UUID ownerId,
@@ -34,6 +37,32 @@ public class ProductionNode {
         this.styleId = styleId != null ? styleId : "default";
         this.lastCalculatedTime = lastCalculatedTime;
         this.createdAt = createdAt;
+        this.activeEventKey = null;
+        this.eventProgress = 0;
+    }
+
+    public ProductionNode(
+        UUID nodeId,
+        UUID ownerId,
+        NodeType nodeType,
+        int level,
+        int sizeChunks,
+        String styleId,
+        long lastCalculatedTime,
+        long createdAt,
+        String activeEventKey,
+        int eventProgress
+    ) {
+        this.nodeId = nodeId;
+        this.ownerId = ownerId;
+        this.nodeType = nodeType;
+        this.level = level;
+        this.sizeChunks = sizeChunks;
+        this.styleId = styleId != null ? styleId : "default";
+        this.lastCalculatedTime = lastCalculatedTime;
+        this.createdAt = createdAt;
+        this.activeEventKey = activeEventKey;
+        this.eventProgress = eventProgress;
     }
 
     public UUID getNodeId() {
@@ -86,5 +115,21 @@ public class ProductionNode {
 
     public String getTierKey() {
         return nodeType.name().toLowerCase() + "_lv" + level;
+    }
+
+    public String getActiveEventKey() {
+        return activeEventKey;
+    }
+
+    public void setActiveEventKey(String activeEventKey) {
+        this.activeEventKey = activeEventKey;
+    }
+
+    public int getEventProgress() {
+        return eventProgress;
+    }
+
+    public void setEventProgress(int eventProgress) {
+        this.eventProgress = eventProgress;
     }
 }

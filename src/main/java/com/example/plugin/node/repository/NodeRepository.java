@@ -86,22 +86,26 @@ public class NodeRepository implements Repository<ProductionNode, UUID> {
     public void save(ProductionNode entity) {
         String sql = isMySql
             ? """
-              INSERT INTO production_nodes (node_id, owner_id, node_type, level, size_chunks, style_id, last_calculated_time, created_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+              INSERT INTO production_nodes (node_id, owner_id, node_type, level, size_chunks, style_id, last_calculated_time, created_at, active_event, event_progress)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               ON DUPLICATE KEY UPDATE
                 level = VALUES(level),
                 size_chunks = VALUES(size_chunks),
                 style_id = VALUES(style_id),
-                last_calculated_time = VALUES(last_calculated_time)
+                last_calculated_time = VALUES(last_calculated_time),
+                active_event = VALUES(active_event),
+                event_progress = VALUES(event_progress)
               """
             : """
-              INSERT INTO production_nodes (node_id, owner_id, node_type, level, size_chunks, style_id, last_calculated_time, created_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+              INSERT INTO production_nodes (node_id, owner_id, node_type, level, size_chunks, style_id, last_calculated_time, created_at, active_event, event_progress)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               ON CONFLICT(node_id) DO UPDATE SET
                 level = excluded.level,
                 size_chunks = excluded.size_chunks,
                 style_id = excluded.style_id,
-                last_calculated_time = excluded.last_calculated_time
+                last_calculated_time = excluded.last_calculated_time,
+                active_event = excluded.active_event,
+                event_progress = excluded.event_progress
               """;
 
         try (Connection conn = dbManager.getConnection();
@@ -114,6 +118,8 @@ public class NodeRepository implements Repository<ProductionNode, UUID> {
             ps.setString(6, entity.getStyleId());
             ps.setLong(7, entity.getLastCalculatedTime());
             ps.setLong(8, entity.getCreatedAt());
+            ps.setString(9, entity.getActiveEventKey());
+            ps.setInt(10, entity.getEventProgress());
             ps.executeUpdate();
         } catch (SQLException e) {
             plugin.getLogger().severe("[NodeRepository] Error saving production node: " + e.getMessage());
@@ -148,6 +154,8 @@ public class NodeRepository implements Repository<ProductionNode, UUID> {
         String style = rs.getString("style_id");
         long lastCalc = rs.getLong("last_calculated_time");
         long createdAt = rs.getLong("created_at");
-        return new ProductionNode(nodeId, ownerId, type, level, size, style, lastCalc, createdAt);
+        String activeEvent = rs.getString("active_event");
+        int eventProgress = rs.getInt("event_progress");
+        return new ProductionNode(nodeId, ownerId, type, level, size, style, lastCalc, createdAt, activeEvent, eventProgress);
     }
 }

@@ -1,7 +1,13 @@
 package com.example.plugin.gui;
 
+import com.example.plugin.config.RegistryManager;
+import com.example.plugin.economy.service.EconomyService;
 import com.example.plugin.gui.item.ItemBuilder;
 import com.example.plugin.node.model.ProductionNode;
+import com.example.plugin.node.service.NodeService;
+import com.example.plugin.onboarding.service.OnboardingService;
+import com.example.plugin.storage.service.StorageService;
+import com.example.plugin.territory.service.TerritoryService;
 import com.example.plugin.worker.model.WorkerInstance;
 import com.example.plugin.worker.service.WorkerService;
 import org.bukkit.Bukkit;
@@ -11,7 +17,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,21 +25,42 @@ import java.util.UUID;
 
 /**
  * Interactive GUI listing available worker instances and enabling slot assignment or unassignment.
+ * Navigates back to NodeOverviewGUI (Back to Node) or MainHubGUI (Back to Hub).
  */
 public class WorkerManagementGUI implements InventoryProvider {
 
     private final Player player;
     private final ProductionNode node;
     private final WorkerService workerService;
-    private final com.example.plugin.config.RegistryManager registryManager;
+    private final RegistryManager registryManager;
+    private final NodeService nodeService;
+    private final StorageService storageService;
+    private final EconomyService economyService;
+    private final TerritoryService territoryService;
+    private final OnboardingService onboardingService;
     private final Inventory inventory;
     private final Map<Integer, UUID> slotToWorkerMap = new HashMap<>();
 
-    public WorkerManagementGUI(Player player, ProductionNode node, WorkerService workerService, com.example.plugin.config.RegistryManager registryManager) {
+    public WorkerManagementGUI(
+        Player player,
+        ProductionNode node,
+        WorkerService workerService,
+        RegistryManager registryManager,
+        NodeService nodeService,
+        StorageService storageService,
+        EconomyService economyService,
+        TerritoryService territoryService,
+        OnboardingService onboardingService
+    ) {
         this.player = player;
         this.node = node;
         this.workerService = workerService;
         this.registryManager = registryManager;
+        this.nodeService = nodeService;
+        this.storageService = storageService;
+        this.economyService = economyService;
+        this.territoryService = territoryService;
+        this.onboardingService = onboardingService;
         this.inventory = Bukkit.createInventory(this, 54, "§8Manage Workers: §a" + node.getTierKey());
         populate();
     }
@@ -71,20 +97,25 @@ public class WorkerManagementGUI implements InventoryProvider {
                 }
             }
 
+            // Build lore with base info first, then append status using addLore()
+            com.example.plugin.worker.model.WorkerStats stats = workerService.getEffectiveStats(w);
             ItemBuilder builder = new ItemBuilder(Material.PLAYER_HEAD)
                 .name("§e" + w.getTemplateId() + " §8(Lv." + w.getLevel() + ")")
                 .lore(
                     "§7Rarity: §d" + rarityStr,
-                    "§7Speed Bonus: §a+" + (w.getLevel() * 2) + "%",
-                    "§7Yield Bonus: §b+" + (w.getLevel() * 3) + "%"
+                    "§7Speed Bonus: §a+" + String.format("%.0f", stats.speedBonus() * 100) + "%",
+                    "§7Yield Bonus: §b+" + String.format("%.0f", stats.yieldBonus() * 100) + "%",
+                    "§7Rare Drop Bonus: §d+" + String.format("%.0f", stats.rareDropBonus() * 100) + "%",
+                    "§7Experience: §e" + w.getExperience() + " §7/ §e" + (w.getLevel() * 500) + " XP"
                 );
 
+            // Append assignment status without overwriting base lore
             if (isAssignedHere) {
-                builder.lore("§a§l[ASSIGNED TO THIS NODE]", "§cClick to unassign.");
+                builder.addLore("", "§a§l[ASSIGNED TO THIS NODE]", "§cClick to unassign.");
             } else if (isAssignedElsewhere) {
-                builder.lore("§c§l[ASSIGNED TO ANOTHER NODE]", "§7Cannot assign here unless unassigned.");
+                builder.addLore("", "§c§l[ASSIGNED TO ANOTHER NODE]", "§7Cannot assign here unless unassigned.");
             } else {
-                builder.lore("§e§l[AVAILABLE]", "§aClick to assign to this node.");
+                builder.addLore("", "§e§l[AVAILABLE]", "§aClick to assign to this node.");
             }
 
             inventory.setItem(slot, builder.build());
@@ -92,14 +123,28 @@ public class WorkerManagementGUI implements InventoryProvider {
             slot++;
         }
 
-        inventory.setItem(49, new ItemBuilder(Material.BARRIER).name("§c§lBack to Node").build());
+        // Slot 45: Back to Hub
+        inventory.setItem(45, new ItemBuilder(Material.ARROW)
+            .name("§c§lBack to Hub").build());
+
+        // Slot 49: Back to Node Overview
+        inventory.setItem(49, new ItemBuilder(Material.BEACON)
+            .name("§e§lBack to Node").build());
     }
 
     @Override
     public void onClick(InventoryClickEvent event) {
         int slot = event.getRawSlot();
+
+        if (slot == 45) {
+            // Back to Hub
+            player.openInventory(new MainHubGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
+            return;
+        }
+
         if (slot == 49) {
-            player.closeInventory();
+            // Back to Node Overview
+            player.openInventory(new NodeOverviewGUI(player, node, nodeService, workerService, storageService, economyService, registryManager, territoryService, onboardingService).getInventory());
             return;
         }
 
@@ -109,8 +154,21 @@ public class WorkerManagementGUI implements InventoryProvider {
             if (workerOpt.isPresent()) {
                 WorkerInstance w = workerOpt.get();
                 if (node.getNodeId().equals(w.getAssignedNodeId())) {
-                    boolean success = workerService.unassignWorker(player, workerId);
-                    if (success) populate();
+                    // Unassign — show confirmation
+                    player.openInventory(new ConfirmationGUI(
+                        player,
+                        "Unassign Worker",
+                        List.of(
+                            "§7Worker: §e" + w.getTemplateId(),
+                            "§7This will remove the worker from this node.",
+                            "§7The worker can be reassigned later."
+                        ),
+                        () -> {
+                            workerService.unassignWorker(player, workerId);
+                            player.openInventory(new WorkerManagementGUI(player, node, workerService, registryManager, nodeService, storageService, economyService, territoryService, onboardingService).getInventory());
+                        },
+                        () -> player.openInventory(new WorkerManagementGUI(player, node, workerService, registryManager, nodeService, storageService, economyService, territoryService, onboardingService).getInventory())
+                    ).getInventory());
                 } else if (w.getAssignedNodeId() == null) {
                     boolean success = workerService.assignWorker(player, workerId, node.getNodeId());
                     if (success) populate();

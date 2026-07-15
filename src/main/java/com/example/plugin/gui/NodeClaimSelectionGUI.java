@@ -1,8 +1,12 @@
 package com.example.plugin.gui;
 
+import com.example.plugin.config.RegistryManager;
+import com.example.plugin.economy.service.EconomyService;
 import com.example.plugin.gui.item.ItemBuilder;
 import com.example.plugin.node.model.NodeType;
 import com.example.plugin.node.service.NodeService;
+import com.example.plugin.onboarding.service.OnboardingService;
+import com.example.plugin.storage.service.StorageService;
 import com.example.plugin.territory.service.TerritoryService;
 import com.example.plugin.worker.service.WorkerService;
 import org.bukkit.Bukkit;
@@ -14,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  * GUI for selecting a NodeType to create upon claiming a new chunk.
+ * Cancel returns to TerritoryMapGUI.
  */
 public class NodeClaimSelectionGUI implements InventoryProvider {
 
@@ -23,6 +28,10 @@ public class NodeClaimSelectionGUI implements InventoryProvider {
     private final TerritoryService territoryService;
     private final NodeService nodeService;
     private final WorkerService workerService;
+    private final StorageService storageService;
+    private final EconomyService economyService;
+    private final OnboardingService onboardingService;
+    private final RegistryManager registryManager;
     private final Inventory inventory;
 
     public NodeClaimSelectionGUI(
@@ -31,7 +40,11 @@ public class NodeClaimSelectionGUI implements InventoryProvider {
         int chunkZ,
         TerritoryService territoryService,
         NodeService nodeService,
-        WorkerService workerService
+        WorkerService workerService,
+        StorageService storageService,
+        EconomyService economyService,
+        OnboardingService onboardingService,
+        RegistryManager registryManager
     ) {
         this.player = player;
         this.chunkX = chunkX;
@@ -39,6 +52,10 @@ public class NodeClaimSelectionGUI implements InventoryProvider {
         this.territoryService = territoryService;
         this.nodeService = nodeService;
         this.workerService = workerService;
+        this.storageService = storageService;
+        this.economyService = economyService;
+        this.onboardingService = onboardingService;
+        this.registryManager = registryManager;
         this.inventory = Bukkit.createInventory(this, 27, "§8Select Node Type to Build");
         populate();
     }
@@ -68,7 +85,8 @@ public class NodeClaimSelectionGUI implements InventoryProvider {
     public void onClick(InventoryClickEvent event) {
         int slot = event.getRawSlot();
         if (slot == 22) {
-            player.openInventory(new TerritoryMapGUI(player, territoryService, nodeService, workerService).getInventory());
+            // Cancel → back to Territory Map
+            player.openInventory(new TerritoryMapGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
             return;
         }
 
@@ -87,7 +105,7 @@ public class NodeClaimSelectionGUI implements InventoryProvider {
                 nodeService.createNode(player.getUniqueId(), type, chunkX, chunkZ);
                 player.sendMessage("§aClaimed chunk at (" + chunkX + ", " + chunkZ + ") as a " + type.name() + " node!");
             }
-            player.openInventory(new TerritoryMapGUI(player, territoryService, nodeService, workerService).getInventory());
+            player.openInventory(new TerritoryMapGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
         }
     }
 

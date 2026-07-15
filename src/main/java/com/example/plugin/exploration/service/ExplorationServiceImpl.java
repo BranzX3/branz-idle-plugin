@@ -61,6 +61,14 @@ public class ExplorationServiceImpl implements ExplorationService {
     }
 
     @Override
+    public void setExplorationLevel(UUID nodeId, int level) {
+        NodeExploration exp = getExploration(nodeId);
+        exp.setExplorationLevel(level);
+        exp.setExperience(0L);
+        saveQueue.queueTask(() -> repository.save(exp));
+    }
+
+    @Override
     public List<DropTableRegistry.DropEntry> getEligibleRareDrops(UUID nodeId, NodeType nodeType) {
         NodeExploration exp = getExploration(nodeId);
         int currentLevel = exp.getExplorationLevel();

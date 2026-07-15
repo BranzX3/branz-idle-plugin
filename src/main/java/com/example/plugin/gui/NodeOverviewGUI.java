@@ -1,12 +1,15 @@
 package com.example.plugin.gui;
 
 import com.example.plugin.config.NodeRegistry;
+import com.example.plugin.config.RegistryManager;
 import com.example.plugin.economy.service.EconomyService;
 import com.example.plugin.gui.item.ItemBuilder;
 import com.example.plugin.node.model.ProductionNode;
 import com.example.plugin.node.service.NodeService;
+import com.example.plugin.onboarding.service.OnboardingService;
 import com.example.plugin.storage.model.NodeStorage;
 import com.example.plugin.storage.service.StorageService;
+import com.example.plugin.territory.service.TerritoryService;
 import com.example.plugin.worker.model.WorkerInstance;
 import com.example.plugin.worker.service.WorkerService;
 import org.bukkit.Bukkit;
@@ -17,11 +20,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
  * Interactive GUI providing an overview of a production node's tier, worker slots, yield buffer, and upgrades.
+ * Navigates to WorkerManagementGUI for worker slots, and back to MainHubGUI or NodeSelectionGUI.
  */
 public class NodeOverviewGUI implements InventoryProvider {
 
@@ -31,7 +34,9 @@ public class NodeOverviewGUI implements InventoryProvider {
     private final WorkerService workerService;
     private final StorageService storageService;
     private final EconomyService economyService;
-    private final com.example.plugin.config.RegistryManager registryManager;
+    private final RegistryManager registryManager;
+    private final TerritoryService territoryService;
+    private final OnboardingService onboardingService;
     private final Inventory inventory;
 
     public NodeOverviewGUI(
@@ -41,7 +46,9 @@ public class NodeOverviewGUI implements InventoryProvider {
         WorkerService workerService,
         StorageService storageService,
         EconomyService economyService,
-        com.example.plugin.config.RegistryManager registryManager
+        RegistryManager registryManager,
+        TerritoryService territoryService,
+        OnboardingService onboardingService
     ) {
         this.player = player;
         this.node = node;
@@ -50,6 +57,8 @@ public class NodeOverviewGUI implements InventoryProvider {
         this.storageService = storageService;
         this.economyService = economyService;
         this.registryManager = registryManager;
+        this.territoryService = territoryService;
+        this.onboardingService = onboardingService;
         this.inventory = Bukkit.createInventory(this, 36, "§8Node Overview: §a" + node.getTierKey());
         populate();
     }
@@ -67,18 +76,49 @@ public class NodeOverviewGUI implements InventoryProvider {
         NodeStorage storage = storageService.getNodeStorage(node.getNodeId());
         long totalStored = storage.getResourceQuantities().values().stream().mapToLong(Long::longValue).sum();
 
-        inventory.setItem(4, new ItemBuilder(Material.BEACON)
+        com.example.plugin.exploration.service.ExplorationService explorationService =
+            org.bukkit.plugin.java.JavaPlugin.getPlugin(com.example.plugin.bootstrap.BranzIdlePlugin.class)
+                .getServiceRegistry()
+                .getRequiredService(com.example.plugin.exploration.service.ExplorationService.class);
+        com.example.plugin.exploration.model.NodeExploration exp = explorationService.getExploration(node.getNodeId());
+        long currentXp = exp.getExperience();
+        long requiredXp = exp.getExplorationLevel() * 100L;
+        double percent = requiredXp > 0 ? (currentXp * 100.0 / requiredXp) : 0.0;
+        String bar = getProgressBar(currentXp, requiredXp);
+
+        String eventStatusName = null;
+        String eventStatusCycles = null;
+        if (node.getActiveEventKey() != null) {
+            String prefix = node.getNodeType().name().toLowerCase();
+            String eventDisplayName = registryManager.getEventDropRegistry().getEvent(prefix, node.getActiveEventKey())
+                .map(com.example.plugin.config.EventDropRegistry.EventDefinition::displayName)
+                .orElse(node.getActiveEventKey());
+            eventStatusName = "§d§l★ Event Active: §d" + org.bukkit.ChatColor.translateAlternateColorCodes('&', eventDisplayName);
+            eventStatusCycles = "§d§l★ Event Cycles Left: §b" + node.getEventProgress() + " cycles";
+        }
+
+        ItemBuilder builder = new ItemBuilder(Material.BEACON)
             .name("§6§lProduction Node: §e" + node.getNodeType())
             .lore(
                 "§7Tier Key: §f" + node.getTierKey(),
                 "§7Level: §a" + node.getLevel(),
-                "§7Stored Resources: §b" + totalStored + " items"
-            ).build());
+                "§7Stored Resources: §b" + totalStored + " items",
+                "",
+                "§7Exploration Level: §bLv." + exp.getExplorationLevel(),
+                "§7Exploration Progress: §f" + currentXp + "§7/§f" + requiredXp + " XP §8(" + String.format("%.1f", percent) + "%)",
+                "§8[" + bar + "§8]"
+            );
+
+        if (eventStatusName != null) {
+            builder.addLore("", eventStatusName, eventStatusCycles);
+        }
+
+        inventory.setItem(4, builder.build());
 
         // Slots 11-15: Worker Slots
         List<WorkerInstance> assignedWorkers = workerService.getNodeWorkers(node.getNodeId());
-        Optional<NodeRegistry.NodeDefinition> defOpt = registryManager != null 
-            ? registryManager.getNodeRegistry().getNodeDefinition(node.getTierKey()) 
+        Optional<NodeRegistry.NodeDefinition> defOpt = registryManager != null
+            ? registryManager.getNodeRegistry().getNodeDefinition(node.getTierKey())
             : Optional.empty();
         int maxSlots = defOpt.map(NodeRegistry.NodeDefinition::workerSlots).orElse(1);
 
@@ -134,20 +174,33 @@ public class NodeOverviewGUI implements InventoryProvider {
                 "§eClick to attempt node upgrade!"
             ).build());
 
-        // Slot 31: Close
-        inventory.setItem(31, new ItemBuilder(Material.BARRIER).name("§c§lClose Menu").build());
+        // Slot 27: Back to Hub
+        inventory.setItem(27, new ItemBuilder(Material.ARROW)
+            .name("§c§lBack to Hub").build());
+
+        // Slot 31: Back to Node List
+        inventory.setItem(31, new ItemBuilder(Material.BOOK)
+            .name("§e§lBack to Node List").build());
     }
 
     @Override
     public void onClick(InventoryClickEvent event) {
         int slot = event.getRawSlot();
+
+        if (slot == 27) {
+            // Back to Hub
+            player.openInventory(new MainHubGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
+            return;
+        }
+
         if (slot == 31) {
-            player.closeInventory();
+            // Back to Node Selection
+            player.openInventory(new NodeSelectionGUI(player, NodeSelectionGUI.Mode.OVERVIEW, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
             return;
         }
 
         if (slot >= 11 && slot <= 15) {
-            player.openInventory(new WorkerManagementGUI(player, node, workerService, registryManager).getInventory());
+            player.openInventory(new WorkerManagementGUI(player, node, workerService, registryManager, nodeService, storageService, economyService, territoryService, onboardingService).getInventory());
             return;
         }
 
@@ -160,8 +213,9 @@ public class NodeOverviewGUI implements InventoryProvider {
         }
 
         if (slot == 26) {
-            Optional<NodeRegistry.NodeDefinition> defOpt = registryManager != null 
-                ? registryManager.getNodeRegistry().getNodeDefinition(node.getTierKey()) 
+            // Upgrade Node — show confirmation
+            Optional<NodeRegistry.NodeDefinition> defOpt = registryManager != null
+                ? registryManager.getNodeRegistry().getNodeDefinition(node.getTierKey())
                 : Optional.empty();
             if (defOpt.isEmpty()) {
                 player.sendMessage("§cUpgrade info not found!");
@@ -184,11 +238,44 @@ public class NodeOverviewGUI implements InventoryProvider {
                 return;
             }
 
-            boolean upgraded = nodeService.upgradeNode(player, node.getNodeId());
-            if (upgraded) {
-                populate();
-            }
+            player.openInventory(new ConfirmationGUI(
+                player,
+                "Upgrade Node",
+                List.of(
+                    "§7Node: §e" + node.getNodeType().name() + " (Lv." + node.getLevel() + ")",
+                    "§7Cost: §6" + coinsCost + " Coins §7/ §b" + diamondsCost + " Diamonds",
+                    "",
+                    "§7This will upgrade the node to the next level."
+                ),
+                () -> {
+                    boolean upgraded = nodeService.upgradeNode(player, node.getNodeId());
+                    if (upgraded) {
+                        // Re-fetch the node to get updated level
+                        nodeService.getNode(node.getNodeId()).ifPresentOrElse(
+                            updatedNode -> player.openInventory(new NodeOverviewGUI(player, updatedNode, nodeService, workerService, storageService, economyService, registryManager, territoryService, onboardingService).getInventory()),
+                            () -> player.openInventory(new MainHubGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory())
+                        );
+                    } else {
+                        player.openInventory(new NodeOverviewGUI(player, node, nodeService, workerService, storageService, economyService, registryManager, territoryService, onboardingService).getInventory());
+                    }
+                },
+                () -> player.openInventory(new NodeOverviewGUI(player, node, nodeService, workerService, storageService, economyService, registryManager, territoryService, onboardingService).getInventory())
+            ).getInventory());
         }
+    }
+
+    private String getProgressBar(long current, long max) {
+        int totalBars = 10;
+        int filledBars = max > 0 ? (int) Math.min(totalBars, (current * totalBars) / max) : 0;
+        StringBuilder sb = new StringBuilder("§a");
+        for (int i = 0; i < filledBars; i++) {
+            sb.append("■");
+        }
+        sb.append("§7");
+        for (int i = filledBars; i < totalBars; i++) {
+            sb.append("■");
+        }
+        return sb.toString();
     }
 
     @Override

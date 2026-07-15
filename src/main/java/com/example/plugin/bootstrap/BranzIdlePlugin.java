@@ -104,9 +104,6 @@ public final class BranzIdlePlugin extends JavaPlugin {
         ProtectionService protectionService = new ProtectionService(this, territoryService);
         serviceRegistry.registerService(ProtectionService.class, protectionService);
 
-        OnboardingService onboardingService = new OnboardingServiceImpl(this, economyService, territoryService);
-        serviceRegistry.registerService(OnboardingService.class, onboardingService);
-
         NodeRepository nodeRepository = new NodeRepository(this, databaseManager);
         NodeService nodeService = new NodeServiceImpl(this, nodeRepository, saveQueueService, registryManager, economyService, territoryService);
         nodeService.initialize();
@@ -116,6 +113,10 @@ public final class BranzIdlePlugin extends JavaPlugin {
         WorkerService workerService = new WorkerServiceImpl(this, workerRepository, saveQueueService, registryManager, nodeService);
         workerService.initialize();
         serviceRegistry.registerService(WorkerService.class, workerService);
+
+        // OnboardingService created after Node/Worker services for resetBase() dependency
+        OnboardingService onboardingService = new OnboardingServiceImpl(this, economyService, territoryService, nodeService, workerService);
+        serviceRegistry.registerService(OnboardingService.class, onboardingService);
 
         StorageRepository storageRepository = new StorageRepository(this, databaseManager);
         WalletRepository walletRepository = new WalletRepository(this, databaseManager);

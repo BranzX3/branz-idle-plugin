@@ -25,4 +25,13 @@ public interface OnboardingService {
      * @return true if onboarding completed successfully, false if area occupied or already onboarded
      */
     boolean startOnboarding(Player player, int originChunkX, int originChunkZ);
+
+    /**
+     * Resets the player's base entirely: unclaims all territory, deletes all nodes,
+     * unassigns all workers (workers are kept but detached), and resets onboarding status.
+     * Currency balances (coins/diamonds) are NOT affected.
+     *
+     * @return true if reset completed successfully, false if player was never onboarded
+     */
+    boolean resetBase(Player player);
 }

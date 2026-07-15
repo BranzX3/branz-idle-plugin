@@ -1,7 +1,12 @@
 package com.example.plugin.gui;
 
+import com.example.plugin.config.RegistryManager;
 import com.example.plugin.economy.service.EconomyService;
 import com.example.plugin.gui.item.ItemBuilder;
+import com.example.plugin.node.service.NodeService;
+import com.example.plugin.onboarding.service.OnboardingService;
+import com.example.plugin.storage.service.StorageService;
+import com.example.plugin.territory.service.TerritoryService;
 import com.example.plugin.worker.model.WorkerInstance;
 import com.example.plugin.worker.service.WorkerService;
 import org.bukkit.Bukkit;
@@ -15,20 +20,38 @@ import java.util.Optional;
 
 /**
  * Interactive GUI providing Gacha worker recruitment pulls (1x and 10x).
+ * Back button navigates to MainHubGUI.
  */
 public class GachaPullGUI implements InventoryProvider {
 
     private final Player player;
     private final WorkerService workerService;
     private final EconomyService economyService;
-    private final com.example.plugin.config.RegistryManager registryManager;
+    private final RegistryManager registryManager;
+    private final TerritoryService territoryService;
+    private final NodeService nodeService;
+    private final StorageService storageService;
+    private final OnboardingService onboardingService;
     private final Inventory inventory;
 
-    public GachaPullGUI(Player player, WorkerService workerService, EconomyService economyService, com.example.plugin.config.RegistryManager registryManager) {
+    public GachaPullGUI(
+        Player player,
+        WorkerService workerService,
+        EconomyService economyService,
+        RegistryManager registryManager,
+        TerritoryService territoryService,
+        NodeService nodeService,
+        StorageService storageService,
+        OnboardingService onboardingService
+    ) {
         this.player = player;
         this.workerService = workerService;
         this.economyService = economyService;
         this.registryManager = registryManager;
+        this.territoryService = territoryService;
+        this.nodeService = nodeService;
+        this.storageService = storageService;
+        this.onboardingService = onboardingService;
         this.inventory = Bukkit.createInventory(this, 27, "§8Worker Recruitment Banner");
         populate();
     }
@@ -63,12 +86,23 @@ public class GachaPullGUI implements InventoryProvider {
                 "§eClick to perform a 10x multi-pull!"
             ).build());
 
+        // Slot 18: Back to Hub
+        inventory.setItem(18, new ItemBuilder(Material.ARROW)
+            .name("§c§lBack to Hub").build());
+
         inventory.setItem(22, new ItemBuilder(Material.BARRIER).name("§c§lClose Menu").build());
     }
 
     @Override
     public void onClick(InventoryClickEvent event) {
         int slot = event.getRawSlot();
+
+        if (slot == 18) {
+            // Back to Hub
+            player.openInventory(new MainHubGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
+            return;
+        }
+
         if (slot == 22) {
             player.closeInventory();
             return;

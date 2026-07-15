@@ -129,6 +129,17 @@ public class TerritoryServiceImpl implements TerritoryService {
     }
 
     @Override
+    public boolean unclaimChunkInternal(int chunkX, int chunkZ) {
+        long packed = ChunkCoord.toPackedLong(chunkX, chunkZ);
+        if (territoryCache.containsKey(packed)) {
+            territoryCache.remove(packed);
+            saveQueue.queueTask(() -> repository.deleteById(new ChunkCoord(chunkX, chunkZ)));
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public boolean hasAdjacentClaim(UUID playerId, int chunkX, int chunkZ) {
         int[][] dirs = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
         for (int[] dir : dirs) {

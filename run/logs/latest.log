@@ -1,138 +1,118 @@
-[18:09:30] [ServerMain/INFO]: [bootstrap] Running Java 26 (OpenJDK 64-Bit Server VM 26.0.1+8; Eclipse Adoptium Temurin-26.0.1+8) on Windows 11 10.0 (amd64)
-[18:09:30] [ServerMain/INFO]: [bootstrap] Loading Paper 26.2-60-main@1cb58fb (2026-07-12T16:08:02Z) for Minecraft 26.2
-[18:09:31] [ServerMain/INFO]: [PluginInitializerManager] Initializing plugins...
-[18:09:31] [ServerMain/INFO]: [PluginInitializerManager] Initialized 1 plugin
-[18:09:31] [ServerMain/INFO]: [PluginInitializerManager] Bukkit plugins (1):
+[02:04:03] [ServerMain/INFO]: [bootstrap] Running Java 26 (OpenJDK 64-Bit Server VM 26.0.1+8; Eclipse Adoptium Temurin-26.0.1+8) on Windows 11 10.0 (amd64)
+[02:04:03] [ServerMain/INFO]: [bootstrap] Loading Paper 26.2-60-main@1cb58fb (2026-07-12T16:08:02Z) for Minecraft 26.2
+[02:04:03] [ServerMain/INFO]: [PluginInitializerManager] Initializing plugins...
+[02:04:03] [ServerMain/INFO]: [PluginInitializerManager] Initialized 1 plugin
+[02:04:03] [ServerMain/INFO]: [PluginInitializerManager] Bukkit plugins (1):
  - BranzIdle (1.0.0-SNAPSHOT)
-[18:09:35] [ServerMain/INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, profilesHost=https://api.mojang.com, name=PROD]
-[18:09:37] [ServerMain/INFO]: Loaded 1585 recipes
-[18:09:37] [ServerMain/INFO]: Loaded 1688 advancements
-[18:09:37] [ServerMain/INFO]: [ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry] Initialising converters for DataConverter...
-[18:09:37] [ServerMain/INFO]: [ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry] Finished initialising converters for DataConverter in 326.4ms
-[18:09:37] [Server thread/INFO]: Starting minecraft server version 26.2
-[18:09:37] [Server thread/INFO]: Loading properties
-[18:09:37] [Server thread/INFO]: This server is running Paper version 26.2-60-main@1cb58fb (2026-07-12T16:08:02Z) (Implementing API version 26.2.build.60-beta)
-[18:09:37] [Server thread/INFO]: [spark] This server bundles the spark profiler. For more information please visit https://docs.papermc.io/paper/profiling
-[18:09:37] [Server thread/INFO]: Using 4 threads for Netty based IO
-[18:09:37] [Server thread/INFO]: Server Ping Player Sample Count: 12
-[18:09:38] [Server thread/INFO]: [MoonriseCommon] Paper is using 3 worker threads, 1 I/O threads
-[18:09:38] [Server thread/INFO]: Default game type: SURVIVAL
-[18:09:38] [Server thread/INFO]: Generating keypair
-[18:09:38] [Server thread/INFO]: Starting Minecraft server on *:25565
-[18:09:38] [Server thread/INFO]: Paper: Using Java compression from Velocity.
-[18:09:38] [Server thread/INFO]: Paper: Using Java cipher from Velocity.
-[18:09:38] [Server thread/INFO]: [BranzIdle] Loading server plugin BranzIdle v1.0.0-SNAPSHOT
-[18:09:38] [Server thread/INFO]: Server permissions file permissions.yml is empty, ignoring it
-[18:09:38] [Server thread/INFO]: Preparing level "idle_world"
-[18:09:39] [Server thread/INFO]: Loading 0 persistent chunks for level 'minecraft:overworld'...
-[18:09:39] [Server thread/INFO]: Prepared spawn area in 1 ms
-[18:09:39] [Server thread/INFO]: Loading 0 persistent chunks for level 'minecraft:the_nether'...
-[18:09:39] [Server thread/INFO]: Prepared spawn area in 0 ms
-[18:09:39] [Server thread/INFO]: Loading 0 persistent chunks for level 'minecraft:the_end'...
-[18:09:39] [Server thread/INFO]: Prepared spawn area in 1 ms
-[18:09:39] [Server thread/INFO]: Done preparing level "idle_world" (0.507s)
-[18:09:39] [Server thread/INFO]: [BranzIdle] Enabling BranzIdle v1.0.0-SNAPSHOT
-[18:09:39] [Server thread/INFO]: [BranzIdle] ==========================================
-[18:09:39] [Server thread/INFO]: [BranzIdle] Initializing Branz.Idle MMORPG Framework
-[18:09:39] [Server thread/INFO]: [BranzIdle] ==========================================
-[18:09:39] [Server thread/INFO]: [BranzIdle] [ProviderManager] Detected Providers -> Citizens: false | FAWE: false | WorldEdit: false | Vault: false
-[18:09:39] [Server thread/INFO]: [com.example.plugin.lib.hikari.HikariDataSource] BranzIdle-Pool - Starting...
-[18:09:39] [Server thread/INFO]: [com.example.plugin.lib.hikari.pool.HikariPool] BranzIdle-Pool - Added connection org.sqlite.jdbc4.JDBC4Connection@1c8a2bc0
-[18:09:39] [Server thread/INFO]: [com.example.plugin.lib.hikari.HikariDataSource] BranzIdle-Pool - Start completed.
-[18:09:39] [Server thread/INFO]: [BranzIdle] [DatabaseManager] Successfully initialized SQLITE connection pool.
-[18:09:39] [Server thread/INFO]: [BranzIdle] [SaveQueueService] Asynchronous save queue started.
-[18:09:39] [Server thread/INFO]: [BranzIdle] [RegistryManager] Successfully loaded/reloaded all 5 data registries.
-[18:09:39] [Server thread/INFO]: [BranzIdle] [VaultBridge] Vault not detected; using standalone EconomyService.
-[18:09:39] [Server thread/INFO]: [BranzIdle] [TerritoryService] Cached 5 territory chunk claims.
-[18:09:39] [Server thread/INFO]: [BranzIdle] [NodeService] Cached 7 production nodes.
-[18:09:39] [Server thread/INFO]: [BranzIdle] [WorkerService] Cached 6 worker instances.
-[18:09:39] [Server thread/INFO]: [BranzIdle] [StorageService] Cached 7 node storages and 1 player wallets.
-[18:09:39] [Server thread/INFO]: [BranzIdle] [ExplorationService] Cached 7 node exploration records.
-[18:09:39] [Server thread/INFO]: [BranzIdle] [VisualService] Citizens not found; running with NoOp visual provider.
-[18:09:39] [Server thread/INFO]: [BranzIdle] Branz.Idle successfully enabled in 443 ms!
-[18:09:39] [Server thread/INFO]: [spark] Starting background profiler...
-[18:09:39] [Server thread/INFO]: [spark] The async-profiler engine is not supported for your os/arch (windows11/amd64), so the built-in Java engine will be used instead.
-[18:09:39] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:overworld
-[18:09:39] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:the_nether
-[18:09:39] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:the_end
-[18:09:39] [Server thread/INFO]: ThreadedAnvilChunkStorage (world): All chunks are saved
-[18:09:39] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
-[18:09:39] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
-[18:09:39] [Server thread/INFO]: ThreadedAnvilChunkStorage: All dimensions are saved
-[18:09:39] [Server thread/INFO]: Running delayed init tasks
-[18:09:39] [Server thread/INFO]: Done (9.783s)! For help, type "help"
-[18:09:41] [User Authenticator #0/INFO]: UUID of player Branz_ is 26fc58bf-07b1-435c-a9bb-fb3689aea5a2
-[18:09:42] [Server thread/INFO]: Branz_ joined the game
-[18:09:42] [Server thread/INFO]: Branz_[/171.97.116.162:62343] logged in with entity id 80 at ([minecraft:overworld]6.170057853411736, 73.0, -12.119454966160053)
-[18:09:51] [Server thread/INFO]: Branz_ issued server command: /idle collect
-[18:09:56] [Server thread/INFO]: Branz_ issued server command: /idle
-[18:10:02] [Server thread/INFO]: Branz_ issued server command: /base
-[18:10:13] [Server thread/INFO]: Branz_ issued server command: /base
-[18:10:47] [Server thread/INFO]: Branz_ issued server command: /base
-[18:10:51] [Server thread/INFO]: Branz_ issued server command: /base
-[18:10:54] [Server thread/INFO]: Branz_ issued server command: /base
-[18:10:58] [Server thread/INFO]: Branz_ issued server command: /base
-[18:11:02] [Server thread/INFO]: Branz_ issued server command: /base
-[18:11:05] [Server thread/INFO]: Branz_ issued server command: /base
-[18:11:09] [Server thread/INFO]: Branz_ issued server command: /base
-[18:11:13] [Server thread/INFO]: Branz_ issued server command: /base
-[18:11:20] [Server thread/INFO]: Branz_ issued server command: /base unclaim
-[18:11:27] [Server thread/INFO]: Branz_ issued server command: /base unclaim
-[18:11:39] [Server thread/INFO]: Branz_ issued server command: /base unclaim
-[18:11:51] [Server thread/INFO]: Branz_ issued server command: /base
-[18:11:54] [Server thread/INFO]: Branz_ issued server command: /base node
-[18:12:04] [Server thread/INFO]: Branz_ issued server command: /base
-[18:12:07] [Server thread/INFO]: Branz_ issued server command: /base collect
-[18:12:14] [Server thread/INFO]: Branz_ issued server command: /base worker
-[18:12:26] [Server thread/INFO]: Branz_ issued server command: /base worker
-[18:12:45] [Server thread/INFO]: Branz_ issued server command: /help
-[18:12:58] [Server thread/INFO]: Branz_ issued server command: /help branzidle
-[18:13:12] [Server thread/INFO]: Branz_ issued server command: /idle help
-[18:13:28] [Server thread/INFO]: Branz_ issued server command: /help 23
-[18:13:32] [Server thread/INFO]: Branz_ issued server command: /help 5
-[18:13:40] [Server thread/INFO]: Branz_ issued server command: /help 6
-[18:13:47] [Server thread/INFO]: Branz_ issued server command: /idlebase
-[18:13:52] [Server thread/INFO]: Branz_ issued server command: /idle market
-[18:14:05] [Server thread/INFO]: Branz_ issued server command: /idle market
-[18:14:26] [Server thread/INFO]: Stopping the server
-[18:14:26] [Server thread/INFO]: Stopping server
-[18:14:26] [Server thread/INFO]: [BranzIdle] Disabling BranzIdle v1.0.0-SNAPSHOT
-[18:14:26] [Server thread/INFO]: [BranzIdle] Shutting down Branz.Idle...
-[18:14:26] [Server thread/INFO]: [BranzIdle] [SaveQueueService] Stopped and flushed remaining tasks.
-[18:14:26] [Server thread/INFO]: [com.example.plugin.lib.hikari.HikariDataSource] BranzIdle-Pool - Shutdown initiated...
-[18:14:26] [Server thread/INFO]: [com.example.plugin.lib.hikari.HikariDataSource] BranzIdle-Pool - Shutdown completed.
-[18:14:26] [Server thread/INFO]: [BranzIdle] [DatabaseManager] Connection pool closed successfully.
-[18:14:26] [Server thread/INFO]: [BranzIdle] Branz.Idle has been successfully disabled.
-[18:14:26] [Server thread/INFO]: Saving players
-[18:14:26] [Server thread/INFO]: Branz_ lost connection: Server closed
-[18:14:26] [Server thread/INFO]: Branz_ left the game
-[18:14:26] [Server thread/INFO]: Saving worlds
-[18:14:26] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:overworld
-[18:14:26] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'minecraft:overworld'
-[18:14:26] [Server thread/INFO]: [ChunkHolderManager] Halted chunk system for world 'minecraft:overworld'
-[18:14:26] [Server thread/INFO]: [ChunkHolderManager] Saving all chunkholders for world 'minecraft:overworld'
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Saved 2109 block chunks, 828 entity chunks, 2 poi chunks in world 'minecraft:overworld' in 0.99s
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk I/O to halt for world 'minecraft:overworld'
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Halted I/O scheduler for world 'minecraft:overworld'
-[18:14:27] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:the_nether
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'minecraft:the_nether'
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Halted chunk system for world 'minecraft:the_nether'
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Saving all chunkholders for world 'minecraft:the_nether'
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Saved 0 block chunks, 0 entity chunks, 0 poi chunks in world 'minecraft:the_nether' in 0.00s
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk I/O to halt for world 'minecraft:the_nether'
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Halted I/O scheduler for world 'minecraft:the_nether'
-[18:14:27] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:the_end
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'minecraft:the_end'
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Halted chunk system for world 'minecraft:the_end'
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Saving all chunkholders for world 'minecraft:the_end'
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Saved 0 block chunks, 0 entity chunks, 0 poi chunks in world 'minecraft:the_end' in 0.00s
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk I/O to halt for world 'minecraft:the_end'
-[18:14:27] [Server thread/INFO]: [ChunkHolderManager] Halted I/O scheduler for world 'minecraft:the_end'
-[18:14:27] [Server thread/INFO]: ThreadedAnvilChunkStorage (world): All chunks are saved
-[18:14:27] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
-[18:14:27] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
-[18:14:27] [Server thread/INFO]: ThreadedAnvilChunkStorage: All dimensions are saved
-[18:14:27] [Server thread/INFO]: Waiting for all RegionFile I/O tasks to complete...
-[18:14:27] [Server thread/INFO]: All RegionFile I/O tasks to complete
-[18:14:27] [Server thread/INFO]: [MoonriseCommon] Awaiting termination of worker pool for up to 60s...
-[18:14:27] [Server thread/INFO]: [MoonriseCommon] Awaiting termination of I/O pool for up to 60s...
+[02:04:06] [ServerMain/INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, profilesHost=https://api.mojang.com, name=PROD]
+[02:04:07] [ServerMain/INFO]: Loaded 1585 recipes
+[02:04:08] [ServerMain/INFO]: Loaded 1688 advancements
+[02:04:08] [ServerMain/INFO]: [ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry] Initialising converters for DataConverter...
+[02:04:08] [ServerMain/INFO]: [ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry] Finished initialising converters for DataConverter in 244.9ms
+[02:04:08] [Server thread/INFO]: Starting minecraft server version 26.2
+[02:04:08] [Server thread/INFO]: Loading properties
+[02:04:08] [Server thread/INFO]: This server is running Paper version 26.2-60-main@1cb58fb (2026-07-12T16:08:02Z) (Implementing API version 26.2.build.60-beta)
+[02:04:08] [Server thread/INFO]: [spark] This server bundles the spark profiler. For more information please visit https://docs.papermc.io/paper/profiling
+[02:04:08] [Server thread/INFO]: Server Ping Player Sample Count: 12
+[02:04:08] [Server thread/INFO]: Using 4 threads for Netty based IO
+[02:04:08] [Server thread/INFO]: [MoonriseCommon] Paper is using 3 worker threads, 1 I/O threads
+[02:04:08] [Server thread/INFO]: Default game type: SURVIVAL
+[02:04:08] [Server thread/INFO]: Generating keypair
+[02:04:08] [Server thread/INFO]: Starting Minecraft server on *:25565
+[02:04:08] [Server thread/INFO]: Paper: Using Java compression from Velocity.
+[02:04:08] [Server thread/INFO]: Paper: Using Java cipher from Velocity.
+[02:04:08] [Server thread/INFO]: [BranzIdle] Loading server plugin BranzIdle v1.0.0-SNAPSHOT
+[02:04:08] [Server thread/INFO]: Server permissions file permissions.yml is empty, ignoring it
+[02:04:08] [Server thread/INFO]: Preparing level "idle_world"
+[02:04:09] [Server thread/INFO]: Loading 0 persistent chunks for level 'minecraft:overworld'...
+[02:04:09] [Server thread/INFO]: Preparing spawn area: 100%
+[02:04:09] [Server thread/INFO]: Prepared spawn area in 3 ms
+[02:04:09] [Server thread/INFO]: Loading 0 persistent chunks for level 'minecraft:the_nether'...
+[02:04:09] [Server thread/INFO]: Prepared spawn area in 0 ms
+[02:04:09] [Server thread/INFO]: Loading 0 persistent chunks for level 'minecraft:the_end'...
+[02:04:09] [Server thread/INFO]: Prepared spawn area in 1 ms
+[02:04:09] [Server thread/INFO]: Done preparing level "idle_world" (0.317s)
+[02:04:09] [Server thread/INFO]: [BranzIdle] Enabling BranzIdle v1.0.0-SNAPSHOT
+[02:04:09] [Server thread/INFO]: [BranzIdle] ==========================================
+[02:04:09] [Server thread/INFO]: [BranzIdle] Initializing Branz.Idle MMORPG Framework
+[02:04:09] [Server thread/INFO]: [BranzIdle] ==========================================
+[02:04:09] [Server thread/INFO]: [BranzIdle] [ProviderManager] Detected Providers -> Citizens: false | FAWE: false | WorldEdit: false | Vault: false
+[02:04:09] [Server thread/INFO]: [com.example.plugin.lib.hikari.HikariDataSource] BranzIdle-Pool - Starting...
+[02:04:09] [Server thread/INFO]: [com.example.plugin.lib.hikari.pool.HikariPool] BranzIdle-Pool - Added connection org.sqlite.jdbc4.JDBC4Connection@7f55d7ac
+[02:04:09] [Server thread/INFO]: [com.example.plugin.lib.hikari.HikariDataSource] BranzIdle-Pool - Start completed.
+[02:04:09] [Server thread/INFO]: [BranzIdle] [DatabaseManager] Successfully initialized SQLITE connection pool.
+[02:04:09] [Server thread/INFO]: [BranzIdle] [SaveQueueService] Asynchronous save queue started.
+[02:04:09] [Server thread/INFO]: [BranzIdle] [RegistryManager] Successfully loaded/reloaded all 6 data registries.
+[02:04:09] [Server thread/INFO]: [BranzIdle] [VaultBridge] Vault not detected; using standalone EconomyService.
+[02:04:09] [Server thread/INFO]: [BranzIdle] [TerritoryService] Cached 9 territory chunk claims.
+[02:04:09] [Server thread/INFO]: [BranzIdle] [NodeService] Cached 11 production nodes.
+[02:04:09] [Server thread/INFO]: [BranzIdle] [WorkerService] Cached 7 worker instances.
+[02:04:09] [Server thread/INFO]: [BranzIdle] [StorageService] Cached 16 node storages and 1 player wallets.
+[02:04:09] [Server thread/INFO]: [BranzIdle] [ExplorationService] Cached 16 node exploration records.
+[02:04:09] [Server thread/INFO]: [BranzIdle] [VisualService] Citizens not found; running with NoOp visual provider.
+[02:04:09] [Server thread/INFO]: [BranzIdle] Branz.Idle successfully enabled in 337 ms!
+[02:04:09] [Server thread/INFO]: [spark] Starting background profiler...
+[02:04:09] [Server thread/INFO]: [spark] The async-profiler engine is not supported for your os/arch (windows11/amd64), so the built-in Java engine will be used instead.
+[02:04:09] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:overworld
+[02:04:09] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:the_nether
+[02:04:09] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:the_end
+[02:04:09] [Server thread/INFO]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[02:04:09] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[02:04:09] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[02:04:09] [Server thread/INFO]: ThreadedAnvilChunkStorage: All dimensions are saved
+[02:04:09] [Server thread/INFO]: Running delayed init tasks
+[02:04:09] [Server thread/INFO]: Done (7.390s)! For help, type "help"
+[02:04:17] [User Authenticator #0/INFO]: UUID of player Branz_ is 26fc58bf-07b1-435c-a9bb-fb3689aea5a2
+[02:04:18] [Server thread/INFO]: Branz_ joined the game
+[02:04:18] [Server thread/INFO]: Branz_[/171.97.116.162:63394] logged in with entity id 101 at ([minecraft:overworld]7.902928166312389, 73.59199641514977, -57.97331249775253)
+[02:04:23] [Server thread/INFO]: Branz_ issued server command: /idle
+[02:05:01] [Server thread/INFO]: Branz_ issued server command: /idle
+[02:06:08] [Server thread/INFO]: Branz_ issued server command: /idle
+[02:06:35] [Server thread/INFO]: Branz_ issued server command: /idle admin
+[02:06:52] [Server thread/INFO]: [BranzIdle] [RegistryManager] Successfully loaded/reloaded all 6 data registries.
+[02:07:06] [Server thread/INFO]: Branz_ has made the advancement [Diamonds!]
+[02:07:10] [Server thread/INFO]: Branz_ issued server command: /idle admin
+[02:07:43] [Server thread/INFO]: Branz_ issued server command: /idle admin
+[02:09:10] [Server thread/INFO]: Branz_ issued server command: /idle admin
+[02:15:42] [Server thread/INFO]: Stopping the server
+[02:15:42] [Server thread/INFO]: Stopping server
+[02:15:42] [Server thread/INFO]: [BranzIdle] Disabling BranzIdle v1.0.0-SNAPSHOT
+[02:15:42] [Server thread/INFO]: [BranzIdle] Shutting down Branz.Idle...
+[02:15:42] [Server thread/INFO]: [BranzIdle] [SaveQueueService] Stopped and flushed remaining tasks.
+[02:15:42] [Server thread/INFO]: [com.example.plugin.lib.hikari.HikariDataSource] BranzIdle-Pool - Shutdown initiated...
+[02:15:42] [Server thread/INFO]: [com.example.plugin.lib.hikari.HikariDataSource] BranzIdle-Pool - Shutdown completed.
+[02:15:42] [Server thread/INFO]: [BranzIdle] [DatabaseManager] Connection pool closed successfully.
+[02:15:42] [Server thread/INFO]: [BranzIdle] Branz.Idle has been successfully disabled.
+[02:15:42] [Server thread/INFO]: Saving players
+[02:15:42] [Server thread/INFO]: Branz_ lost connection: Server closed
+[02:15:42] [Server thread/INFO]: Branz_ left the game
+[02:15:42] [Server thread/INFO]: Saving worlds
+[02:15:42] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:overworld
+[02:15:42] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'minecraft:overworld'
+[02:15:42] [Server thread/INFO]: [ChunkHolderManager] Halted chunk system for world 'minecraft:overworld'
+[02:15:42] [Server thread/INFO]: [ChunkHolderManager] Saving all chunkholders for world 'minecraft:overworld'
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Saved 655 block chunks, 191 entity chunks, 0 poi chunks in world 'minecraft:overworld' in 0.13s
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk I/O to halt for world 'minecraft:overworld'
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Halted I/O scheduler for world 'minecraft:overworld'
+[02:15:43] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:the_nether
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'minecraft:the_nether'
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Halted chunk system for world 'minecraft:the_nether'
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Saving all chunkholders for world 'minecraft:the_nether'
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Saved 0 block chunks, 0 entity chunks, 0 poi chunks in world 'minecraft:the_nether' in 0.00s
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk I/O to halt for world 'minecraft:the_nether'
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Halted I/O scheduler for world 'minecraft:the_nether'
+[02:15:43] [Server thread/INFO]: Saving chunks for level 'ServerLevel[idle_world]'/minecraft:the_end
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk system to halt for world 'minecraft:the_end'
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Halted chunk system for world 'minecraft:the_end'
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Saving all chunkholders for world 'minecraft:the_end'
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Saved 0 block chunks, 0 entity chunks, 0 poi chunks in world 'minecraft:the_end' in 0.00s
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Waiting 60s for chunk I/O to halt for world 'minecraft:the_end'
+[02:15:43] [Server thread/INFO]: [ChunkHolderManager] Halted I/O scheduler for world 'minecraft:the_end'
+[02:15:43] [Server thread/INFO]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[02:15:43] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[02:15:43] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[02:15:43] [Server thread/INFO]: ThreadedAnvilChunkStorage: All dimensions are saved
+[02:15:43] [Server thread/INFO]: Waiting for all RegionFile I/O tasks to complete...
+[02:15:43] [Server thread/INFO]: All RegionFile I/O tasks to complete
+[02:15:43] [Server thread/INFO]: [MoonriseCommon] Awaiting termination of worker pool for up to 60s...
+[02:15:43] [Server thread/INFO]: [MoonriseCommon] Awaiting termination of I/O pool for up to 60s...

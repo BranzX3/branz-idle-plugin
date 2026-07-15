@@ -47,6 +47,12 @@ public interface TerritoryService {
     boolean unclaimChunk(Player player, int chunkX, int chunkZ);
 
     /**
+     * Internal unclaim method for base resets and system overrides.
+     * Bypasses player permission checks and messaging.
+     */
+    boolean unclaimChunkInternal(int chunkX, int chunkZ);
+
+    /**
      * Checks if the player owns at least one directly adjacent chunk (N, S, E, W).
      */
     boolean hasAdjacentClaim(UUID playerId, int chunkX, int chunkZ);

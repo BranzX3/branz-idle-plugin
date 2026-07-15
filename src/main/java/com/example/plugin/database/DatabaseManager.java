@@ -124,7 +124,9 @@ public class DatabaseManager {
                 size_chunks INT DEFAULT 1,
                 style_id VARCHAR(64) NOT NULL,
                 last_calculated_time BIGINT NOT NULL,
-                created_at BIGINT NOT NULL
+                created_at BIGINT NOT NULL,
+                active_event VARCHAR(64) NULL,
+                event_progress INT DEFAULT 0
             );
             """,
             // 4. Node Storage Table
@@ -182,6 +184,13 @@ public class DatabaseManager {
             for (String index : indexes) {
                 stmt.execute(index);
             }
+            // Alter production_nodes table to add event progression fields if they don't exist
+            try {
+                stmt.execute("ALTER TABLE production_nodes ADD COLUMN active_event VARCHAR(64) NULL;");
+            } catch (SQLException ignored) {}
+            try {
+                stmt.execute("ALTER TABLE production_nodes ADD COLUMN event_progress INT DEFAULT 0;");
+            } catch (SQLException ignored) {}
         } catch (SQLException e) {
             plugin.getLogger().severe("[DatabaseManager] Failed to execute DDL schema initialization: " + e.getMessage());
             e.printStackTrace();
