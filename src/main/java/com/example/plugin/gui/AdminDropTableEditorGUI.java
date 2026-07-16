@@ -70,25 +70,35 @@ public class AdminDropTableEditorGUI implements InventoryProvider {
                 "§7• §bDrag any item§7 from cursor and §bclick an empty slot§7 inside",
                 "§7  the drop grid below (slots 9-44) to add it to the pool.",
                 "§7• §aLeft-Click§7: +5 Weight    §7• §aShift-Left§7: +20 Weight",
-                "§7• §bRight-Click§7: -5 Weight   §7• §cShift-Right§7: §c§lDelete Item"
+                "§7• §bRight-Click§7: -5 Weight   §7• §dPress Q (Drop)§7: Edit Qty Range",
+                "§7• §cShift-Right§7: §c§lDelete Item"
             ).build());
 
         if (def != null) {
+            double totalWeight = 0.0;
+            for (DropTableRegistry.DropEntry entry : def.entries()) {
+                totalWeight += entry.weight();
+            }
+
             int slot = 9;
             for (DropTableRegistry.DropEntry entry : def.entries()) {
                 if (slot >= 45) break;
 
                 Material mat = getMaterial(entry.resourceKey());
                 String displayName = getDisplayName(entry.resourceKey());
+                double probability = totalWeight > 0 ? (entry.weight() / totalWeight) * 100.0 : 0.0;
 
                 inventory.setItem(slot, new ItemBuilder(mat)
                     .name(displayName)
                     .lore(
                         "§7Resource Key: §8" + entry.resourceKey(),
-                        "§7Current Weight: §b" + entry.weight(),
+                        "§7Current Weight: §b" + entry.weight() + " §8(" + String.format("%.2f", probability) + "%)",
                         "§7Qty Range: §f" + entry.minQty() + " - " + entry.maxQty(),
                         "",
-                        "§7Click to adjust weight. Shift-Right to delete."
+                        "§eLeft/Right Click: §7Adjust weight (+/-5)",
+                        "§aShift-Left: §7+20 Weight",
+                        "§bPress Q (Drop Key): §eEdit Qty Range",
+                        "§cShift-Right: §cDelete item"
                     ).build());
 
                 slotToResourceMap.put(slot, entry.resourceKey());
@@ -248,19 +258,22 @@ public class AdminDropTableEditorGUI implements InventoryProvider {
             for (Map<?, ?> rawMap : rawList) {
                 if (resourceKey.equals(rawMap.get("resource_key"))) {
                     double currentWeight = 100.0;
-                    Object weightVal = rawMap.get("weight");
+                    // Read drop_weight first, then weight
+                    Object weightVal = rawMap.get("drop_weight");
+                    if (weightVal == null) weightVal = rawMap.get("weight");
                     if (weightVal instanceof Number) {
                         currentWeight = ((Number) weightVal).doubleValue();
                     }
                     double newWeight = Math.max(1.0, currentWeight + delta);
 
                     Map<Object, Object> updatedMap = new HashMap<>(rawMap);
-                    updatedMap.put("weight", newWeight);
+                    updatedMap.remove("weight"); // Clean up old key if exists
+                    updatedMap.put("drop_weight", newWeight);
 
                     int idx = rawList.indexOf(rawMap);
                     rawList.set(idx, updatedMap);
                     found = true;
-                    player.sendMessage("§aUpdated §e" + resourceKey + " §aweight: §b" + currentWeight + " §a-> §b" + newWeight);
+                    player.sendMessage("§aUpdated §e" + resourceKey + " §adrop_weight: §b" + currentWeight + " §a-> §b" + newWeight);
                     break;
                 }
             }
@@ -277,6 +290,97 @@ public class AdminDropTableEditorGUI implements InventoryProvider {
                 }
             }
         }
+    }
+
+    private void editQuantityRange(String resourceKey) {
+        player.closeInventory();
+        player.sendMessage("§d§l[QUANTITY RANGE] §eType min and max quantity (e.g., `5-15` or `10 20`), or type `cancel`.");
+
+        org.bukkit.event.Listener listener = new org.bukkit.event.Listener() {
+            @org.bukkit.event.EventHandler
+            public void onChat(org.bukkit.event.player.AsyncPlayerChatEvent e) {
+                if (!e.getPlayer().getUniqueId().equals(player.getUniqueId())) return;
+                e.setCancelled(true);
+
+                String msg = e.getMessage().trim().toLowerCase();
+                if (msg.equals("cancel")) {
+                    player.sendMessage("§cCancelled quantity range edit.");
+                    org.bukkit.event.HandlerList.unregisterAll(this);
+                    openEditorLater();
+                    return;
+                }
+
+                String[] parts = msg.split("[- ]+");
+                if (parts.length != 2) {
+                    player.sendMessage("§cInvalid format! Use format like `5-15` or `10 20`.");
+                    return;
+                }
+
+                try {
+                    long min = Long.parseLong(parts[0]);
+                    long max = Long.parseLong(parts[1]);
+
+                    if (min < 0 || max < min) {
+                        player.sendMessage("§cInvalid range! Min must be >= 0 and Max >= Min.");
+                        return;
+                    }
+
+                    org.bukkit.event.HandlerList.unregisterAll(this);
+                    Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(BranzIdlePlugin.class), () -> {
+                        updateQuantityRangeInFile(resourceKey, min, max);
+                    });
+                } catch (NumberFormatException ex) {
+                    player.sendMessage("§cInvalid numbers! Please input valid integers.");
+                }
+            }
+        };
+
+        Bukkit.getPluginManager().registerEvents(listener, JavaPlugin.getPlugin(BranzIdlePlugin.class));
+    }
+
+    private void updateQuantityRangeInFile(String resourceKey, long min, long max) {
+        BranzIdlePlugin plugin = JavaPlugin.getPlugin(BranzIdlePlugin.class);
+        File file = new File(plugin.getDataFolder(), "drop_tables.yml");
+        if (!file.exists()) return;
+
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        ConfigurationSection section = config.getConfigurationSection(tableKey);
+        if (section != null) {
+            List<Map<?, ?>> rawList = section.getMapList("entries");
+            boolean found = false;
+
+            for (Map<?, ?> rawMap : rawList) {
+                if (resourceKey.equals(rawMap.get("resource_key"))) {
+                    Map<Object, Object> updatedMap = new HashMap<>(rawMap);
+                    updatedMap.put("min_qty", min);
+                    updatedMap.put("max_qty", max);
+
+                    int idx = rawList.indexOf(rawMap);
+                    rawList.set(idx, updatedMap);
+                    found = true;
+                    player.sendMessage("§aUpdated §e" + resourceKey + " §aqty range to §b" + min + " - " + max);
+                    break;
+                }
+            }
+
+            if (found) {
+                section.set("entries", rawList);
+                try {
+                    config.save(file);
+                    plugin.getServiceRegistry().getRegistryManager().reloadAll();
+                } catch (IOException e) {
+                    player.sendMessage("§cFailed to save drop_tables.yml!");
+                    e.printStackTrace();
+                }
+            }
+        }
+        player.openInventory(getInventory());
+    }
+
+    private void openEditorLater() {
+        Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(BranzIdlePlugin.class), () -> {
+            player.openInventory(getInventory());
+        });
     }
 
     @Override
@@ -331,13 +435,13 @@ public class AdminDropTableEditorGUI implements InventoryProvider {
             if (resKey != null) {
                 if (click == ClickType.SHIFT_RIGHT) {
                     removeItemFromDropTable(resKey);
+                } else if (click == ClickType.DROP) {
+                    editQuantityRange(resKey);
                 } else {
                     double delta = 0.0;
 
                     if (click == ClickType.SHIFT_LEFT) {
                         delta = 20.0;
-                    } else if (click == ClickType.SHIFT_RIGHT) {
-                        delta = -20.0;
                     } else if (click.isLeftClick()) {
                         delta = 5.0;
                     } else if (click.isRightClick()) {

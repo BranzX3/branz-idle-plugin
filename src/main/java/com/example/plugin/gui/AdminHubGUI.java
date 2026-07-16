@@ -76,34 +76,34 @@ public class AdminHubGUI implements InventoryProvider {
                 "§eClick to manage events!"
             ).build());
 
-        // Slot 13: Gacha (Phase 2)
+        // Slot 13: Gacha (Editable)
         inventory.setItem(13, new ItemBuilder(Material.ENDER_CHEST)
             .name("§5§lGacha")
             .lore(
                 "§7Configure gacha pools and rates.",
-                "§8Coming in Phase 2.",
+                "§aLive Editable — reward weights and costs.",
                 "",
-                "§7§oNot yet available."
+                "§eClick to manage Gacha!"
             ).build());
 
-        // Slot 14: Economy (Phase 2)
+        // Slot 14: Economy (Editable)
         inventory.setItem(14, new ItemBuilder(Material.GOLD_INGOT)
             .name("§6§lEconomy")
             .lore(
-                "§7Adjust global economy parameters.",
-                "§8Coming in Phase 2.",
+                "§7Adjust tax rates, modifiers, and unit prices.",
+                "§aLive Editable — saves dynamically.",
                 "",
-                "§7§oNot yet available."
+                "§eClick to edit Economy!"
             ).build());
 
-        // Slot 15: Production (Phase 2)
+        // Slot 15: Production (Editable)
         inventory.setItem(15, new ItemBuilder(Material.FURNACE)
             .name("§e§lProduction")
             .lore(
                 "§7Tune production formula and tick rates.",
-                "§8Coming in Phase 2.",
+                "§aLive Editable — formula multipliers.",
                 "",
-                "§7§oNot yet available."
+                "§eClick to edit Production!"
             ).build());
 
         // ── Row 3: Module Grid ──
@@ -224,8 +224,12 @@ public class AdminHubGUI implements InventoryProvider {
             case 20 -> player.openInventory(new AdminWorkerBrowserGUI(player).getInventory());
             case 21 -> player.openInventory(new AdminNodeBrowserGUI(player).getInventory());
 
-            // Phase 2/3 placeholders — no-op with feedback
-            case 13, 14, 15, 22, 23, 24 -> player.sendMessage("§7§oThis module is not yet available.");
+            case 13 -> player.openInventory(new AdminGachaEditorGUI(player).getInventory());
+            case 14 -> player.openInventory(new AdminEconomyEditorGUI(player).getInventory());
+            case 15 -> player.openInventory(new AdminProductionEditorGUI(player).getInventory());
+
+            // Phase 3 placeholders — no-op with feedback
+            case 22, 23, 24 -> player.sendMessage("§7§oThis module is not yet available.");
 
             // ── Utility Actions ──
             case 37 -> {
@@ -238,7 +242,7 @@ public class AdminHubGUI implements InventoryProvider {
             case 39 -> player.openInventory(new AdminPlayerSelectorGUI(player).getInventory());
             case 41 -> {
                 player.sendMessage("§eSaving all in-memory data to disk...");
-                plugin.getServiceRegistry().getWorkerService().flushAll();
+                plugin.getServiceRegistry().getRequiredService(com.example.plugin.worker.service.WorkerService.class).flushDirtyWorkers();
                 player.sendMessage("§aAll data saved successfully!");
             }
             case 49 -> player.closeInventory();

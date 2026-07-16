@@ -1,5 +1,6 @@
 package com.example.plugin.gui;
 
+import com.example.plugin.bootstrap.BranzIdlePlugin;
 import com.example.plugin.config.RegistryManager;
 import com.example.plugin.economy.service.EconomyService;
 import com.example.plugin.gui.item.ItemBuilder;
@@ -15,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.List;
@@ -85,15 +87,16 @@ public class MarketplaceGUI implements InventoryProvider {
             if (amount <= 0) continue;
 
             String resKey = entry.getKey();
-            long pricePerItem = getUnitPrice(resKey);
-            long totalValue = amount * pricePerItem;
+            double pricePerItem = getUnitPrice(resKey);
+            if (pricePerItem <= 0.0) continue; // Skip non-sellable resources
+            double totalValue = amount * pricePerItem;
 
             inventory.setItem(slot, new ItemBuilder(Material.CHEST_MINECART)
                 .name("§e§lResource: §a" + resKey)
                 .lore(
                     "§7Stored Quantity: §b" + amount,
-                    "§7Unit Price: §6" + pricePerItem + " Coins",
-                    "§7Total Value: §a" + totalValue + " Coins",
+                    "§7Unit Price: §6" + String.format("%.2f", pricePerItem) + " Coins",
+                    "§7Total Value: §a" + String.format("%.2f", totalValue) + " Coins",
                     "§eClick to sell all!"
                 ).build());
 
@@ -108,14 +111,19 @@ public class MarketplaceGUI implements InventoryProvider {
         inventory.setItem(49, new ItemBuilder(Material.BARRIER).name("§c§lClose Marketplace").build());
     }
 
-    private long getUnitPrice(String resourceKey) {
-        return switch (resourceKey.toLowerCase()) {
-            case "iron_ore", "coal" -> 5L;
-            case "gold_ore", "lapis_lazuli" -> 15L;
-            case "diamond", "emerald" -> 50L;
-            case "netherite_scrap" -> 200L;
-            default -> 10L;
-        };
+    private double getUnitPrice(String resourceKey) {
+        var resDefOpt = registryManager.getResourceRegistry().getResource(resourceKey);
+        if (resDefOpt.isEmpty()) {
+            return 10.0;
+        }
+        var def = resDefOpt.get();
+        if (!def.npcSell()) {
+            return 0.0;
+        }
+        double basePrice = def.sellPrice();
+        double npcPriceModifier = JavaPlugin.getPlugin(BranzIdlePlugin.class).getConfig().getDouble("economy.npc_price_modifier", 1.0);
+        double sellTax = JavaPlugin.getPlugin(BranzIdlePlugin.class).getConfig().getDouble("economy.global_sell_tax", 0.0);
+        return Math.max(0.0, basePrice * npcPriceModifier * (1.0 - sellTax));
     }
 
     @Override
@@ -139,7 +147,9 @@ public class MarketplaceGUI implements InventoryProvider {
             long amount = wallet.getQuantity(resKey);
             if (amount <= 0) return;
 
-            long totalCoins = amount * getUnitPrice(resKey);
+            double unitPrice = getUnitPrice(resKey);
+            if (unitPrice <= 0) return;
+            double totalCoins = amount * unitPrice;
 
             // Show confirmation before selling
             player.openInventory(new ConfirmationGUI(
@@ -148,7 +158,7 @@ public class MarketplaceGUI implements InventoryProvider {
                 List.of(
                     "§7Resource: §e" + resKey,
                     "§7Quantity: §b" + amount,
-                    "§7Total Value: §6" + totalCoins + " Coins",
+                    "§7Total Value: §6" + String.format("%.2f", totalCoins) + " Coins",
                     "",
                     "§7All stored units will be sold."
                 ),
@@ -157,9 +167,9 @@ public class MarketplaceGUI implements InventoryProvider {
                     PlayerResourceWallet freshWallet = storageService.getPlayerWallet(player.getUniqueId());
                     long freshAmount = freshWallet.getQuantity(resKey);
                     if (freshAmount > 0 && storageService.spendResource(player.getUniqueId(), resKey, freshAmount)) {
-                        long freshCoins = freshAmount * getUnitPrice(resKey);
+                        double freshCoins = freshAmount * getUnitPrice(resKey);
                         economyService.addCoins(player.getUniqueId(), freshCoins);
-                        player.sendMessage("§aSold " + freshAmount + "x " + resKey + " for §6" + freshCoins + " coins!");
+                        player.sendMessage("§aSold " + freshAmount + "x " + resKey + " for §6" + String.format("%.2f", freshCoins) + " coins!");
                     }
                     player.openInventory(new MarketplaceGUI(player, storageService, economyService, territoryService, nodeService, workerService, onboardingService, registryManager).getInventory());
                 },
