@@ -1,5 +1,9 @@
 # Branz.Idle Main Configuration File
 
+resource_packs:
+  - vanilla
+  # - fantasy
+
 database:
   type: "sqlite" # sqlite or mysql
   sqlite:
@@ -20,6 +24,8 @@ territory:
 production:
   ticker_interval_seconds: 5
   offline_max_hours: 24
+  yield_scale_exponent: 1.2
+  yield_scale_multiplier: 0.05
 
 onboarding:
   starter_coins: 1000.0
@@ -32,3 +38,35 @@ onboarding:
 economy:
   vault_sync: true
   currency_name: "Coins"
+
+exploration:
+  max_level: 1000
+  base_xp: 100
+  xp_exponent: 1.5
+
+worker_settings:
+  born_locations:
+    MINING: "Mining Guild"
+    LUMBER: "Lumbercamp Outpost"
+    FISHING: "Deepsea Harbor"
+  personalities:
+    CHEERFUL:
+      display_name: "Cheerful"
+      dialogues:
+        - "Hi boss! Ready to collect some yields?"
+        - "I love working here! Everything is so bright!"
+    LAZY:
+      display_name: "Lazy"
+      dialogues:
+        - "Ugh... is it break time yet?"
+        - "Don't work too hard, boss. Sleeping is much better."
+    SERIOUS:
+      display_name: "Serious"
+      dialogues:
+        - "Reporting for duty. Production rates are stable."
+        - "Efficiency is my top priority."
+    BRAVE:
+      display_name: "Brave"
+      dialogues:
+        - "No mountain is too high! Let's get to work!"
+        - "I fear no challenge. The tools are ready!"

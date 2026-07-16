@@ -66,15 +66,19 @@ public class NodeClaimSelectionGUI implements InventoryProvider {
             inventory.setItem(i, border);
         }
 
-        inventory.setItem(11, new ItemBuilder(Material.IRON_PICKAXE)
+        inventory.setItem(10, new ItemBuilder(Material.GRASS_BLOCK)
+            .name("§e§lRESIDENTIAL BASE")
+            .lore("§7Claim this chunk as a", "§7Residential base plot.", "", "§aClick to claim!").build());
+
+        inventory.setItem(12, new ItemBuilder(Material.IRON_PICKAXE)
             .name("§6§lMINING NODE")
             .lore("§7Claim this chunk and build", "§7a Mining node here.", "", "§aClick to build!").build());
 
-        inventory.setItem(13, new ItemBuilder(Material.IRON_AXE)
+        inventory.setItem(14, new ItemBuilder(Material.IRON_AXE)
             .name("§a§lLUMBER NODE")
             .lore("§7Claim this chunk and build", "§7a Lumber node here.", "", "§aClick to build!").build());
 
-        inventory.setItem(15, new ItemBuilder(Material.FISHING_ROD)
+        inventory.setItem(16, new ItemBuilder(Material.FISHING_ROD)
             .name("§b§lFISHING NODE")
             .lore("§7Claim this chunk and build", "§7a Fishing node here.", "", "§aClick to build!").build());
 
@@ -90,12 +94,21 @@ public class NodeClaimSelectionGUI implements InventoryProvider {
             return;
         }
 
+        if (slot == 10) {
+            boolean success = territoryService.claimChunk(player, chunkX, chunkZ, com.example.plugin.territory.model.ChunkType.RESIDENTIAL);
+            if (success) {
+                player.sendMessage("§aClaimed chunk at (" + chunkX + ", " + chunkZ + ") as a Residential Base!");
+            }
+            player.openInventory(new TerritoryMapGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
+            return;
+        }
+
         NodeType type = null;
-        if (slot == 11) {
+        if (slot == 12) {
             type = NodeType.MINING;
-        } else if (slot == 13) {
+        } else if (slot == 14) {
             type = NodeType.LUMBER;
-        } else if (slot == 15) {
+        } else if (slot == 16) {
             type = NodeType.FISHING;
         }
 

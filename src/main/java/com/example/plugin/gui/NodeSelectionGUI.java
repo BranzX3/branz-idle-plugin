@@ -10,6 +10,7 @@ import com.example.plugin.storage.service.StorageService;
 import com.example.plugin.territory.service.TerritoryService;
 import com.example.plugin.worker.model.WorkerInstance;
 import com.example.plugin.worker.service.WorkerService;
+import com.example.plugin.worker.gui.WorkerManagementGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -146,8 +147,12 @@ public class NodeSelectionGUI implements InventoryProvider {
         }
 
         // Back to Hub button
-        inventory.setItem(49, new ItemBuilder(Material.ARROW)
+        inventory.setItem(45, new ItemBuilder(Material.ARROW)
             .name("§c§lBack to Hub").build());
+
+        // Close Menu button
+        inventory.setItem(49, new ItemBuilder(Material.BARRIER)
+            .name("§c§lClose Menu").build());
     }
 
     private Material getNodeIcon(com.example.plugin.node.model.NodeType type) {
@@ -162,9 +167,14 @@ public class NodeSelectionGUI implements InventoryProvider {
     public void onClick(InventoryClickEvent event) {
         int slot = event.getRawSlot();
 
-        if (slot == 49) {
+        if (slot == 45) {
             // Back to Hub
             player.openInventory(new MainHubGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
+            return;
+        }
+
+        if (slot == 49) {
+            player.closeInventory();
             return;
         }
 

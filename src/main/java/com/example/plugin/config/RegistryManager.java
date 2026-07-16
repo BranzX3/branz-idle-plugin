@@ -43,7 +43,28 @@ public class RegistryManager {
             GachaRegistry newGacha = new GachaRegistry();
             EventDropRegistry newEventDrops = new EventDropRegistry();
 
-            newResources.load(loadYaml("resources.yml"));
+            // Load main config to determine resource packs list
+            YamlConfiguration mainConfig = loadYaml("config.yml");
+            java.util.List<String> packs = mainConfig.getStringList("resource_packs");
+            if (packs.isEmpty()) {
+                packs = java.util.List.of("vanilla");
+            }
+
+            newResources.clear();
+            for (String pack : packs) {
+                File packFile = new File(plugin.getDataFolder(), "resources/" + pack + ".yml");
+                if (!packFile.exists()) {
+                    try {
+                        plugin.saveResource("resources/" + pack + ".yml", false);
+                    } catch (IllegalArgumentException ignored) {}
+                }
+                if (packFile.exists()) {
+                    newResources.load(YamlConfiguration.loadConfiguration(packFile));
+                } else {
+                    plugin.getLogger().warning("[RegistryManager] Resource pack file resources/" + pack + ".yml does not exist!");
+                }
+            }
+
             newWorkers.load(loadYaml("workers.yml"));
             newNodes.load(loadYaml("nodes.yml"));
             newDropTables.load(loadYaml("drop_tables.yml"));
@@ -58,7 +79,7 @@ public class RegistryManager {
             this.gachaRegistry = newGacha;
             this.eventDropRegistry = newEventDrops;
 
-            plugin.getLogger().info("[RegistryManager] Successfully loaded/reloaded all 6 data registries.");
+            plugin.getLogger().info("[RegistryManager] Successfully loaded/reloaded all data registries.");
             return true;
         } catch (Exception e) {
             plugin.getLogger().severe("[RegistryManager] Failed to reload registries: " + e.getMessage());
@@ -76,11 +97,13 @@ public class RegistryManager {
     }
 
     private void saveDefaultFiles() {
-        String[] files = {"config.yml", "resources.yml", "workers.yml", "nodes.yml", "drop_tables.yml", "gacha.yml", "event_drops.yml"};
+        String[] files = {"config.yml", "workers.yml", "nodes.yml", "drop_tables.yml", "gacha.yml", "event_drops.yml", "resources/vanilla.yml", "resources/fantasy.yml"};
         for (String f : files) {
             File dest = new File(plugin.getDataFolder(), f);
             if (!dest.exists()) {
-                plugin.saveResource(f, false);
+                try {
+                    plugin.saveResource(f, false);
+                } catch (IllegalArgumentException ignored) {}
             }
         }
     }

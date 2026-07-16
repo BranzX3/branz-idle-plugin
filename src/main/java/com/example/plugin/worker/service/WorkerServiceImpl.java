@@ -6,6 +6,11 @@ import com.example.plugin.config.WorkerRegistry;
 import com.example.plugin.database.SaveQueueService;
 import com.example.plugin.node.model.ProductionNode;
 import com.example.plugin.node.service.NodeService;
+import com.example.plugin.worker.biography.WorkerBiographyService;
+import com.example.plugin.worker.biography.WorkerBiographyServiceImpl;
+import com.example.plugin.worker.factory.WorkerFactory;
+import com.example.plugin.worker.fusion.WorkerFusionService;
+import com.example.plugin.worker.fusion.WorkerFusionServiceImpl;
 import com.example.plugin.worker.model.WorkerInstance;
 import com.example.plugin.worker.model.WorkerStats;
 import com.example.plugin.worker.repository.WorkerRepository;
@@ -16,20 +21,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Implementation of WorkerService using ConcurrentHashMap cache and async persistence.
+ * Implementation of WorkerService managing memory caching, periodic database flushing, and sub-service delegates.
  */
-public class WorkerServiceImpl implements WorkerService {
+public class WorkerServiceImpl implements WorkerService, org.bukkit.event.Listener {
 
     private final JavaPlugin plugin;
     private final WorkerRepository repository;
     private final SaveQueueService saveQueue;
     private final RegistryManager registryManager;
     private final NodeService nodeService;
+    
+    // Memory caches
     private final Map<UUID, WorkerInstance> workerCache = new ConcurrentHashMap<>();
+    private final Set<UUID> dirtyWorkers = ConcurrentHashMap.newKeySet();
+
+    // Delegate Services
+    private final WorkerBiographyService biographyService;
+    private final WorkerFactory workerFactory;
+    private final WorkerFusionService fusionService;
 
     public WorkerServiceImpl(
         JavaPlugin plugin,
@@ -43,15 +57,46 @@ public class WorkerServiceImpl implements WorkerService {
         this.saveQueue = saveQueue;
         this.registryManager = registryManager;
         this.nodeService = nodeService;
+
+        // Initialize domain delegates
+        this.biographyService = new WorkerBiographyServiceImpl(plugin);
+        this.workerFactory = new WorkerFactory(plugin, registryManager, biographyService);
+        this.fusionService = new WorkerFusionServiceImpl(this, registryManager, biographyService, repository, saveQueue);
     }
 
     @Override
     public void initialize() {
         workerCache.clear();
+        dirtyWorkers.clear();
         for (WorkerInstance w : repository.loadAll()) {
             workerCache.put(w.getWorkerId(), w);
         }
         plugin.getLogger().info("[WorkerService] Cached " + workerCache.size() + " worker instances.");
+
+        // Register events
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+
+        // Start periodic autosave flush task (runs asynchronously every 5 minutes / 6000 ticks)
+        org.bukkit.Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::flushDirtyWorkers, 6000L, 6000L);
+    }
+
+    @org.bukkit.event.EventHandler
+    public void onPlayerQuit(org.bukkit.event.player.PlayerQuitEvent event) {
+        UUID playerId = event.getPlayer().getUniqueId();
+        // Asynchronously flush this quitting player's dirty workers to the database
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            for (WorkerInstance w : getPlayerWorkers(playerId)) {
+                if (dirtyWorkers.remove(w.getWorkerId())) {
+                    repository.save(w);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void shutdown() {
+        plugin.getLogger().info("[WorkerService] Flushing dirty workers on shutdown...");
+        flushDirtyWorkers();
     }
 
     @Override
@@ -88,10 +133,8 @@ public class WorkerServiceImpl implements WorkerService {
 
     @Override
     public WorkerInstance spawnWorker(UUID ownerId, String templateId) {
-        UUID workerId = UUID.randomUUID();
-        WorkerInstance worker = new WorkerInstance(workerId, ownerId, templateId, null, 1, 0L);
-        workerCache.put(workerId, worker);
-        saveQueue.queueTask(() -> repository.save(worker));
+        WorkerInstance worker = workerFactory.generateWorker(ownerId, templateId);
+        saveWorkerImmediate(worker); // Critical creation event: write immediately
         return worker;
     }
 
@@ -120,7 +163,7 @@ public class WorkerServiceImpl implements WorkerService {
             return false;
         }
 
-        // Verify profession match or generic compatibility
+        // Verify profession match
         Optional<WorkerRegistry.WorkerTemplate> tplOpt = registryManager.getWorkerRegistry().getTemplate(worker.getTemplateId());
         if (tplOpt.isPresent()) {
             String profession = tplOpt.get().profession();
@@ -141,7 +184,7 @@ public class WorkerServiceImpl implements WorkerService {
         }
 
         worker.setAssignedNodeId(nodeId);
-        updateWorker(worker);
+        saveWorkerImmediate(worker); // Assignment change: write immediately
         player.sendMessage("§aAssigned worker to node successfully!");
         return true;
     }
@@ -151,7 +194,7 @@ public class WorkerServiceImpl implements WorkerService {
         WorkerInstance worker = workerCache.get(workerId);
         if (worker != null) {
             worker.setAssignedNodeId(nodeId);
-            updateWorker(worker);
+            saveWorkerImmediate(worker); // State change: write immediately
             return true;
         }
         return false;
@@ -171,7 +214,7 @@ public class WorkerServiceImpl implements WorkerService {
         }
 
         worker.setAssignedNodeId(null);
-        updateWorker(worker);
+        saveWorkerImmediate(worker); // Assignment change: write immediately
         player.sendMessage("§eUnassigned worker from node.");
         return true;
     }
@@ -180,8 +223,64 @@ public class WorkerServiceImpl implements WorkerService {
     public void updateWorker(WorkerInstance worker) {
         if (worker != null) {
             workerCache.put(worker.getWorkerId(), worker);
+            dirtyWorkers.add(worker.getWorkerId()); // Flags for periodic flush
+        }
+    }
+
+    @Override
+    public void saveWorkerImmediate(WorkerInstance worker) {
+        if (worker != null) {
+            workerCache.put(worker.getWorkerId(), worker);
+            dirtyWorkers.remove(worker.getWorkerId());
             saveQueue.queueTask(() -> repository.save(worker));
         }
+    }
+
+    @Override
+    public void deleteWorker(UUID workerId) {
+        workerCache.remove(workerId);
+        dirtyWorkers.remove(workerId);
+        saveQueue.queueTask(() -> repository.deleteById(workerId));
+    }
+
+    @Override
+    public void flushDirtyWorkers() {
+        if (dirtyWorkers.isEmpty()) return;
+
+        List<UUID> toSave = new ArrayList<>(dirtyWorkers);
+        dirtyWorkers.clear();
+
+        plugin.getLogger().info("[WorkerService] Flushing " + toSave.size() + " modified workers to database...");
+        for (UUID id : toSave) {
+            WorkerInstance w = workerCache.get(id);
+            if (w != null) {
+                repository.save(w);
+            }
+        }
+    }
+
+    @Override
+    public boolean fuseWorkers(Player player, UUID targetId, UUID ingredientId1, UUID ingredientId2) {
+        WorkerInstance target = workerCache.get(targetId);
+        WorkerInstance w1 = workerCache.get(ingredientId1);
+        WorkerInstance w2 = workerCache.get(ingredientId2);
+
+        if (target == null || w1 == null || w2 == null) {
+            player.sendMessage("§cOne or more workers could not be found!");
+            return false;
+        }
+
+        return fusionService.fuseWorkers(player, target, w1, w2);
+    }
+
+    @Override
+    public WorkerBiographyService getBiographyService() {
+        return biographyService;
+    }
+
+    @Override
+    public WorkerFusionService getFusionService() {
+        return fusionService;
     }
 
     @Override
@@ -193,9 +292,9 @@ public class WorkerServiceImpl implements WorkerService {
 
         WorkerRegistry.WorkerTemplate tpl = tplOpt.get();
         int lvl = Math.max(1, worker.getLevel());
-        double speed = tpl.speedBonus() + (lvl - 1) * tpl.growthPerLevel();
-        double yield = tpl.yieldBonus() + (lvl - 1) * tpl.growthPerLevel();
-        double rare = tpl.rareDropBonus() + (lvl - 1) * (tpl.growthPerLevel() / 2.0);
+        double speed = tpl.speedBonus() + (lvl - 1) * tpl.growthPerLevel() * worker.getSpeedPotential();
+        double yield = tpl.yieldBonus() + (lvl - 1) * tpl.growthPerLevel() * worker.getYieldPotential();
+        double rare = tpl.rareDropBonus() + (lvl - 1) * (tpl.growthPerLevel() / 2.0) * worker.getRarePotential();
         return new WorkerStats(speed, yield, rare);
     }
 }

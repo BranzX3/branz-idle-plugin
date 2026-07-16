@@ -2,6 +2,8 @@ package com.example.plugin.worker.service;
 
 import com.example.plugin.worker.model.WorkerInstance;
 import com.example.plugin.worker.model.WorkerStats;
+import com.example.plugin.worker.biography.WorkerBiographyService;
+import com.example.plugin.worker.fusion.WorkerFusionService;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -17,6 +19,11 @@ public interface WorkerService {
      * Initializes worker cache from database during startup.
      */
     void initialize();
+
+    /**
+     * Shuts down the service and flushes all memory changes to the database.
+     */
+    void shutdown();
 
     /**
      * Retrieves a worker instance by its UUID.
@@ -39,7 +46,7 @@ public interface WorkerService {
     List<WorkerInstance> getAllWorkers();
 
     /**
-     * Spawns a new worker instance from a template and persists it.
+     * Spawns a new worker instance from a template and persists it immediately.
      */
     WorkerInstance spawnWorker(UUID ownerId, String templateId);
 
@@ -60,12 +67,42 @@ public interface WorkerService {
     boolean unassignWorker(Player player, UUID workerId);
 
     /**
-     * Updates a worker instance in memory and queues an async database save.
+     * Updates a worker instance in memory cache and flags it for periodic database saving.
      */
     void updateWorker(WorkerInstance worker);
 
     /**
-     * Computes the effective stats (Speed, Yield, Rare Drop) scaled by the worker's current level.
+     * Saves a worker instance to the database immediately (bypassing periodic flush queue).
+     */
+    void saveWorkerImmediate(WorkerInstance worker);
+
+    /**
+     * Removes a worker from cache and queues database deletion.
+     */
+    void deleteWorker(UUID workerId);
+
+    /**
+     * Force flushes all dirty worker states to the database.
+     */
+    void flushDirtyWorkers();
+
+    /**
+     * Fuses three duplicate workers of the same rarity and profession to upgrade the target worker's rarity tier.
+     */
+    boolean fuseWorkers(Player player, UUID targetId, UUID ingredientId1, UUID ingredientId2);
+
+    /**
+     * Retrieves the Biography Service.
+     */
+    WorkerBiographyService getBiographyService();
+
+    /**
+     * Retrieves the Fusion Service.
+     */
+    WorkerFusionService getFusionService();
+
+    /**
+     * Computes the effective stats (Speed, Yield, Rare Drop) scaled by the worker's current level and potentials.
      */
     WorkerStats getEffectiveStats(WorkerInstance worker);
 }

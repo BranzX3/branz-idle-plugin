@@ -2,6 +2,7 @@ package com.example.plugin.gui;
 
 import com.example.plugin.config.RegistryManager;
 import com.example.plugin.economy.service.EconomyService;
+import java.util.Optional;
 import com.example.plugin.gui.item.ItemBuilder;
 import com.example.plugin.node.service.NodeService;
 import com.example.plugin.onboarding.service.OnboardingService;

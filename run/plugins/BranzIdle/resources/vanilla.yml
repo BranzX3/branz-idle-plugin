@@ -1,0 +1,2428 @@
+# Branz.Idle Vanilla Resource Pack
+# Part of the data-driven progression system (Lv 1-1000)
+
+# ==========================================
+#              MINING CATEGORY
+# ==========================================
+
+stone:
+  display_name: "&7Stone"
+  material: STONE
+  custom_model_data: 2001
+  rarity: COMMON
+  quality: NORMAL
+  category: MINING
+  family: STONE
+  tier: TIER_1
+  unlock_level: 1
+  allowed_nodes:
+    - MINING
+  zones:
+    - SURFACE
+  resource_type: RAW_RESOURCE
+  sell_price: 1.0
+  buy_price: 2.0
+  exp: 1
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - STONE
+    - MINING
+  translation_key: resource.stone
+  enabled: true
+  introduced_in: 1
+
+coal:
+  display_name: "&8Coal"
+  material: COAL
+  custom_model_data: 2002
+  rarity: COMMON
+  quality: NORMAL
+  category: MINING
+  family: COAL
+  tier: TIER_1
+  unlock_level: 10
+  allowed_nodes:
+    - MINING
+  zones:
+    - SURFACE
+  resource_type: RAW_RESOURCE
+  sell_price: 3.0
+  buy_price: 6.0
+  exp: 2
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - ORE
+    - FUEL
+  translation_key: resource.coal
+  enabled: true
+  introduced_in: 1
+
+raw_copper:
+  display_name: "&eRaw Copper"
+  material: RAW_COPPER
+  custom_model_data: 2003
+  rarity: COMMON
+  quality: NORMAL
+  category: MINING
+  family: COPPER
+  tier: TIER_1
+  unlock_level: 20
+  allowed_nodes:
+    - MINING
+  zones:
+    - SURFACE
+  resource_type: RAW_RESOURCE
+  sell_price: 5.0
+  buy_price: 10.0
+  exp: 3
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - ORE
+    - METAL
+  translation_key: resource.raw_copper
+  enabled: true
+  introduced_in: 1
+
+raw_iron:
+  display_name: "&fRaw Iron"
+  material: RAW_IRON
+  custom_model_data: 2004
+  rarity: COMMON
+  quality: NORMAL
+  category: MINING
+  family: IRON
+  tier: TIER_1
+  unlock_level: 35
+  allowed_nodes:
+    - MINING
+  zones:
+    - SURFACE
+  resource_type: RAW_RESOURCE
+  sell_price: 8.0
+  buy_price: 16.0
+  exp: 4
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - ORE
+    - METAL
+  translation_key: resource.raw_iron
+  enabled: true
+  introduced_in: 1
+
+flint:
+  display_name: "&8Flint"
+  material: FLINT
+  custom_model_data: 2005
+  rarity: COMMON
+  quality: NORMAL
+  category: MINING
+  family: FLINT
+  tier: TIER_1
+  unlock_level: 45
+  allowed_nodes:
+    - MINING
+  zones:
+    - SURFACE
+  resource_type: RAW_RESOURCE
+  sell_price: 10.0
+  buy_price: 20.0
+  exp: 5
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - STONE
+    - FLINT
+  translation_key: resource.flint
+  enabled: true
+  introduced_in: 1
+
+deepslate:
+  display_name: "&8Cobbled Deepslate"
+  material: COBBLED_DEEPSLATE
+  custom_model_data: 2011
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: MINING
+  family: DEEPSLATE
+  tier: TIER_2
+  unlock_level: 51
+  allowed_nodes:
+    - MINING
+  zones:
+    - DEEP_CAVE
+  resource_type: RAW_RESOURCE
+  sell_price: 12.0
+  buy_price: 24.0
+  exp: 6
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - DEEPSLATE
+    - STONE
+  translation_key: resource.deepslate
+  enabled: true
+  introduced_in: 1
+
+deepslate_iron:
+  display_name: "&7Deepslate Iron Ore"
+  material: DEEPSLATE_IRON_ORE
+  custom_model_data: 2012
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: MINING
+  family: IRON
+  tier: TIER_2
+  unlock_level: 70
+  allowed_nodes:
+    - MINING
+  zones:
+    - DEEP_CAVE
+  resource_type: RAW_RESOURCE
+  sell_price: 15.0
+  buy_price: 30.0
+  exp: 8
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - ORE
+    - METAL
+  translation_key: resource.deepslate_iron
+  enabled: true
+  introduced_in: 1
+
+raw_gold:
+  display_name: "&6Raw Gold"
+  material: RAW_GOLD
+  custom_model_data: 2013
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: MINING
+  family: GOLD
+  tier: TIER_2
+  unlock_level: 90
+  allowed_nodes:
+    - MINING
+  zones:
+    - DEEP_CAVE
+  resource_type: RAW_RESOURCE
+  sell_price: 20.0
+  buy_price: 40.0
+  exp: 10
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - ORE
+    - METAL
+  translation_key: resource.raw_gold
+  enabled: true
+  introduced_in: 1
+
+lapis_lazuli:
+  display_name: "&9Lapis Lazuli"
+  material: LAPIS_LAZULI
+  custom_model_data: 2014
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: MINING
+  family: LAPIS
+  tier: TIER_2
+  unlock_level: 110
+  allowed_nodes:
+    - MINING
+  zones:
+    - DEEP_CAVE
+  resource_type: RAW_RESOURCE
+  sell_price: 22.0
+  buy_price: 44.0
+  exp: 12
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - GEM
+    - DYE
+  translation_key: resource.lapis_lazuli
+  enabled: true
+  introduced_in: 1
+
+redstone:
+  display_name: "&cRedstone Dust"
+  material: REDSTONE
+  custom_model_data: 2015
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: MINING
+  family: REDSTONE
+  tier: TIER_2
+  unlock_level: 120
+  allowed_nodes:
+    - MINING
+  zones:
+    - DEEP_CAVE
+  resource_type: RAW_RESOURCE
+  sell_price: 25.0
+  buy_price: 50.0
+  exp: 14
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - DUST
+    - REDSTONE
+  translation_key: resource.redstone
+  enabled: true
+  introduced_in: 1
+
+calcite:
+  display_name: "&fCalcite"
+  material: CALCITE
+  custom_model_data: 2016
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: MINING
+  family: CALCITE
+  tier: TIER_2
+  unlock_level: 135
+  allowed_nodes:
+    - MINING
+  zones:
+    - DEEP_CAVE
+  resource_type: RAW_RESOURCE
+  sell_price: 28.0
+  buy_price: 56.0
+  exp: 16
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - STONE
+    - CALCITE
+  translation_key: resource.calcite
+  enabled: true
+  introduced_in: 1
+
+tuff:
+  display_name: "&8Tuff"
+  material: TUFF
+  custom_model_data: 2017
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: MINING
+  family: TUFF
+  tier: TIER_2
+  unlock_level: 145
+  allowed_nodes:
+    - MINING
+  zones:
+    - DEEP_CAVE
+  resource_type: RAW_RESOURCE
+  sell_price: 30.0
+  buy_price: 60.0
+  exp: 18
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - STONE
+    - TUFF
+  translation_key: resource.tuff
+  enabled: true
+  introduced_in: 1
+
+emerald:
+  display_name: "&aEmerald"
+  material: EMERALD
+  custom_model_data: 2021
+  rarity: RARE
+  quality: FINE
+  category: MINING
+  family: EMERALD
+  tier: TIER_3
+  unlock_level: 151
+  allowed_nodes:
+    - MINING
+  zones:
+    - CRYSTAL_CAVE
+  resource_type: RAW_RESOURCE
+  sell_price: 40.0
+  buy_price: 80.0
+  exp: 25
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - GEM
+    - EMERALD
+  translation_key: resource.emerald
+  enabled: true
+  introduced_in: 1
+
+diamond:
+  display_name: "&bDiamond"
+  material: DIAMOND
+  custom_model_data: 2022
+  rarity: RARE
+  quality: FINE
+  category: MINING
+  family: DIAMOND
+  tier: TIER_3
+  unlock_level: 180
+  allowed_nodes:
+    - MINING
+  zones:
+    - CRYSTAL_CAVE
+  resource_type: RAW_RESOURCE
+  sell_price: 50.0
+  buy_price: 100.0
+  exp: 30
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - GEM
+    - DIAMOND
+  translation_key: resource.diamond
+  enabled: true
+  introduced_in: 1
+
+amethyst_shard:
+  display_name: "&dAmethyst Shard"
+  material: AMETHYST_SHARD
+  custom_model_data: 2023
+  rarity: RARE
+  quality: FINE
+  category: MINING
+  family: AMETHYST
+  tier: TIER_3
+  unlock_level: 200
+  allowed_nodes:
+    - MINING
+  zones:
+    - CRYSTAL_CAVE
+  resource_type: RAW_RESOURCE
+  sell_price: 55.0
+  buy_price: 110.0
+  exp: 35
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - GEM
+    - CRYSTAL
+  translation_key: resource.amethyst_shard
+  enabled: true
+  introduced_in: 1
+
+amethyst_cluster:
+  display_name: "&dAmethyst Cluster"
+  material: AMETHYST_CLUSTER
+  custom_model_data: 2024
+  rarity: RARE
+  quality: FINE
+  category: MINING
+  family: AMETHYST
+  tier: TIER_3
+  unlock_level: 220
+  allowed_nodes:
+    - MINING
+  zones:
+    - CRYSTAL_CAVE
+  resource_type: BLOCK
+  sell_price: 70.0
+  buy_price: 140.0
+  exp: 45
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - CRYSTAL
+  translation_key: resource.amethyst_cluster
+  enabled: true
+  introduced_in: 1
+
+obsidian:
+  display_name: "&5Obsidian"
+  material: OBSIDIAN
+  custom_model_data: 2025
+  rarity: RARE
+  quality: FINE
+  category: MINING
+  family: OBSIDIAN
+  tier: TIER_3
+  unlock_level: 240
+  allowed_nodes:
+    - MINING
+  zones:
+    - CRYSTAL_CAVE
+  resource_type: BLOCK
+  sell_price: 85.0
+  buy_price: 170.0
+  exp: 55
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - STONE
+  translation_key: resource.obsidian
+  enabled: true
+  introduced_in: 1
+
+echo_shard:
+  display_name: "&3Echo Shard"
+  material: ECHO_SHARD
+  custom_model_data: 2031
+  rarity: EPIC
+  quality: EXCELLENT
+  category: MINING
+  family: ECHO
+  tier: TIER_4
+  unlock_level: 251
+  allowed_nodes:
+    - MINING
+  zones:
+    - SCULK_DEPTHS
+  resource_type: RAW_RESOURCE
+  sell_price: 120.0
+  buy_price: 240.0
+  exp: 80
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - GEM
+    - DEEP_DARK
+  translation_key: resource.echo_shard
+  enabled: true
+  introduced_in: 1
+
+sculk:
+  display_name: "&3Sculk"
+  material: SCULK
+  custom_model_data: 2032
+  rarity: EPIC
+  quality: EXCELLENT
+  category: MINING
+  family: SCULK
+  tier: TIER_4
+  unlock_level: 280
+  allowed_nodes:
+    - MINING
+  zones:
+    - SCULK_DEPTHS
+  resource_type: BLOCK
+  sell_price: 140.0
+  buy_price: 280.0
+  exp: 100
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - DEEP_DARK
+  translation_key: resource.sculk
+  enabled: true
+  introduced_in: 1
+
+sculk_catalyst:
+  display_name: "&3Sculk Catalyst"
+  material: SCULK_CATALYST
+  custom_model_data: 2033
+  rarity: EPIC
+  quality: EXCELLENT
+  category: MINING
+  family: SCULK
+  tier: TIER_4
+  unlock_level: 320
+  allowed_nodes:
+    - MINING
+  zones:
+    - SCULK_DEPTHS
+  resource_type: BLOCK
+  sell_price: 180.0
+  buy_price: 360.0
+  exp: 130
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - DEEP_DARK
+  translation_key: resource.sculk_catalyst
+  enabled: true
+  introduced_in: 1
+
+sculk_sensor:
+  display_name: "&3Sculk Sensor"
+  material: SCULK_SENSOR
+  custom_model_data: 2034
+  rarity: EPIC
+  quality: EXCELLENT
+  category: MINING
+  family: SCULK
+  tier: TIER_4
+  unlock_level: 360
+  allowed_nodes:
+    - MINING
+  zones:
+    - SCULK_DEPTHS
+  resource_type: BLOCK
+  sell_price: 220.0
+  buy_price: 440.0
+  exp: 160
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - DEEP_DARK
+  translation_key: resource.sculk_sensor
+  enabled: true
+  introduced_in: 1
+
+ancient_debris:
+  display_name: "&4Ancient Debris"
+  material: ANCIENT_DEBRIS
+  custom_model_data: 2041
+  rarity: EPIC
+  quality: EXCELLENT
+  category: MINING
+  family: NETHERITE
+  tier: TIER_5
+  unlock_level: 401
+  allowed_nodes:
+    - MINING
+  zones:
+    - NETHER_DEPTHS
+  resource_type: RAW_RESOURCE
+  sell_price: 350.0
+  buy_price: 700.0
+  exp: 250
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - ORE
+    - NETHER
+  translation_key: resource.ancient_debris
+  enabled: true
+  introduced_in: 1
+
+nether_quartz:
+  display_name: "&fNether Quartz"
+  material: QUARTZ
+  custom_model_data: 2042
+  rarity: EPIC
+  quality: EXCELLENT
+  category: MINING
+  family: QUARTZ
+  tier: TIER_5
+  unlock_level: 450
+  allowed_nodes:
+    - MINING
+  zones:
+    - NETHER_DEPTHS
+  resource_type: RAW_RESOURCE
+  sell_price: 280.0
+  buy_price: 560.0
+  exp: 200
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - GEM
+    - NETHER
+  translation_key: resource.nether_quartz
+  enabled: true
+  introduced_in: 1
+
+blackstone:
+  display_name: "&8Blackstone"
+  material: BLACKSTONE
+  custom_model_data: 2043
+  rarity: EPIC
+  quality: EXCELLENT
+  category: MINING
+  family: BLACKSTONE
+  tier: TIER_5
+  unlock_level: 500
+  allowed_nodes:
+    - MINING
+  zones:
+    - NETHER_DEPTHS
+  resource_type: BLOCK
+  sell_price: 300.0
+  buy_price: 600.0
+  exp: 220
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - NETHER
+  translation_key: resource.blackstone
+  enabled: true
+  introduced_in: 1
+
+basalt:
+  display_name: "&8Basalt"
+  material: BASALT
+  custom_model_data: 2044
+  rarity: EPIC
+  quality: EXCELLENT
+  category: MINING
+  family: BASALT
+  tier: TIER_5
+  unlock_level: 540
+  allowed_nodes:
+    - MINING
+  zones:
+    - NETHER_DEPTHS
+  resource_type: BLOCK
+  sell_price: 320.0
+  buy_price: 640.0
+  exp: 240
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - NETHER
+  translation_key: resource.basalt
+  enabled: true
+  introduced_in: 1
+
+glowstone_dust:
+  display_name: "&eGlowstone Dust"
+  material: GLOWSTONE_DUST
+  custom_model_data: 2045
+  rarity: EPIC
+  quality: EXCELLENT
+  category: MINING
+  family: GLOWSTONE
+  tier: TIER_5
+  unlock_level: 580
+  allowed_nodes:
+    - MINING
+  zones:
+    - NETHER_DEPTHS
+  resource_type: RAW_RESOURCE
+  sell_price: 340.0
+  buy_price: 680.0
+  exp: 260
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - DUST
+    - NETHER
+  translation_key: resource.glowstone_dust
+  enabled: true
+  introduced_in: 1
+
+netherite_scrap:
+  display_name: "&4Netherite Scrap"
+  material: NETHERITE_SCRAP
+  custom_model_data: 2051
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: MINING
+  family: NETHERITE
+  tier: TIER_6
+  unlock_level: 601
+  allowed_nodes:
+    - MINING
+  zones:
+    - END_SHORES
+  resource_type: RAW_RESOURCE
+  sell_price: 600.0
+  buy_price: 1200.0
+  exp: 450
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - ORE
+    - ENDGAME
+  translation_key: resource.netherite_scrap
+  enabled: true
+  introduced_in: 1
+
+dragon_breath:
+  display_name: "&dDragon's Breath"
+  material: DRAGON_BREATH
+  custom_model_data: 2052
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: MINING
+  family: DRAGON
+  tier: TIER_6
+  unlock_level: 650
+  allowed_nodes:
+    - MINING
+  zones:
+    - END_SHORES
+  resource_type: RAW_RESOURCE
+  sell_price: 700.0
+  buy_price: 1400.0
+  exp: 550
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - INGREDIENT
+    - END
+  translation_key: resource.dragon_breath
+  enabled: true
+  introduced_in: 1
+
+end_stone:
+  display_name: "&eEnd Stone"
+  material: END_STONE
+  custom_model_data: 2053
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: MINING
+  family: ENDSTONE
+  tier: TIER_6
+  unlock_level: 700
+  allowed_nodes:
+    - MINING
+  zones:
+    - END_SHORES
+  resource_type: BLOCK
+  sell_price: 650.0
+  buy_price: 1300.0
+  exp: 500
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - END
+  translation_key: resource.end_stone
+  enabled: true
+  introduced_in: 1
+
+chorus_fruit:
+  display_name: "&dChorus Fruit"
+  material: CHORUS_FRUIT
+  custom_model_data: 2054
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: MINING
+  family: CHORUS
+  tier: TIER_6
+  unlock_level: 750
+  allowed_nodes:
+    - MINING
+  zones:
+    - END_SHORES
+  resource_type: RAW_RESOURCE
+  sell_price: 680.0
+  buy_price: 1360.0
+  exp: 520
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - FRUIT
+    - END
+  translation_key: resource.chorus_fruit
+  enabled: true
+  introduced_in: 1
+
+purpur_block:
+  display_name: "&dPurpur Block"
+  material: PURPUR_BLOCK
+  custom_model_data: 2055
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: MINING
+  family: PURPUR
+  tier: TIER_6
+  unlock_level: 780
+  allowed_nodes:
+    - MINING
+  zones:
+    - END_SHORES
+  resource_type: BLOCK
+  sell_price: 720.0
+  buy_price: 1440.0
+  exp: 580
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - END
+  translation_key: resource.purpur_block
+  enabled: true
+  introduced_in: 1
+
+nether_star:
+  display_name: "&fNether Star"
+  material: NETHER_STAR
+  custom_model_data: 2061
+  rarity: MYTHIC
+  quality: MASTERWORK
+  category: MINING
+  family: WITHER
+  tier: TIER_7
+  unlock_level: 801
+  allowed_nodes:
+    - MINING
+  zones:
+    - ABYSS
+  resource_type: RAW_RESOURCE
+  sell_price: 1500.0
+  buy_price: 3000.0
+  exp: 1200
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - STAR
+    - MYTHIC
+  translation_key: resource.nether_star
+  enabled: true
+  introduced_in: 1
+
+heart_of_the_sea:
+  display_name: "&bHeart of the Sea"
+  material: HEART_OF_THE_SEA
+  custom_model_data: 2062
+  rarity: MYTHIC
+  quality: MASTERWORK
+  category: MINING
+  family: SEA
+  tier: TIER_7
+  unlock_level: 850
+  allowed_nodes:
+    - MINING
+  zones:
+    - ABYSS
+  resource_type: RAW_RESOURCE
+  sell_price: 1750.0
+  buy_price: 3500.0
+  exp: 1400
+  drop_weight: 100
+  max_stack: 16
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - SEA
+    - MYTHIC
+  translation_key: resource.heart_of_the_sea
+  enabled: true
+  introduced_in: 1
+
+ominous_bottle:
+  display_name: "&5Ominous Bottle"
+  material: OMINOUS_BOTTLE
+  custom_model_data: 2063
+  rarity: MYTHIC
+  quality: MASTERWORK
+  category: MINING
+  family: OMINOUS
+  tier: TIER_7
+  unlock_level: 900
+  allowed_nodes:
+    - MINING
+  zones:
+    - ABYSS
+  resource_type: RAW_RESOURCE
+  sell_price: 2000.0
+  buy_price: 4000.0
+  exp: 1600
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - OMINOUS
+    - MYTHIC
+  translation_key: resource.ominous_bottle
+  enabled: true
+  introduced_in: 1
+
+heavy_core:
+  display_name: "&8Heavy Core"
+  material: HEAVY_CORE
+  custom_model_data: 2064
+  rarity: MYTHIC
+  quality: MASTERWORK
+  category: MINING
+  family: CORE
+  tier: TIER_7
+  unlock_level: 950
+  allowed_nodes:
+    - MINING
+  zones:
+    - ABYSS
+  resource_type: RAW_RESOURCE
+  sell_price: 2500.0
+  buy_price: 5000.0
+  exp: 2000
+  drop_weight: 100
+  max_stack: 16
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - CORE
+    - MYTHIC
+  translation_key: resource.heavy_core
+  enabled: true
+  introduced_in: 1
+
+echo_core:
+  display_name: "&3Echo Core"
+  material: NETHER_STAR
+  custom_model_data: 2065
+  rarity: MYTHIC
+  quality: MASTERWORK
+  category: MINING
+  family: CORE
+  tier: TIER_7
+  unlock_level: 990
+  allowed_nodes:
+    - MINING
+  zones:
+    - ABYSS
+  resource_type: RAW_RESOURCE
+  sell_price: 3000.0
+  buy_price: 6000.0
+  exp: 2500
+  drop_weight: 100
+  max_stack: 16
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - CORE
+    - MYTHIC
+  translation_key: resource.echo_core
+  enabled: true
+  introduced_in: 1
+
+# ==========================================
+#              LUMBER CATEGORY
+# ==========================================
+
+oak_log:
+  display_name: "&6Oak Log"
+  material: OAK_LOG
+  custom_model_data: 3001
+  rarity: COMMON
+  quality: NORMAL
+  category: LUMBER
+  family: OAK
+  tier: TIER_1
+  unlock_level: 1
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - FOREST
+  resource_type: RAW_RESOURCE
+  sell_price: 2.0
+  buy_price: 4.0
+  exp: 1
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - LOG
+    - WOOD
+  translation_key: resource.oak_log
+  enabled: true
+  introduced_in: 1
+
+birch_log:
+  display_name: "&fBirch Log"
+  material: BIRCH_LOG
+  custom_model_data: 3002
+  rarity: COMMON
+  quality: NORMAL
+  category: LUMBER
+  family: BIRCH
+  tier: TIER_1
+  unlock_level: 15
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - FOREST
+  resource_type: RAW_RESOURCE
+  sell_price: 4.0
+  buy_price: 8.0
+  exp: 2
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - LOG
+    - WOOD
+  translation_key: resource.birch_log
+  enabled: true
+  introduced_in: 1
+
+spruce_log:
+  display_name: "&cSpruce Log"
+  material: SPRUCE_LOG
+  custom_model_data: 3003
+  rarity: COMMON
+  quality: NORMAL
+  category: LUMBER
+  family: SPRUCE
+  tier: TIER_1
+  unlock_level: 30
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - FOREST
+  resource_type: RAW_RESOURCE
+  sell_price: 7.0
+  buy_price: 14.0
+  exp: 3
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - LOG
+    - WOOD
+  translation_key: resource.spruce_log
+  enabled: true
+  introduced_in: 1
+
+jungle_log:
+  display_name: "&eJungle Log"
+  material: JUNGLE_LOG
+  custom_model_data: 3011
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: LUMBER
+  family: JUNGLE
+  tier: TIER_2
+  unlock_level: 51
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - TROPICS
+  resource_type: RAW_RESOURCE
+  sell_price: 12.0
+  buy_price: 24.0
+  exp: 6
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - LOG
+    - WOOD
+  translation_key: resource.jungle_log
+  enabled: true
+  introduced_in: 1
+
+acacia_log:
+  display_name: "&6Acacia Log"
+  material: ACACIA_LOG
+  custom_model_data: 3012
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: LUMBER
+  family: ACACIA
+  tier: TIER_2
+  unlock_level: 80
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - TROPICS
+  resource_type: RAW_RESOURCE
+  sell_price: 16.0
+  buy_price: 32.0
+  exp: 8
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - LOG
+    - WOOD
+  translation_key: resource.acacia_log
+  enabled: true
+  introduced_in: 1
+
+dark_oak_log:
+  display_name: "&8Dark Oak Log"
+  material: DARK_OAK_LOG
+  custom_model_data: 3013
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: LUMBER
+  family: OAK
+  tier: TIER_2
+  unlock_level: 120
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - TROPICS
+  resource_type: RAW_RESOURCE
+  sell_price: 22.0
+  buy_price: 44.0
+  exp: 11
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - LOG
+    - WOOD
+  translation_key: resource.dark_oak_log
+  enabled: true
+  introduced_in: 1
+
+mangrove_log:
+  display_name: "&cMangrove Log"
+  material: MANGROVE_LOG
+  custom_model_data: 3021
+  rarity: RARE
+  quality: FINE
+  category: LUMBER
+  family: MANGROVE
+  tier: TIER_3
+  unlock_level: 151
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - SWAMP
+  resource_type: RAW_RESOURCE
+  sell_price: 35.0
+  buy_price: 70.0
+  exp: 20
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - LOG
+    - WOOD
+  translation_key: resource.mangrove_log
+  enabled: true
+  introduced_in: 1
+
+cherry_log:
+  display_name: "&dCherry Log"
+  material: CHERRY_LOG
+  custom_model_data: 3022
+  rarity: RARE
+  quality: FINE
+  category: LUMBER
+  family: CHERRY
+  tier: TIER_3
+  unlock_level: 190
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - SWAMP
+  resource_type: RAW_RESOURCE
+  sell_price: 45.0
+  buy_price: 90.0
+  exp: 25
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - LOG
+    - WOOD
+  translation_key: resource.cherry_log
+  enabled: true
+  introduced_in: 1
+
+bamboo:
+  display_name: "&aBamboo"
+  material: BAMBOO
+  custom_model_data: 3023
+  rarity: RARE
+  quality: FINE
+  category: LUMBER
+  family: BAMBOO
+  tier: TIER_3
+  unlock_level: 220
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - SWAMP
+  resource_type: RAW_RESOURCE
+  sell_price: 55.0
+  buy_price: 110.0
+  exp: 30
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BAMBOO
+    - WOOD
+  translation_key: resource.bamboo
+  enabled: true
+  introduced_in: 1
+
+crimson_stem:
+  display_name: "&cCrimson Stem"
+  material: CRIMSON_STEM
+  custom_model_data: 3031
+  rarity: EPIC
+  quality: EXCELLENT
+  category: LUMBER
+  family: CRIMSON
+  tier: TIER_4
+  unlock_level: 251
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - HELL_WOODS
+  resource_type: RAW_RESOURCE
+  sell_price: 100.0
+  buy_price: 200.0
+  exp: 70
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - LOG
+    - NETHER
+  translation_key: resource.crimson_stem
+  enabled: true
+  introduced_in: 1
+
+warped_stem:
+  display_name: "&3Warped Stem"
+  material: WARPED_STEM
+  custom_model_data: 3032
+  rarity: EPIC
+  quality: EXCELLENT
+  category: LUMBER
+  family: WARPED
+  tier: TIER_4
+  unlock_level: 300
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - HELL_WOODS
+  resource_type: RAW_RESOURCE
+  sell_price: 130.0
+  buy_price: 260.0
+  exp: 90
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - LOG
+    - NETHER
+  translation_key: resource.warped_stem
+  enabled: true
+  introduced_in: 1
+
+shroomlight:
+  display_name: "&eShroomlight"
+  material: SHROOMLIGHT
+  custom_model_data: 3033
+  rarity: EPIC
+  quality: EXCELLENT
+  category: LUMBER
+  family: SHROOMLIGHT
+  tier: TIER_4
+  unlock_level: 350
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - HELL_WOODS
+  resource_type: BLOCK
+  sell_price: 180.0
+  buy_price: 360.0
+  exp: 120
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - NETHER
+  translation_key: resource.shroomlight
+  enabled: true
+  introduced_in: 1
+
+glow_lichen:
+  display_name: "&aGlow Lichen"
+  material: GLOW_LICHEN
+  custom_model_data: 3041
+  rarity: EPIC
+  quality: EXCELLENT
+  category: LUMBER
+  family: LICHEN
+  tier: TIER_5
+  unlock_level: 401
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - OVERGROWTH
+  resource_type: BLOCK
+  sell_price: 250.0
+  buy_price: 500.0
+  exp: 180
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - CAVE
+  translation_key: resource.glow_lichen
+  enabled: true
+  introduced_in: 1
+
+moss_block:
+  display_name: "&aMoss Block"
+  material: MOSS_BLOCK
+  custom_model_data: 3042
+  rarity: EPIC
+  quality: EXCELLENT
+  category: LUMBER
+  family: MOSS
+  tier: TIER_5
+  unlock_level: 480
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - OVERGROWTH
+  resource_type: BLOCK
+  sell_price: 300.0
+  buy_price: 600.0
+  exp: 220
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - NATURE
+  translation_key: resource.moss_block
+  enabled: true
+  introduced_in: 1
+
+moss_carpet:
+  display_name: "&aMoss Carpet"
+  material: MOSS_CARPET
+  custom_model_data: 3043
+  rarity: EPIC
+  quality: EXCELLENT
+  category: LUMBER
+  family: MOSS
+  tier: TIER_5
+  unlock_level: 550
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - OVERGROWTH
+  resource_type: BLOCK
+  sell_price: 350.0
+  buy_price: 700.0
+  exp: 260
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - NATURE
+  translation_key: resource.moss_carpet
+  enabled: true
+  introduced_in: 1
+
+azalea:
+  display_name: "&aAzalea"
+  material: AZALEA
+  custom_model_data: 3051
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: LUMBER
+  family: AZALEA
+  tier: TIER_6
+  unlock_level: 601
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - ANCIENT_GARDEN
+  resource_type: BLOCK
+  sell_price: 500.0
+  buy_price: 1000.0
+  exp: 400
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - AZALEA
+  translation_key: resource.azalea
+  enabled: true
+  introduced_in: 1
+
+flowering_azalea:
+  display_name: "&dFlowering Azalea"
+  material: FLOWERING_AZALEA
+  custom_model_data: 3052
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: LUMBER
+  family: AZALEA
+  tier: TIER_6
+  unlock_level: 680
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - ANCIENT_GARDEN
+  resource_type: BLOCK
+  sell_price: 650.0
+  buy_price: 1300.0
+  exp: 480
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - AZALEA
+  translation_key: resource.flowering_azalea
+  enabled: true
+  introduced_in: 1
+
+spore_blossom:
+  display_name: "&dSpore Blossom"
+  material: SPORE_BLOSSOM
+  custom_model_data: 3053
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: LUMBER
+  family: AZALEA
+  tier: TIER_6
+  unlock_level: 750
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - ANCIENT_GARDEN
+  resource_type: BLOCK
+  sell_price: 800.0
+  buy_price: 1600.0
+  exp: 600
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - NATURE
+  translation_key: resource.spore_blossom
+  enabled: true
+  introduced_in: 1
+
+creaking_heart:
+  display_name: "&dCreaking Heart"
+  material: CREAKING_HEART
+  custom_model_data: 3061
+  rarity: MYTHIC
+  quality: MASTERWORK
+  category: LUMBER
+  family: CREAKING
+  tier: TIER_7
+  unlock_level: 801
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - PALE_FOREST
+  resource_type: BLOCK
+  sell_price: 1500.0
+  buy_price: 3000.0
+  exp: 1100
+  drop_weight: 100
+  max_stack: 16
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - MYTHIC
+  translation_key: resource.creaking_heart
+  enabled: true
+  introduced_in: 1
+
+resin_brick:
+  display_name: "&cResin Brick"
+  material: RESIN_BRICK
+  custom_model_data: 3062
+  rarity: MYTHIC
+  quality: MASTERWORK
+  category: LUMBER
+  family: RESIN
+  tier: TIER_7
+  unlock_level: 880
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - PALE_FOREST
+  resource_type: INGREDIENT
+  sell_price: 1800.0
+  buy_price: 3600.0
+  exp: 1300
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - RESIN
+    - MYTHIC
+  translation_key: resource.resin_brick
+  enabled: true
+  introduced_in: 1
+
+resin_clump:
+  display_name: "&eResin Clump"
+  material: RESIN_CLUMP
+  custom_model_data: 3063
+  rarity: MYTHIC
+  quality: MASTERWORK
+  category: LUMBER
+  family: RESIN
+  tier: TIER_7
+  unlock_level: 960
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - PALE_FOREST
+  resource_type: RAW_RESOURCE
+  sell_price: 2200.0
+  buy_price: 4400.0
+  exp: 1600
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - RESIN
+    - MYTHIC
+  translation_key: resource.resin_clump
+  enabled: true
+  introduced_in: 1
+
+pale_oak_log:
+  display_name: "&fPale Oak Log"
+  material: PALE_OAK_LOG
+  custom_model_data: 3064
+  rarity: MYTHIC
+  quality: MASTERWORK
+  category: LUMBER
+  family: OAK
+  tier: TIER_7
+  unlock_level: 990
+  allowed_nodes:
+    - LUMBER
+  zones:
+    - PALE_FOREST
+  resource_type: RAW_RESOURCE
+  sell_price: 2800.0
+  buy_price: 5600.0
+  exp: 2000
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - LOG
+    - MYTHIC
+  translation_key: resource.pale_oak_log
+  enabled: true
+  introduced_in: 1
+
+# ==========================================
+#              FISHING CATEGORY
+# ==========================================
+
+cod:
+  display_name: "&7Raw Cod"
+  material: COD
+  custom_model_data: 4001
+  rarity: COMMON
+  quality: NORMAL
+  category: FISHING
+  family: FISH
+  tier: TIER_1
+  unlock_level: 1
+  allowed_nodes:
+    - FISHING
+  zones:
+    - SHALLOWS
+  resource_type: FISH
+  sell_price: 2.0
+  buy_price: 4.0
+  exp: 1
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - FISH
+    - FOOD
+  translation_key: resource.cod
+  enabled: true
+  introduced_in: 1
+
+salmon:
+  display_name: "&cRaw Salmon"
+  material: SALMON
+  custom_model_data: 4002
+  rarity: COMMON
+  quality: NORMAL
+  category: FISHING
+  family: FISH
+  tier: TIER_1
+  unlock_level: 15
+  allowed_nodes:
+    - FISHING
+  zones:
+    - SHALLOWS
+  resource_type: FISH
+  sell_price: 4.0
+  buy_price: 8.0
+  exp: 2
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - FISH
+    - FOOD
+  translation_key: resource.salmon
+  enabled: true
+  introduced_in: 1
+
+tropical_fish:
+  display_name: "&6Tropical Fish"
+  material: TROPICAL_FISH
+  custom_model_data: 4003
+  rarity: COMMON
+  quality: NORMAL
+  category: FISHING
+  family: FISH
+  tier: TIER_1
+  unlock_level: 30
+  allowed_nodes:
+    - FISHING
+  zones:
+    - SHALLOWS
+  resource_type: FISH
+  sell_price: 6.0
+  buy_price: 12.0
+  exp: 3
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - FISH
+    - FOOD
+  translation_key: resource.tropical_fish
+  enabled: true
+  introduced_in: 1
+
+pufferfish:
+  display_name: "&ePufferfish"
+  material: PUFFERFISH
+  custom_model_data: 4004
+  rarity: COMMON
+  quality: NORMAL
+  category: FISHING
+  family: FISH
+  tier: TIER_1
+  unlock_level: 45
+  allowed_nodes:
+    - FISHING
+  zones:
+    - SHALLOWS
+  resource_type: FISH
+  sell_price: 8.0
+  buy_price: 16.0
+  exp: 4
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - FISH
+    - FOOD
+  translation_key: resource.pufferfish
+  enabled: true
+  introduced_in: 1
+
+kelp:
+  display_name: "&aKelp"
+  material: KELP
+  custom_model_data: 4011
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: FISHING
+  family: KELP
+  tier: TIER_2
+  unlock_level: 51
+  allowed_nodes:
+    - FISHING
+  zones:
+    - REEF
+  resource_type: RAW_RESOURCE
+  sell_price: 10.0
+  buy_price: 20.0
+  exp: 5
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - PLANTS
+    - SEA
+  translation_key: resource.kelp
+  enabled: true
+  introduced_in: 1
+
+seagrass:
+  display_name: "&2Seagrass"
+  material: SEAGRASS
+  custom_model_data: 4012
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: FISHING
+  family: SEAGRASS
+  tier: TIER_2
+  unlock_level: 75
+  allowed_nodes:
+    - FISHING
+  zones:
+    - REEF
+  resource_type: RAW_RESOURCE
+  sell_price: 12.0
+  buy_price: 24.0
+  exp: 6
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - PLANTS
+    - SEA
+  translation_key: resource.seagrass
+  enabled: true
+  introduced_in: 1
+
+sea_pickle:
+  display_name: "&aSea Pickle"
+  material: SEA_PICKLE
+  custom_model_data: 4013
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: FISHING
+  family: SEA_PICKLE
+  tier: TIER_2
+  unlock_level: 100
+  allowed_nodes:
+    - FISHING
+  zones:
+    - REEF
+  resource_type: RAW_RESOURCE
+  sell_price: 15.0
+  buy_price: 30.0
+  exp: 8
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - SEA
+    - LIGHT
+  translation_key: resource.sea_pickle
+  enabled: true
+  introduced_in: 1
+
+clay_ball:
+  display_name: "&7Clay Ball"
+  material: CLAY_BALL
+  custom_model_data: 4014
+  rarity: UNCOMMON
+  quality: NORMAL
+  category: FISHING
+  family: CLAY
+  tier: TIER_2
+  unlock_level: 130
+  allowed_nodes:
+    - FISHING
+  zones:
+    - REEF
+  resource_type: RAW_RESOURCE
+  sell_price: 20.0
+  buy_price: 40.0
+  exp: 10
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - CLAY
+    - SHORE
+  translation_key: resource.clay_ball
+  enabled: true
+  introduced_in: 1
+
+prismarine_shard:
+  display_name: "&3Prismarine Shard"
+  material: PRISMARINE_SHARD
+  custom_model_data: 4021
+  rarity: RARE
+  quality: FINE
+  category: FISHING
+  family: PRISMARINE
+  tier: TIER_3
+  unlock_level: 151
+  allowed_nodes:
+    - FISHING
+  zones:
+    - DEEP_SEA
+  resource_type: RAW_RESOURCE
+  sell_price: 35.0
+  buy_price: 70.0
+  exp: 20
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - GEM
+    - TEMPLE
+  translation_key: resource.prismarine_shard
+  enabled: true
+  introduced_in: 1
+
+prismarine_crystals:
+  display_name: "&bPrismarine Crystals"
+  material: PRISMARINE_CRYSTALS
+  custom_model_data: 4022
+  rarity: RARE
+  quality: FINE
+  category: FISHING
+  family: PRISMARINE
+  tier: TIER_3
+  unlock_level: 190
+  allowed_nodes:
+    - FISHING
+  zones:
+    - DEEP_SEA
+  resource_type: RAW_RESOURCE
+  sell_price: 45.0
+  buy_price: 90.0
+  exp: 25
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - GEM
+    - TEMPLE
+  translation_key: resource.prismarine_crystals
+  enabled: true
+  introduced_in: 1
+
+sponge:
+  display_name: "&eSponge"
+  material: SPONGE
+  custom_model_data: 4023
+  rarity: RARE
+  quality: FINE
+  category: FISHING
+  family: SPONGE
+  tier: TIER_3
+  unlock_level: 220
+  allowed_nodes:
+    - FISHING
+  zones:
+    - DEEP_SEA
+  resource_type: BLOCK
+  sell_price: 60.0
+  buy_price: 120.0
+  exp: 35
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BLOCK
+    - TEMPLE
+  translation_key: resource.sponge
+  enabled: true
+  introduced_in: 1
+
+nautilus_shell:
+  display_name: "&6Nautilus Shell"
+  material: NAUTILUS_SHELL
+  custom_model_data: 4031
+  rarity: EPIC
+  quality: EXCELLENT
+  category: FISHING
+  family: NAUTILUS
+  tier: TIER_4
+  unlock_level: 251
+  allowed_nodes:
+    - FISHING
+  zones:
+    - OCEAN_TRENCH
+  resource_type: TREASURE
+  sell_price: 100.0
+  buy_price: 200.0
+  exp: 60
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - TREASURE
+    - SEA
+  translation_key: resource.nautilus_shell
+  enabled: true
+  introduced_in: 1
+
+ender_pearl:
+  display_name: "&dEnder Pearl"
+  material: ENDER_PEARL
+  custom_model_data: 4032
+  rarity: EPIC
+  quality: EXCELLENT
+  category: FISHING
+  family: PEARL
+  tier: TIER_4
+  unlock_level: 300
+  allowed_nodes:
+    - FISHING
+  zones:
+    - OCEAN_TRENCH
+  resource_type: TREASURE
+  sell_price: 120.0
+  buy_price: 240.0
+  exp: 80
+  drop_weight: 100
+  max_stack: 16
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - TREASURE
+    - END
+  translation_key: resource.ender_pearl
+  enabled: true
+  introduced_in: 1
+
+ink_sac:
+  display_name: "&8Ink Sac"
+  material: INK_SAC
+  custom_model_data: 4033
+  rarity: EPIC
+  quality: EXCELLENT
+  category: FISHING
+  family: INK
+  tier: TIER_4
+  unlock_level: 340
+  allowed_nodes:
+    - FISHING
+  zones:
+    - OCEAN_TRENCH
+  resource_type: RAW_RESOURCE
+  sell_price: 150.0
+  buy_price: 300.0
+  exp: 100
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - INGREDIENT
+    - DYE
+  translation_key: resource.ink_sac
+  enabled: true
+  introduced_in: 1
+
+glow_ink_sac:
+  display_name: "&bGlow Ink Sac"
+  material: GLOW_INK_SAC
+  custom_model_data: 4034
+  rarity: EPIC
+  quality: EXCELLENT
+  category: FISHING
+  family: INK
+  tier: TIER_4
+  unlock_level: 380
+  allowed_nodes:
+    - FISHING
+  zones:
+    - OCEAN_TRENCH
+  resource_type: RAW_RESOURCE
+  sell_price: 180.0
+  buy_price: 360.0
+  exp: 120
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - INGREDIENT
+    - DYE
+  translation_key: resource.glow_ink_sac
+  enabled: true
+  introduced_in: 1
+
+heart_of_the_sea_fishing:
+  display_name: "&bHeart of the Sea"
+  material: HEART_OF_THE_SEA
+  custom_model_data: 4041
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: FISHING
+  family: SEA
+  tier: TIER_5
+  unlock_level: 401
+  allowed_nodes:
+    - FISHING
+  zones:
+    - OCEAN_TRENCH
+  resource_type: TREASURE
+  sell_price: 400.0
+  buy_price: 800.0
+  exp: 300
+  drop_weight: 100
+  max_stack: 16
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - TREASURE
+    - SEA
+  translation_key: resource.heart_of_the_sea_fishing
+  enabled: true
+  introduced_in: 1
+
+trident_fragment:
+  display_name: "&bTrident Fragment"
+  material: PRISMARINE_SHARD
+  custom_model_data: 4042
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: FISHING
+  family: TRIDENT
+  tier: TIER_5
+  unlock_level: 500
+  allowed_nodes:
+    - FISHING
+  zones:
+    - OCEAN_TRENCH
+  resource_type: INGREDIENT
+  sell_price: 600.0
+  buy_price: 1200.0
+  exp: 400
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - WEAPON
+    - SEA
+  translation_key: resource.trident_fragment
+  enabled: true
+  introduced_in: 1
+
+# ==========================================
+#             TREASURE POOL
+# ==========================================
+
+saddle:
+  display_name: "&6Saddle"
+  material: SADDLE
+  custom_model_data: 5001
+  rarity: RARE
+  quality: FINE
+  category: TREASURE
+  family: SADDLE
+  tier: TIER_1
+  unlock_level: 100
+  allowed_nodes:
+    - FISHING
+  zones:
+    - SHALLOWS
+    - REEF
+    - DEEP_SEA
+  resource_type: TREASURE
+  sell_price: 150.0
+  buy_price: 300.0
+  exp: 50
+  drop_weight: 100
+  max_stack: 1
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - SADDLE
+    - TREASURE
+  translation_key: resource.saddle
+  enabled: true
+  introduced_in: 1
+
+name_tag:
+  display_name: "&fName Tag"
+  material: NAME_TAG
+  custom_model_data: 5002
+  rarity: RARE
+  quality: FINE
+  category: TREASURE
+  family: NAMETAG
+  tier: TIER_1
+  unlock_level: 100
+  allowed_nodes:
+    - FISHING
+  zones:
+    - SHALLOWS
+    - REEF
+    - DEEP_SEA
+  resource_type: TREASURE
+  sell_price: 150.0
+  buy_price: 300.0
+  exp: 50
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - NAME_TAG
+    - TREASURE
+  translation_key: resource.name_tag
+  enabled: true
+  introduced_in: 1
+
+enchanted_book:
+  display_name: "&eEnchanted Book"
+  material: ENCHANTED_BOOK
+  custom_model_data: 5003
+  rarity: EPIC
+  quality: EXCELLENT
+  category: TREASURE
+  family: BOOK
+  tier: TIER_1
+  unlock_level: 150
+  allowed_nodes:
+    - FISHING
+  zones:
+    - SHALLOWS
+    - REEF
+    - DEEP_SEA
+  resource_type: TREASURE
+  sell_price: 300.0
+  buy_price: 600.0
+  exp: 100
+  drop_weight: 100
+  max_stack: 1
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - BOOK
+    - TREASURE
+  translation_key: resource.enchanted_book
+  enabled: true
+  introduced_in: 1
+
+music_disc:
+  display_name: "&dMusic Disc"
+  material: MUSIC_DISC_13
+  custom_model_data: 5004
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: TREASURE
+  family: DISC
+  tier: TIER_1
+  unlock_level: 200
+  allowed_nodes:
+    - FISHING
+  zones:
+    - SHALLOWS
+    - REEF
+    - DEEP_SEA
+  resource_type: TREASURE
+  sell_price: 500.0
+  buy_price: 1000.0
+  exp: 200
+  drop_weight: 100
+  max_stack: 1
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - DISC
+    - TREASURE
+  translation_key: resource.music_disc
+  enabled: true
+  introduced_in: 1
+
+armor_trim:
+  display_name: "&dArmor Trim Template"
+  material: SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE
+  custom_model_data: 5005
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: TREASURE
+  family: TRIM
+  tier: TIER_1
+  unlock_level: 300
+  allowed_nodes:
+    - FISHING
+  zones:
+    - SHALLOWS
+    - REEF
+    - DEEP_SEA
+  resource_type: TREASURE
+  sell_price: 800.0
+  buy_price: 1600.0
+  exp: 300
+  drop_weight: 100
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - TRIM
+    - TREASURE
+  translation_key: resource.armor_trim
+  enabled: true
+  introduced_in: 1

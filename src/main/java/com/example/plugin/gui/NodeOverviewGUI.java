@@ -12,6 +12,7 @@ import com.example.plugin.storage.service.StorageService;
 import com.example.plugin.territory.service.TerritoryService;
 import com.example.plugin.worker.model.WorkerInstance;
 import com.example.plugin.worker.service.WorkerService;
+import com.example.plugin.worker.gui.WorkerManagementGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -82,7 +83,7 @@ public class NodeOverviewGUI implements InventoryProvider {
                 .getRequiredService(com.example.plugin.exploration.service.ExplorationService.class);
         com.example.plugin.exploration.model.NodeExploration exp = explorationService.getExploration(node.getNodeId());
         long currentXp = exp.getExperience();
-        long requiredXp = exp.getExplorationLevel() * 100L;
+        long requiredXp = explorationService.getRequiredExperience(exp.getExplorationLevel());
         double percent = requiredXp > 0 ? (currentXp * 100.0 / requiredXp) : 0.0;
         String bar = getProgressBar(currentXp, requiredXp);
 
@@ -97,6 +98,117 @@ public class NodeOverviewGUI implements InventoryProvider {
             eventStatusCycles = "§d§l★ Event Cycles Left: §b" + node.getEventProgress() + " cycles";
         }
 
+        int expLvl = exp.getExplorationLevel();
+        String zoneName;
+        String nextMilestone;
+        if (expLvl >= 900) {
+            zoneName = switch (node.getNodeType()) {
+                case LUMBER -> "Ancient Underworld";
+                case FISHING -> "Deep Ocean Abyss";
+                default -> "Primordial Core";
+            };
+            nextMilestone = "Max Zone Reached";
+        } else if (expLvl >= 800) {
+            zoneName = switch (node.getNodeType()) {
+                case LUMBER -> "Warped Nether Forest";
+                case FISHING -> "Abyssal Ruins";
+                default -> "World Core";
+            };
+            nextMilestone = switch (node.getNodeType()) {
+                case LUMBER -> "Lv.900 (Ancient Underworld)";
+                case FISHING -> "Lv.900 (Deep Ocean Abyss)";
+                default -> "Lv.900 (Primordial Core)";
+            };
+        } else if (expLvl >= 700) {
+            zoneName = switch (node.getNodeType()) {
+                case LUMBER -> "Crimson Nether Forest";
+                case FISHING -> "Forgotten Trench";
+                default -> "Crystal Core";
+            };
+            nextMilestone = switch (node.getNodeType()) {
+                case LUMBER -> "Lv.800 (Warped Nether Forest)";
+                case FISHING -> "Lv.800 (Abyssal Ruins)";
+                default -> "Lv.800 (World Core)";
+            };
+        } else if (expLvl >= 600) {
+            zoneName = switch (node.getNodeType()) {
+                case LUMBER -> "Cherry Blossom Grove";
+                case FISHING -> "Sunken Coral Reef";
+                default -> "Forgotten Depths";
+            };
+            nextMilestone = switch (node.getNodeType()) {
+                case LUMBER -> "Lv.700 (Crimson Nether Forest)";
+                case FISHING -> "Lv.700 (Forgotten Trench)";
+                default -> "Lv.700 (Crystal Core)";
+            };
+        } else if (expLvl >= 500) {
+            zoneName = switch (node.getNodeType()) {
+                case LUMBER -> "Mangrove Swamp";
+                case FISHING -> "Abyssal Trench";
+                default -> "Ancient Mine";
+            };
+            nextMilestone = switch (node.getNodeType()) {
+                case LUMBER -> "Lv.600 (Cherry Blossom Grove)";
+                case FISHING -> "Lv.600 (Sunken Coral Reef)";
+                default -> "Lv.600 (Forgotten Depths)";
+            };
+        } else if (expLvl >= 400) {
+            zoneName = switch (node.getNodeType()) {
+                case LUMBER -> "Jungle Sanctuary";
+                case FISHING -> "Open Sea";
+                default -> "Volcanic Mine";
+            };
+            nextMilestone = switch (node.getNodeType()) {
+                case LUMBER -> "Lv.500 (Mangrove Swamp)";
+                case FISHING -> "Lv.500 (Abyssal Trench)";
+                default -> "Lv.500 (Ancient Mine)";
+            };
+        } else if (expLvl >= 300) {
+            zoneName = switch (node.getNodeType()) {
+                case LUMBER -> "Dark Canopy";
+                case FISHING -> "Reef Bay";
+                default -> "Crystal Cavern";
+            };
+            nextMilestone = switch (node.getNodeType()) {
+                case LUMBER -> "Lv.400 (Jungle Sanctuary)";
+                case FISHING -> "Lv.400 (Open Sea)";
+                default -> "Lv.400 (Volcanic Mine)";
+            };
+        } else if (expLvl >= 200) {
+            zoneName = switch (node.getNodeType()) {
+                case LUMBER -> "Dense Spruce Forest";
+                case FISHING -> "Deep Lake";
+                default -> "Deep Cave";
+            };
+            nextMilestone = switch (node.getNodeType()) {
+                case LUMBER -> "Lv.300 (Dark Canopy)";
+                case FISHING -> "Lv.300 (Reef Bay)";
+                default -> "Lv.300 (Crystal Cavern)";
+            };
+        } else if (expLvl >= 100) {
+            zoneName = switch (node.getNodeType()) {
+                case LUMBER -> "Birch Woods";
+                case FISHING -> "River Delta";
+                default -> "Shallow Cave";
+            };
+            nextMilestone = switch (node.getNodeType()) {
+                case LUMBER -> "Lv.200 (Dense Spruce Forest)";
+                case FISHING -> "Lv.200 (Deep Lake)";
+                default -> "Lv.200 (Deep Cave)";
+            };
+        } else {
+            zoneName = switch (node.getNodeType()) {
+                case LUMBER -> "Grassland Edge";
+                case FISHING -> "Shallow Pond";
+                default -> "Surface Mine";
+            };
+            nextMilestone = switch (node.getNodeType()) {
+                case LUMBER -> "Lv.100 (Birch Woods)";
+                case FISHING -> "Lv.100 (River Delta)";
+                default -> "Lv.100 (Shallow Cave)";
+            };
+        }
+
         ItemBuilder builder = new ItemBuilder(Material.BEACON)
             .name("§6§lProduction Node: §e" + node.getNodeType())
             .lore(
@@ -104,7 +216,10 @@ public class NodeOverviewGUI implements InventoryProvider {
                 "§7Level: §a" + node.getLevel(),
                 "§7Stored Resources: §b" + totalStored + " items",
                 "",
-                "§7Exploration Level: §bLv." + exp.getExplorationLevel(),
+                "§7Exploration Level: §bLv." + expLvl,
+                "§7Active Zone: §d" + zoneName,
+                "§7Next Milestone: §8" + nextMilestone,
+                "",
                 "§7Exploration Progress: §f" + currentXp + "§7/§f" + requiredXp + " XP §8(" + String.format("%.1f", percent) + "%)",
                 "§8[" + bar + "§8]"
             );

@@ -55,7 +55,11 @@ public class ExplorationServiceImpl implements ExplorationService {
     @Override
     public boolean addExplorationExp(UUID nodeId, long amount) {
         NodeExploration exp = getExploration(nodeId);
-        boolean leveledUp = exp.addExperience(amount);
+        int maxLvl = getMaxLevel();
+        int baseXP = plugin.getConfig().getInt("exploration.base_xp", 100);
+        double exponent = plugin.getConfig().getDouble("exploration.xp_exponent", 1.0);
+
+        boolean leveledUp = exp.addExperience(amount, maxLvl, baseXP, exponent);
         saveQueue.queueTask(() -> repository.save(exp));
         return leveledUp;
     }
@@ -63,7 +67,8 @@ public class ExplorationServiceImpl implements ExplorationService {
     @Override
     public void setExplorationLevel(UUID nodeId, int level) {
         NodeExploration exp = getExploration(nodeId);
-        exp.setExplorationLevel(level);
+        int maxLvl = getMaxLevel();
+        exp.setExplorationLevel(Math.min(level, maxLvl));
         exp.setExperience(0L);
         saveQueue.queueTask(() -> repository.save(exp));
     }
@@ -82,5 +87,23 @@ public class ExplorationServiceImpl implements ExplorationService {
             }
         }
         return eligible;
+    }
+
+    @Override
+    public void deleteExploration(UUID nodeId) {
+        cache.remove(nodeId);
+        saveQueue.queueTask(() -> repository.deleteById(nodeId));
+    }
+
+    @Override
+    public long getRequiredExperience(int level) {
+        int baseXP = plugin.getConfig().getInt("exploration.base_xp", 100);
+        double exponent = plugin.getConfig().getDouble("exploration.xp_exponent", 1.0);
+        return (long) (baseXP * Math.pow(level, exponent));
+    }
+
+    @Override
+    public int getMaxLevel() {
+        return plugin.getConfig().getInt("exploration.max_level", 100);
     }
 }

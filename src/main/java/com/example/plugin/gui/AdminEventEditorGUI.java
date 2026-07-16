@@ -66,9 +66,19 @@ public class AdminEventEditorGUI implements InventoryProvider {
 
             // Slot 11: Edit Min Exploration Level
             inventory.setItem(11, new ItemBuilder(Material.COMPASS)
-                .name("§e§lRequired Exploration Level")
+                .name("§e§lMinimum Exploration Level")
                 .lore(
                     "§7Current Level: §bLv." + eventDef.minExplorationLevel(),
+                    "",
+                    "§aLeft-Click: §f+1 Level    §bRight-Click: §f-1 Level",
+                    "§2Shift-Left: §f+10 Levels  §dShift-Right: §f-10 Levels"
+                ).build());
+
+            // Slot 12: Edit Max Exploration Level
+            inventory.setItem(12, new ItemBuilder(Material.COMPASS)
+                .name("§e§lMaximum Exploration Level")
+                .lore(
+                    "§7Current Level: §bLv." + eventDef.maxExplorationLevel(),
                     "",
                     "§aLeft-Click: §f+1 Level    §bRight-Click: §f-1 Level",
                     "§2Shift-Left: §f+10 Levels  §dShift-Right: §f-10 Levels"
@@ -332,6 +342,20 @@ public class AdminEventEditorGUI implements InventoryProvider {
             if (delta != 0) {
                 int newLvl = Math.max(1, eventDef.minExplorationLevel() + delta);
                 updateEventParameter("min_exploration_level", newLvl);
+            }
+            return;
+        }
+
+        if (slot == 12) {
+            int delta = 0;
+            if (click == ClickType.SHIFT_LEFT) delta = 10;
+            else if (click == ClickType.SHIFT_RIGHT) delta = -10;
+            else if (click.isLeftClick()) delta = 1;
+            else if (click.isRightClick()) delta = -1;
+
+            if (delta != 0) {
+                int newLvl = Math.max(1, eventDef.maxExplorationLevel() + delta);
+                updateEventParameter("max_exploration_level", newLvl);
             }
             return;
         }

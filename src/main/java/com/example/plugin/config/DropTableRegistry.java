@@ -52,7 +52,9 @@ public class DropTableRegistry implements ConfigRegistry {
                 Object maxQtyVal = rawMap.get("max_qty");
                 long maxQty = maxQtyVal instanceof Number ? ((Number) maxQtyVal).longValue() : 1L;
 
-                Object weightVal = rawMap.get("weight");
+                // Prefer drop_weight (new schema); fall back to weight for Admin GUI backwards compatibility
+                Object weightVal = rawMap.get("drop_weight");
+                if (!(weightVal instanceof Number)) weightVal = rawMap.get("weight");
                 double weight = weightVal instanceof Number ? ((Number) weightVal).doubleValue() : 100.0;
 
                 entries.add(new DropEntry(resKey, minQty, maxQty, weight));

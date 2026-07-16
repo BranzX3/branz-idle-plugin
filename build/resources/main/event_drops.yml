@@ -1,35 +1,295 @@
-# Branz.Idle Event Drop Tables per Node Type
-# base_event_chance: base probability per tick cycle (0.01 = 1%)
-# entries: item pools for events
+# Branz.Idle Event Drops Configuration
+# Maps custom events to temporary drop pools.
 
 mining:
-  base_event_chance: 0.01
-  entries:
-    - resource_key: diamond
-      weight: 50.0
-      min_qty: 1
-      max_qty: 3
-    - resource_key: emerald
-      weight: 30.0
-      min_qty: 1
-      max_qty: 2
+  events:
+    cave_in:
+      display_name: "&8&lCave-In Event"
+      min_exploration_level: 10
+      max_exploration_level: 50
+      event_chance: 0.08
+      duration_cycles: 40
+      entries:
+        - resource_key: "coal"
+          weight: 100
+          min_qty: 10
+          max_qty: 25
+        - resource_key: "raw_copper"
+          weight: 50
+          min_qty: 5
+          max_qty: 15
+        - resource_key: "raw_iron"
+          weight: 30
+          min_qty: 2
+          max_qty: 8
+    lucky_vein:
+      display_name: "&e&lLucky Vein Event"
+      min_exploration_level: 51
+      max_exploration_level: 150
+      event_chance: 0.07
+      duration_cycles: 45
+      entries:
+        - resource_key: "raw_gold"
+          weight: 100
+          min_qty: 6
+          max_qty: 18
+        - resource_key: "lapis_lazuli"
+          weight: 70
+          min_qty: 8
+          max_qty: 20
+        - resource_key: "redstone"
+          weight: 70
+          min_qty: 10
+          max_qty: 25
+    crystal_pocket:
+      display_name: "&d&lCrystal Pocket Event"
+      min_exploration_level: 151
+      max_exploration_level: 300
+      event_chance: 0.06
+      duration_cycles: 35
+      entries:
+        - resource_key: "amethyst_shard"
+          weight: 100
+          min_qty: 6
+          max_qty: 18
+        - resource_key: "amethyst_cluster"
+          weight: 50
+          min_qty: 2
+          max_qty: 6
+        - resource_key: "diamond"
+          weight: 30
+          min_qty: 1
+          max_qty: 3
+    volcanic_eruption:
+      display_name: "&c&lVolcanic Eruption"
+      min_exploration_level: 401
+      max_exploration_level: 600
+      event_chance: 0.04
+      duration_cycles: 30
+      entries:
+        - resource_key: "basalt"
+          weight: 80
+          min_qty: 20
+          max_qty: 50
+        - resource_key: "blackstone"
+          weight: 80
+          min_qty: 15
+          max_qty: 35
+        - resource_key: "obsidian"
+          weight: 40
+          min_qty: 3
+          max_qty: 8
+    ancient_cache:
+      display_name: "&b&lAncient Cache Event"
+      min_exploration_level: 601
+      max_exploration_level: 800
+      event_chance: 0.04
+      duration_cycles: 35
+      entries:
+        - resource_key: "netherite_scrap"
+          weight: 60
+          min_qty: 1
+          max_qty: 3
+        - resource_key: "ancient_debris"
+          weight: 80
+          min_qty: 2
+          max_qty: 5
+    abyssal_quake:
+      display_name: "&4&lAbyssal Quake Event"
+      min_exploration_level: 801
+      max_exploration_level: 1000
+      event_chance: 0.03
+      duration_cycles: 30
+      entries:
+        - resource_key: "heavy_core"
+          weight: 60
+          min_qty: 1
+          max_qty: 1
+        - resource_key: "echo_core"
+          weight: 40
+          min_qty: 1
+          max_qty: 1
+        - resource_key: "nether_star"
+          weight: 30
+          min_qty: 1
+          max_qty: 1
 
 lumber:
-  base_event_chance: 0.01
-  entries:
-    - resource_key: golden_apple
-      weight: 20.0
-      min_qty: 1
-      max_qty: 1
+  events:
+    sapling_sprout:
+      display_name: "&a&lSapling Sprout Event"
+      min_exploration_level: 10
+      max_exploration_level: 80
+      event_chance: 0.08
+      duration_cycles: 40
+      entries:
+        - resource_key: "birch_log"
+          weight: 100
+          min_qty: 8
+          max_qty: 20
+        - resource_key: "spruce_log"
+          weight: 60
+          min_qty: 5
+          max_qty: 15
+    jungle_growth:
+      display_name: "&e&lJungle Growth Event"
+      min_exploration_level: 81
+      max_exploration_level: 250
+      event_chance: 0.06
+      duration_cycles: 35
+      entries:
+        - resource_key: "jungle_log"
+          weight: 100
+          min_qty: 12
+          max_qty: 30
+        - resource_key: "acacia_log"
+          weight: 70
+          min_qty: 8
+          max_qty: 20
+        - resource_key: "dark_oak_log"
+          weight: 50
+          min_qty: 6
+          max_qty: 15
+    cherry_bloom:
+      display_name: "&d&lCherry Bloom Event"
+      min_exploration_level: 251
+      max_exploration_level: 500
+      event_chance: 0.05
+      duration_cycles: 40
+      entries:
+        - resource_key: "cherry_log"
+          weight: 100
+          min_qty: 10
+          max_qty: 25
+        - resource_key: "bamboo"
+          weight: 80
+          min_qty: 8
+          max_qty: 20
+        - resource_key: "shroomlight"
+          weight: 30
+          min_qty: 2
+          max_qty: 5
+    nether_bloom:
+      display_name: "&4&lNether Bloom Event"
+      min_exploration_level: 501
+      max_exploration_level: 800
+      event_chance: 0.04
+      duration_cycles: 30
+      entries:
+        - resource_key: "crimson_stem"
+          weight: 100
+          min_qty: 8
+          max_qty: 20
+        - resource_key: "warped_stem"
+          weight: 100
+          min_qty: 8
+          max_qty: 20
+    creaking_resonance:
+      display_name: "&5&lCreaking Resonance"
+      min_exploration_level: 801
+      max_exploration_level: 1000
+      event_chance: 0.03
+      duration_cycles: 35
+      entries:
+        - resource_key: "creaking_heart"
+          weight: 100
+          min_qty: 1
+          max_qty: 2
+        - resource_key: "resin_clump"
+          weight: 80
+          min_qty: 5
+          max_qty: 15
+        - resource_key: "pale_oak_log"
+          weight: 50
+          min_qty: 8
+          max_qty: 20
 
 fishing:
-  base_event_chance: 0.01
-  entries:
-    - resource_key: pearl
-      weight: 30.0
-      min_qty: 1
-      max_qty: 2
-    - resource_key: sunken_relic
-      weight: 10.0
-      min_qty: 1
-      max_qty: 1
+  events:
+    cod_bloom:
+      display_name: "&a&lCod Bloom Event"
+      min_exploration_level: 10
+      max_exploration_level: 80
+      event_chance: 0.08
+      duration_cycles: 40
+      entries:
+        - resource_key: "cod"
+          weight: 100
+          min_qty: 12
+          max_qty: 30
+        - resource_key: "pufferfish"
+          weight: 40
+          min_qty: 3
+          max_qty: 8
+    salmon_run:
+      display_name: "&c&lSalmon Run Event"
+      min_exploration_level: 50
+      max_exploration_level: 200
+      event_chance: 0.07
+      duration_cycles: 45
+      entries:
+        - resource_key: "salmon"
+          weight: 100
+          min_qty: 12
+          max_qty: 30
+        - resource_key: "tropical_fish"
+          weight: 60
+          min_qty: 5
+          max_qty: 15
+    sea_garden:
+      display_name: "&2&lSea Garden Event"
+      min_exploration_level: 201
+      max_exploration_level: 500
+      event_chance: 0.06
+      duration_cycles: 35
+      entries:
+        - resource_key: "kelp"
+          weight: 100
+          min_qty: 15
+          max_qty: 35
+        - resource_key: "seagrass"
+          weight: 80
+          min_qty: 10
+          max_qty: 25
+        - resource_key: "sea_pickle"
+          weight: 50
+          min_qty: 5
+          max_qty: 15
+    prismarine_surge:
+      display_name: "&3&lPrismarine Surge"
+      min_exploration_level: 501
+      max_exploration_level: 800
+      event_chance: 0.04
+      duration_cycles: 40
+      entries:
+        - resource_key: "prismarine_shard"
+          weight: 100
+          min_qty: 8
+          max_qty: 20
+        - resource_key: "prismarine_crystals"
+          weight: 70
+          min_qty: 5
+          max_qty: 15
+        - resource_key: "sponge"
+          weight: 50
+          min_qty: 2
+          max_qty: 6
+    sunken_treasures:
+      display_name: "&6&lSunken Treasures"
+      min_exploration_level: 801
+      max_exploration_level: 1000
+      event_chance: 0.03
+      duration_cycles: 30
+      entries:
+        - resource_key: "trident_fragment"
+          weight: 100
+          min_qty: 1
+          max_qty: 2
+        - resource_key: "heart_of_the_sea_fishing"
+          weight: 50
+          min_qty: 1
+          max_qty: 1
+        - resource_key: "enchanted_book"
+          weight: 40
+          min_qty: 1
+          max_qty: 1

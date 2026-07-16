@@ -124,4 +124,10 @@ public class StorageServiceImpl implements StorageService {
         wallet.addResource(resourceKey, amount);
         saveQueue.queueTask(() -> walletRepository.save(wallet));
     }
+
+    @Override
+    public void deleteNodeStorage(UUID nodeId) {
+        storageCache.remove(nodeId);
+        saveQueue.queueTask(() -> storageRepository.deleteById(nodeId));
+    }
 }

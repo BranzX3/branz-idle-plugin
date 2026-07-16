@@ -46,14 +46,6 @@ public class AdminDropTableEditorGUI implements InventoryProvider {
         for (int i = 0; i < 9; i++) inventory.setItem(i, border);
         for (int i = 45; i < 54; i++) inventory.setItem(i, border);
 
-        inventory.setItem(4, new ItemBuilder(Material.BEACON)
-            .name("§6§lTuning: §e" + tableKey)
-            .lore(
-                "§7Click resources below to tune their weights:",
-                "§aLeft-Click: §f+5 Weight   §bRight-Click: §f-5 Weight",
-                "§2Shift-Left: §f+20 Weight  §dShift-Right: §f-20 Weight"
-            ).build());
-
         DropTableRegistry.DropTableDefinition def = JavaPlugin.getPlugin(BranzIdlePlugin.class)
             .getServiceRegistry()
             .getRegistryManager()
@@ -62,31 +54,41 @@ public class AdminDropTableEditorGUI implements InventoryProvider {
             .orElse(null);
 
         if (def != null) {
+            inventory.setItem(2, new ItemBuilder(Material.COMPASS)
+                .name("§b§lMin Exploration Level")
+                .lore(
+                    "§7Current Requirement: §eLv. " + def.minExplorationLevel(),
+                    "",
+                    "§aLeft-Click: §f+1 Level    §bRight-Click: §f-1 Level",
+                    "§2Shift-Left: §f+10 Levels  §dShift-Right: §f-10 Levels"
+                ).build());
+        }
+
+        inventory.setItem(4, new ItemBuilder(Material.BEACON)
+            .name("§6§lTuning: §e" + tableKey)
+            .lore(
+                "§7• §bDrag any item§7 from cursor and §bclick an empty slot§7 inside",
+                "§7  the drop grid below (slots 9-44) to add it to the pool.",
+                "§7• §aLeft-Click§7: +5 Weight    §7• §aShift-Left§7: +20 Weight",
+                "§7• §bRight-Click§7: -5 Weight   §7• §cShift-Right§7: §c§lDelete Item"
+            ).build());
+
+        if (def != null) {
             int slot = 9;
             for (DropTableRegistry.DropEntry entry : def.entries()) {
                 if (slot >= 45) break;
 
-                Material mat = switch (entry.resourceKey().toLowerCase()) {
-                    case "iron_ore" -> Material.IRON_ORE;
-                    case "coal" -> Material.COAL;
-                    case "oak_log" -> Material.OAK_LOG;
-                    case "mithril_crystal" -> Material.PRISMARINE_CRYSTALS;
-                    case "adamantite_core" -> Material.NETHERITE_SCRAP;
-                    case "hardwood" -> Material.OAK_WOOD;
-                    case "ancient_bark" -> Material.OAK_SAPLING;
-                    case "golden_fish" -> Material.COD;
-                    case "pearl" -> Material.ENDER_PEARL;
-                    case "sunken_relic" -> Material.HEART_OF_THE_SEA;
-                    default -> Material.PAPER;
-                };
+                Material mat = getMaterial(entry.resourceKey());
+                String displayName = getDisplayName(entry.resourceKey());
 
                 inventory.setItem(slot, new ItemBuilder(mat)
-                    .name("§e§l" + entry.resourceKey())
+                    .name(displayName)
                     .lore(
+                        "§7Resource Key: §8" + entry.resourceKey(),
                         "§7Current Weight: §b" + entry.weight(),
                         "§7Qty Range: §f" + entry.minQty() + " - " + entry.maxQty(),
                         "",
-                        "§7§oClick to adjust drop probability weight."
+                        "§7Click to adjust weight. Shift-Right to delete."
                     ).build());
 
                 slotToResourceMap.put(slot, entry.resourceKey());
@@ -97,6 +99,136 @@ public class AdminDropTableEditorGUI implements InventoryProvider {
         // Slot 45: Back to Table List
         inventory.setItem(45, new ItemBuilder(Material.ARROW)
             .name("§c§lBack to Drop Tables").build());
+
+        // Slot 49: Close
+        inventory.setItem(49, new ItemBuilder(Material.BARRIER).name("§c§lClose Menu").build());
+    }
+
+    private Material getMaterial(String resKey) {
+        return JavaPlugin.getPlugin(BranzIdlePlugin.class).getServiceRegistry().getRegistryManager().getResourceRegistry()
+            .getResource(resKey)
+            .map(com.example.plugin.config.ResourceRegistry.ResourceDefinition::material)
+            .orElseGet(() -> {
+                Material mat = Material.matchMaterial(resKey.toUpperCase());
+                return mat != null ? mat : Material.PAPER;
+            });
+    }
+
+    private String getDisplayName(String resKey) {
+        return JavaPlugin.getPlugin(BranzIdlePlugin.class).getServiceRegistry().getRegistryManager().getResourceRegistry()
+            .getResource(resKey)
+            .map(def -> org.bukkit.ChatColor.translateAlternateColorCodes('&', def.displayName()))
+            .orElseGet(() -> "§f" + resKey);
+    }
+
+    private String getResourceKey(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) return null;
+
+        var registry = JavaPlugin.getPlugin(BranzIdlePlugin.class).getServiceRegistry().getRegistryManager().getResourceRegistry();
+        for (var def : registry.getAllResources().values()) {
+            if (def.material() == item.getType()) {
+                if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+                    String name = item.getItemMeta().getDisplayName();
+                    if (name.contains(org.bukkit.ChatColor.translateAlternateColorCodes('&', def.displayName()))) {
+                        return def.key();
+                    }
+                }
+            }
+        }
+
+        return item.getType().name().toLowerCase();
+    }
+
+    private void updateMinExplorationLevel(int delta) {
+        BranzIdlePlugin plugin = JavaPlugin.getPlugin(BranzIdlePlugin.class);
+        File file = new File(plugin.getDataFolder(), "drop_tables.yml");
+        if (!file.exists()) return;
+
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        ConfigurationSection section = config.getConfigurationSection(tableKey);
+        if (section != null) {
+            int currentLevel = section.getInt("min_exploration_level", 1);
+            int newLevel = Math.max(1, currentLevel + delta);
+            section.set("min_exploration_level", newLevel);
+            try {
+                config.save(file);
+                plugin.getServiceRegistry().getRegistryManager().reloadAll();
+                player.sendMessage("§aUpdated min exploration level requirement: §eLv. " + newLevel);
+                populate();
+            } catch (IOException e) {
+                player.sendMessage("§cFailed to save drop_tables.yml!");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void addItemToDropTable(String resourceKey, int amount) {
+        BranzIdlePlugin plugin = JavaPlugin.getPlugin(BranzIdlePlugin.class);
+        File file = new File(plugin.getDataFolder(), "drop_tables.yml");
+        if (!file.exists()) return;
+
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        ConfigurationSection section = config.getConfigurationSection(tableKey);
+        if (section != null) {
+            List<Map<?, ?>> rawList = section.getMapList("entries");
+
+            for (Map<?, ?> rawMap : rawList) {
+                if (resourceKey.equals(rawMap.get("resource_key"))) {
+                    player.sendMessage("§cThis item is already in the drop pool!");
+                    return;
+                }
+            }
+
+            Map<Object, Object> entry = new HashMap<>();
+            entry.put("resource_key", resourceKey);
+            entry.put("drop_weight", 50.0);
+            entry.put("min_qty", 1);
+            entry.put("max_qty", Math.max(1, amount));
+
+            rawList.add(entry);
+            section.set("entries", rawList);
+            try {
+                config.save(file);
+                plugin.getServiceRegistry().getRegistryManager().reloadAll();
+                player.sendMessage("§aAdded §e" + resourceKey + " §ato drop pool!");
+                populate();
+            } catch (IOException e) {
+                player.sendMessage("§cFailed to save drop_tables.yml!");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void removeItemFromDropTable(String resourceKey) {
+        BranzIdlePlugin plugin = JavaPlugin.getPlugin(BranzIdlePlugin.class);
+        File file = new File(plugin.getDataFolder(), "drop_tables.yml");
+        if (!file.exists()) return;
+
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        ConfigurationSection section = config.getConfigurationSection(tableKey);
+        if (section != null) {
+            List<Map<?, ?>> rawList = section.getMapList("entries");
+            boolean found = false;
+            for (Map<?, ?> rawMap : rawList) {
+                if (resourceKey.equals(rawMap.get("resource_key"))) {
+                    rawList.remove(rawMap);
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                section.set("entries", rawList);
+                try {
+                    config.save(file);
+                    plugin.getServiceRegistry().getRegistryManager().reloadAll();
+                    player.sendMessage("§cRemoved §e" + resourceKey + " §cfrom drop pool!");
+                    populate();
+                } catch (IOException e) {
+                    player.sendMessage("§cFailed to save drop_tables.yml!");
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void updateWeightInFile(String resourceKey, double delta) {
@@ -137,7 +269,6 @@ public class AdminDropTableEditorGUI implements InventoryProvider {
                 section.set("entries", rawList);
                 try {
                     config.save(file);
-                    // Force registry to reload atomically
                     plugin.getServiceRegistry().getRegistryManager().reloadAll();
                     populate();
                 } catch (IOException e) {
@@ -163,23 +294,60 @@ public class AdminDropTableEditorGUI implements InventoryProvider {
             return;
         }
 
-        String resKey = slotToResourceMap.get(slot);
-        if (resKey != null) {
-            ClickType click = event.getClick();
-            double delta = 0.0;
+        if (slot == 49) {
+            player.closeInventory();
+            return;
+        }
 
-            if (click == ClickType.SHIFT_LEFT) {
-                delta = 20.0;
-            } else if (click == ClickType.SHIFT_RIGHT) {
-                delta = -20.0;
-            } else if (click.isLeftClick()) {
-                delta = 5.0;
-            } else if (click.isRightClick()) {
-                delta = -5.0;
+        ClickType click = event.getClick();
+
+        if (slot == 2) {
+            int delta = 0;
+            if (click == ClickType.SHIFT_LEFT) delta = 10;
+            else if (click == ClickType.SHIFT_RIGHT) delta = -10;
+            else if (click.isLeftClick()) delta = 1;
+            else if (click.isRightClick()) delta = -1;
+
+            if (delta != 0) {
+                updateMinExplorationLevel(delta);
+            }
+            return;
+        }
+
+        // Drag & click item addition (slots 9 to 44)
+        if (slot >= 9 && slot < 45) {
+            ItemStack cursorItem = event.getCursor();
+            String resKey = slotToResourceMap.get(slot);
+
+            if (cursorItem != null && cursorItem.getType() != Material.AIR) {
+                event.setCancelled(true);
+                String addedKey = getResourceKey(cursorItem);
+                if (addedKey != null) {
+                    addItemToDropTable(addedKey, cursorItem.getAmount());
+                }
+                return;
             }
 
-            if (delta != 0.0) {
-                updateWeightInFile(resKey, delta);
+            if (resKey != null) {
+                if (click == ClickType.SHIFT_RIGHT) {
+                    removeItemFromDropTable(resKey);
+                } else {
+                    double delta = 0.0;
+
+                    if (click == ClickType.SHIFT_LEFT) {
+                        delta = 20.0;
+                    } else if (click == ClickType.SHIFT_RIGHT) {
+                        delta = -20.0;
+                    } else if (click.isLeftClick()) {
+                        delta = 5.0;
+                    } else if (click.isRightClick()) {
+                        delta = -5.0;
+                    }
+
+                    if (delta != 0.0) {
+                        updateWeightInFile(resKey, delta);
+                    }
+                }
             }
         }
     }

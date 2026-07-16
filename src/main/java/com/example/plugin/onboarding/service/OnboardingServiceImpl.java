@@ -77,18 +77,15 @@ public class OnboardingServiceImpl implements OnboardingService {
             return false;
         }
 
-        if (!territoryService.is2x2AreaAvailable(originChunkX, originChunkZ)) {
-            player.sendMessage("§cThe 2x2 chunk space starting at (" + originChunkX + ", " + originChunkZ + ") is obstructed by existing claims. Please choose an open area!");
+        if (territoryService.getClaim(originChunkX, originChunkZ).isPresent()) {
+            player.sendMessage("§cThe target chunk at (" + originChunkX + ", " + originChunkZ + ") is already claimed. Please choose an open area!");
             return false;
         }
 
         UUID playerId = player.getUniqueId();
 
-        // Claim 4 contiguous chunks: 1 Residential Hub + 3 Production Plots
+        // Claim only the 1 Residential Hub chunk
         territoryService.claimChunkInternal(playerId, originChunkX, originChunkZ, ChunkType.RESIDENTIAL);
-        territoryService.claimChunkInternal(playerId, originChunkX + 1, originChunkZ, ChunkType.PRODUCTION);
-        territoryService.claimChunkInternal(playerId, originChunkX, originChunkZ + 1, ChunkType.PRODUCTION);
-        territoryService.claimChunkInternal(playerId, originChunkX + 1, originChunkZ + 1, ChunkType.PRODUCTION);
 
         // Grant initial currency balance
         economyService.addCoins(playerId, starterPack.getStarterCoins());
@@ -96,14 +93,14 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         // Dispatch completion event so worker instances can be assigned
         Bukkit.getScheduler().runTask(plugin, () ->
-            Bukkit.getPluginManager().callEvent(new PlayerOnboardingCompletedEvent(player, starterPack.getFreeChunksGranted(), starterPack.getStarterWorkerTemplates()))
+            Bukkit.getPluginManager().callEvent(new PlayerOnboardingCompletedEvent(player, 1, starterPack.getStarterWorkerTemplates()))
         );
 
         player.sendMessage("§6==========================================");
         player.sendMessage("§e§lWelcome to Branz.Idle MMORPG!");
-        player.sendMessage("§aYour starting 2x2 base territory has been secured!");
+        player.sendMessage("§aYour starting base territory has been secured!");
         player.sendMessage("§f+ §e" + starterPack.getStarterCoins() + " Coins granted to your profile.");
-        player.sendMessage("§f+ §b4 Territory Chunks claimed at (" + originChunkX + ", " + originChunkZ + ").");
+        player.sendMessage("§f+ §b1 Territory Chunk claimed at (" + originChunkX + ", " + originChunkZ + ") as a Residential base.");
         player.sendMessage("§6==========================================");
         return true;
     }

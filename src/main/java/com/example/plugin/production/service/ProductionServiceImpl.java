@@ -146,13 +146,24 @@ public class ProductionServiceImpl implements ProductionService {
 
         boolean anyAdded = false;
         long maxCap = def.maxStorageCapacity();
+        double scaleExponent = plugin.getConfig().getDouble("production.yield_scale_exponent", 1.2);
+        double scaleMultiplier = plugin.getConfig().getDouble("production.yield_scale_multiplier", 0.05);
 
         int explorationLevel = explorationService.getExploration(node.getNodeId()).getExplorationLevel();
-        String prefix = node.getNodeType().name().toLowerCase();
-        List<DropTableRegistry.DropTableDefinition> activeTables = new java.util.ArrayList<>();
+        // Collect all drop entries whose resource definition explicitly allows this node type
+        String nodeTypeName = node.getNodeType().name(); // e.g. "MINING"
+        List<DropTableRegistry.DropEntry> activeTables = new java.util.ArrayList<>();
         for (DropTableRegistry.DropTableDefinition tableDef : registryManager.getDropTableRegistry().getAllDropTables().values()) {
-            if (tableDef.tableKey().startsWith(prefix) && tableDef.minExplorationLevel() <= explorationLevel) {
-                activeTables.add(tableDef);
+            // Table must have unlocked at the current exploration level
+            if (tableDef.minExplorationLevel() > explorationLevel) continue;
+            for (DropTableRegistry.DropEntry entry : tableDef.entries()) {
+                com.example.plugin.config.ResourceRegistry.ResourceDefinition resDef =
+                    registryManager.getResourceRegistry().getResource(entry.resourceKey()).orElse(null);
+                if (resDef == null || !resDef.enabled()) continue;
+                // Honour allowed_nodes: if empty list treat as unrestricted, otherwise must contain this node type
+                java.util.List<String> allowed = resDef.allowedNodes();
+                if (!allowed.isEmpty() && !allowed.contains(nodeTypeName)) continue;
+                activeTables.add(entry);
             }
         }
 
@@ -162,33 +173,31 @@ public class ProductionServiceImpl implements ProductionService {
             case FISHING -> "golden_fish";
         };
 
-        List<DropTableRegistry.DropEntry> eligibleEntries = new java.util.ArrayList<>();
+        // activeTables is already a flat, filtered List<DropEntry>
+        List<DropTableRegistry.DropEntry> eligibleEntries = activeTables;
         double totalWeight = 0.0;
         List<Double> modifiedWeights = new java.util.ArrayList<>();
 
-        for (DropTableRegistry.DropTableDefinition tableDef : activeTables) {
-            for (DropTableRegistry.DropEntry entry : tableDef.entries()) {
-                eligibleEntries.add(entry);
+        for (DropTableRegistry.DropEntry entry : eligibleEntries) {
+            // Fetch resource rarity to boost rare-item weights for workers with high rareDropBonus
+            com.example.plugin.config.ResourceRegistry.Rarity rarity = registryManager.getResourceRegistry()
+                .getResource(entry.resourceKey())
+                .map(com.example.plugin.config.ResourceRegistry.ResourceDefinition::rarity)
+                .orElse(com.example.plugin.config.ResourceRegistry.Rarity.COMMON);
 
-                // Fetch resource definition and rarity to modify drop weights based on worker rare drop bonuses
-                com.example.plugin.config.ResourceRegistry.Rarity rarity = registryManager.getResourceRegistry()
-                    .getResource(entry.resourceKey())
-                    .map(com.example.plugin.config.ResourceRegistry.ResourceDefinition::rarity)
-                    .orElse(com.example.plugin.config.ResourceRegistry.Rarity.COMMON);
-
-                double weight = entry.weight();
-                if (rarity != com.example.plugin.config.ResourceRegistry.Rarity.COMMON) {
-                    weight = weight * (1.0 + totalRareBonus);
-                }
-
-                modifiedWeights.add(weight);
-                totalWeight += weight;
+            double weight = entry.weight();
+            if (rarity != com.example.plugin.config.ResourceRegistry.Rarity.COMMON) {
+                weight = weight * (1.0 + totalRareBonus);
             }
+
+            modifiedWeights.add(weight);
+            totalWeight += weight;
         }
 
         long explorationXPGained = 0;
         int triggeredEvents = 0;
 
+        String prefix = nodeTypeName.toLowerCase(); // used for event lookups
         for (long c = 0; c < cycles; c++) {
             String activeKey = node.getActiveEventKey();
             if (activeKey != null) {
@@ -220,7 +229,21 @@ public class ProductionServiceImpl implements ProductionService {
 
                         if (selected != null) {
                             long qty = ThreadLocalRandom.current().nextLong(selected.minQty(), selected.maxQty() + 1);
-                            long amount = (long) Math.round(qty * (1.0 + totalYieldBonus));
+                            long baseAmount = (long) Math.round(qty * (1.0 + totalYieldBonus));
+
+                            com.example.plugin.config.ResourceRegistry.Rarity rarity = registryManager.getResourceRegistry()
+                                .getResource(selected.resourceKey())
+                                .map(com.example.plugin.config.ResourceRegistry.ResourceDefinition::rarity)
+                                .orElse(com.example.plugin.config.ResourceRegistry.Rarity.COMMON);
+
+                            long amount;
+                            if (rarity == com.example.plugin.config.ResourceRegistry.Rarity.COMMON) {
+                                double levelMultiplier = 1.0 + Math.pow(node.getLevel() - 1, scaleExponent) * scaleMultiplier;
+                                amount = (long) Math.round(baseAmount * levelMultiplier);
+                            } else {
+                                amount = baseAmount;
+                            }
+
                             if (amount > 0) {
                                 long added = storageService.addResourceToNode(node.getNodeId(), selected.resourceKey(), amount, maxCap);
                                 if (added > 0) {
@@ -250,7 +273,10 @@ public class ProductionServiceImpl implements ProductionService {
             } else {
                 // Normal State: Roll drops from normal tables and award exploration XP
                 if (eligibleEntries.isEmpty()) {
-                    long amount = (long) Math.round(1.0 * (1.0 + totalYieldBonus));
+                    long baseAmount = (long) Math.round(1.0 * (1.0 + totalYieldBonus));
+                    double levelMultiplier = 1.0 + Math.pow(node.getLevel() - 1, scaleExponent) * scaleMultiplier;
+                    long amount = (long) Math.round(baseAmount * levelMultiplier);
+
                     if (amount > 0) {
                         long added = storageService.addResourceToNode(node.getNodeId(), defaultItem, amount, maxCap);
                         if (added > 0) {
@@ -273,7 +299,21 @@ public class ProductionServiceImpl implements ProductionService {
                     }
 
                     long baseQty = ThreadLocalRandom.current().nextLong(selected.minQty(), selected.maxQty() + 1);
-                    long amount = (long) Math.round(baseQty * (1.0 + totalYieldBonus));
+                    long baseAmount = (long) Math.round(baseQty * (1.0 + totalYieldBonus));
+
+                    com.example.plugin.config.ResourceRegistry.Rarity rarity = registryManager.getResourceRegistry()
+                        .getResource(selected.resourceKey())
+                        .map(com.example.plugin.config.ResourceRegistry.ResourceDefinition::rarity)
+                        .orElse(com.example.plugin.config.ResourceRegistry.Rarity.COMMON);
+
+                    long amount;
+                    if (rarity == com.example.plugin.config.ResourceRegistry.Rarity.COMMON) {
+                        double levelMultiplier = 1.0 + Math.pow(node.getLevel() - 1, scaleExponent) * scaleMultiplier;
+                        amount = (long) Math.round(baseAmount * levelMultiplier);
+                    } else {
+                        amount = baseAmount;
+                    }
+
                     if (amount > 0) {
                         long added = storageService.addResourceToNode(node.getNodeId(), selected.resourceKey(), amount, maxCap);
                         if (added > 0) {
@@ -289,7 +329,7 @@ public class ProductionServiceImpl implements ProductionService {
                 definedEvents.sort((a, b) -> Integer.compare(b.minExplorationLevel(), a.minExplorationLevel()));
 
                 for (com.example.plugin.config.EventDropRegistry.EventDefinition eventDef : definedEvents) {
-                    if (explorationLevel >= eventDef.minExplorationLevel()) {
+                    if (explorationLevel >= eventDef.minExplorationLevel() && explorationLevel <= eventDef.maxExplorationLevel()) {
                         if (ThreadLocalRandom.current().nextDouble() < eventDef.eventChance()) {
                             node.setActiveEventKey(eventDef.eventKey());
                             node.setEventProgress(eventDef.durationCycles());
@@ -317,8 +357,10 @@ public class ProductionServiceImpl implements ProductionService {
             explorationService.addExplorationExp(node.getNodeId(), explorationXPGained);
         }
 
+        long simulatedSeconds = (long) (cycles * effectiveInterval);
         for (WorkerInstance w : workers) {
             w.addExperience(cycles * 10L);
+            w.setSecondsWorked(w.getSecondsWorked() + simulatedSeconds);
             workerService.updateWorker(w);
         }
 

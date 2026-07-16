@@ -9,6 +9,13 @@ mining:
     weight: 30.0
     min_qty: 1
     max_qty: 2
+  events:
+    coal_seam:
+      display_name: '&e&lcoal seam'
+      min_exploration_level: 10
+      event_chance: 0.01
+      duration_cycles: 50
+      entries: []
 
 lumber:
   base_event_chance: 0.01

@@ -107,55 +107,35 @@ public class AdminEventDropPoolGUI implements InventoryProvider {
     }
 
     private Material getMaterial(String resKey) {
-        return switch (resKey.toLowerCase()) {
-            case "iron_ore" -> Material.IRON_ORE;
-            case "coal" -> Material.COAL;
-            case "oak_log" -> Material.OAK_LOG;
-            case "mithril_crystal" -> Material.PRISMARINE_CRYSTALS;
-            case "adamantite_core" -> Material.NETHERITE_SCRAP;
-            case "hardwood" -> Material.OAK_WOOD;
-            case "ancient_bark" -> Material.OAK_SAPLING;
-            case "golden_fish" -> Material.COD;
-            case "pearl" -> Material.ENDER_PEARL;
-            case "sunken_relic" -> Material.HEART_OF_THE_SEA;
-            default -> {
-                try {
-                    yield Material.valueOf(resKey.toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    yield Material.PAPER;
-                }
-            }
-        };
+        return JavaPlugin.getPlugin(BranzIdlePlugin.class).getServiceRegistry().getRegistryManager().getResourceRegistry()
+            .getResource(resKey)
+            .map(com.example.plugin.config.ResourceRegistry.ResourceDefinition::material)
+            .orElseGet(() -> {
+                Material mat = Material.matchMaterial(resKey.toUpperCase());
+                return mat != null ? mat : Material.PAPER;
+            });
     }
 
     private String getDisplayName(String resKey) {
-        return switch (resKey.toLowerCase()) {
-            case "iron_ore" -> "§fIron Ore";
-            case "coal" -> "§8Coal";
-            case "oak_log" -> "§6Oak Log";
-            case "mithril_crystal" -> "§b§lMithril Crystal";
-            case "adamantite_core" -> "§c§lAdamantite Core";
-            case "hardwood" -> "§6Hardwood";
-            case "ancient_bark" -> "§aAncient Bark";
-            case "golden_fish" -> "§eGolden Fish";
-            case "pearl" -> "§dPearl";
-            case "sunken_relic" -> "§9Sunken Relic";
-            default -> "§f" + resKey;
-        };
+        return JavaPlugin.getPlugin(BranzIdlePlugin.class).getServiceRegistry().getRegistryManager().getResourceRegistry()
+            .getResource(resKey)
+            .map(def -> org.bukkit.ChatColor.translateAlternateColorCodes('&', def.displayName()))
+            .orElseGet(() -> "§f" + resKey);
     }
 
     private String getResourceKey(ItemStack item) {
         if (item == null || item.getType() == Material.AIR) return null;
 
-        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-            String name = item.getItemMeta().getDisplayName();
-            if (name.contains("Mithril Crystal")) return "mithril_crystal";
-            if (name.contains("Adamantite Core")) return "adamantite_core";
-            if (name.contains("Hardwood")) return "hardwood";
-            if (name.contains("Ancient Bark")) return "ancient_bark";
-            if (name.contains("Golden Fish")) return "golden_fish";
-            if (name.contains("Pearl")) return "pearl";
-            if (name.contains("Sunken Relic")) return "sunken_relic";
+        var registry = JavaPlugin.getPlugin(BranzIdlePlugin.class).getServiceRegistry().getRegistryManager().getResourceRegistry();
+        for (var def : registry.getAllResources().values()) {
+            if (def.material() == item.getType()) {
+                if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+                    String name = item.getItemMeta().getDisplayName();
+                    if (name.contains(org.bukkit.ChatColor.translateAlternateColorCodes('&', def.displayName()))) {
+                        return def.key();
+                    }
+                }
+            }
         }
 
         return item.getType().name().toLowerCase();

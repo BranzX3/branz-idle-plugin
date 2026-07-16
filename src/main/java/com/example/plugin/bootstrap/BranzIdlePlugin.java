@@ -176,6 +176,7 @@ public final class BranzIdlePlugin extends JavaPlugin {
         if (serviceRegistry != null) {
             serviceRegistry.getService(VisualService.class).ifPresent(VisualService::clearAllVisuals);
             serviceRegistry.getService(EconomyService.class).ifPresent(EconomyService::flushAll);
+            serviceRegistry.getService(WorkerService.class).ifPresent(WorkerService::shutdown);
         }
 
         // 2. Stop and flush save queue tasks synchronously

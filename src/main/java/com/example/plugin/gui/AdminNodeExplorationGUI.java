@@ -87,6 +87,9 @@ public class AdminNodeExplorationGUI implements InventoryProvider {
         // Slot 45: Back to Node List
         inventory.setItem(45, new ItemBuilder(Material.ARROW)
             .name("§c§lBack to Node List").build());
+
+        // Slot 49: Close
+        inventory.setItem(49, new ItemBuilder(Material.BARRIER).name("§c§lClose Menu").build());
     }
 
     @Override
@@ -101,6 +104,11 @@ public class AdminNodeExplorationGUI implements InventoryProvider {
 
         if (slot == 45) {
             player.openInventory(new AdminPlayerNodesGUI(player, target).getInventory());
+            return;
+        }
+
+        if (slot == 49) {
+            player.closeInventory();
             return;
         }
 

@@ -38,4 +38,19 @@ public interface ExplorationService {
      * Retrieves all rare drop table entries eligible for a node's current exploration mastery level.
      */
     List<DropTableRegistry.DropEntry> getEligibleRareDrops(UUID nodeId, NodeType nodeType);
+
+    /**
+     * Deletes the exploration record for the given node from memory and database.
+     */
+    void deleteExploration(UUID nodeId);
+
+    /**
+     * Retrieves the required XP to level up from the given level.
+     */
+    long getRequiredExperience(int level);
+
+    /**
+     * Retrieves the maximum level allowed for exploration.
+     */
+    int getMaxLevel();
 }

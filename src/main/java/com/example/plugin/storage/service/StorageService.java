@@ -48,4 +48,9 @@ public interface StorageService {
      * Adds resources directly to a player's virtual wallet.
      */
     void addResourceToWallet(UUID playerId, String resourceKey, long amount);
+
+    /**
+     * Deletes the node storage buffer for a deleted production node.
+     */
+    void deleteNodeStorage(UUID nodeId);
 }

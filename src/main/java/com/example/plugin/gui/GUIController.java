@@ -21,15 +21,28 @@ public class GUIController implements Listener {
 
         InventoryHolder holder = event.getInventory().getHolder();
         if (holder instanceof InventoryProvider provider) {
-            event.setCancelled(true);
-
-            if (!DebounceCache.tryClick(player.getUniqueId())) {
-                return; // Double click blocked
-            }
-
             if (event.getClickedInventory() == event.getInventory()) {
+                event.setCancelled(true);
+
+                if (!DebounceCache.tryClick(player.getUniqueId())) {
+                    return; // Double click blocked
+                }
+
                 provider.onClick(event);
+            } else {
+                // Click is in player's own inventory (bottom inventory)
+                // Block Shift-Click to prevent injecting items directly into the custom GUI layout
+                if (event.isShiftClick()) {
+                    event.setCancelled(true);
+                }
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onInventoryDrag(org.bukkit.event.inventory.InventoryDragEvent event) {
+        if (event.getInventory().getHolder() instanceof InventoryProvider) {
+            event.setCancelled(true);
         }
     }
 

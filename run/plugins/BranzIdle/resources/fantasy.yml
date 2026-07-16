@@ -1,0 +1,62 @@
+# Branz.Idle Fantasy Expansion Resource Pack
+# Keep fantasy resources here, separating them from the vanilla core.
+
+mithril_crystal:
+  display_name: "&bMithril Crystal"
+  material: AMETHYST_SHARD
+  custom_model_data: 1003
+  rarity: RARE
+  quality: FINE
+  category: MINING
+  family: MITHRIL
+  tier: TIER_3
+  unlock_level: 300
+  allowed_nodes:
+    - MINING
+  zones:
+    - CRYSTAL_CAVE
+  resource_type: RAW_RESOURCE
+  sell_price: 100.0
+  buy_price: 200.0
+  exp: 30
+  drop_weight: 20
+  max_stack: 64
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - FANTASY
+    - GEM
+  translation_key: resource.mithril_crystal
+  enabled: true
+  introduced_in: 1
+
+adamantite_core:
+  display_name: "&6Adamantite Core"
+  material: NETHER_STAR
+  custom_model_data: 1004
+  rarity: LEGENDARY
+  quality: MASTERWORK
+  category: MINING
+  family: CORE
+  tier: TIER_7
+  unlock_level: 950
+  allowed_nodes:
+    - MINING
+  zones:
+    - ABYSS
+  resource_type: TREASURE
+  sell_price: 2000.0
+  buy_price: 4000.0
+  exp: 500
+  drop_weight: 5
+  max_stack: 16
+  npc_sell: true
+  player_trade: true
+  stack_type: NORMAL
+  tags:
+    - FANTASY
+    - CORE
+  translation_key: resource.adamantite_core
+  enabled: true
+  introduced_in: 1

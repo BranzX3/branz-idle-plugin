@@ -15,6 +15,7 @@ import com.example.plugin.onboarding.service.OnboardingService;
 import com.example.plugin.storage.service.StorageService;
 import com.example.plugin.territory.service.TerritoryService;
 import com.example.plugin.visual.service.VisualService;
+import com.example.plugin.worker.model.WorkerInstance;
 import com.example.plugin.worker.service.WorkerService;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -75,19 +77,35 @@ public class IdleCommand extends BaseCommand {
         String sub = args[0].toLowerCase();
         switch (sub) {
             case "claim" -> {
-                NodeType type = NodeType.MINING;
+                if (!onboardingService.isPlayerOnboarded(player)) {
+                    player.sendMessage("§cYou must establish your base first by typing /idle to complete onboarding!");
+                    return true;
+                }
+                boolean isResidential = false;
+                NodeType type = null;
                 if (args.length >= 2) {
-                    try {
-                        type = NodeType.valueOf(args[1].toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        player.sendMessage("§cInvalid node type! Available: MINING, LUMBER, FISHING.");
-                        return true;
+                    String typeArg = args[1].toUpperCase();
+                    if (typeArg.equals("RESIDENTIAL")) {
+                        isResidential = true;
+                    } else {
+                        try {
+                            type = NodeType.valueOf(typeArg);
+                        } catch (IllegalArgumentException e) {
+                            player.sendMessage("§cInvalid type! Available: MINING, LUMBER, FISHING, RESIDENTIAL.");
+                            return true;
+                        }
                     }
+                } else {
+                    type = NodeType.MINING;
                 }
                 Chunk chunk = player.getLocation().getChunk();
-                boolean success = territoryService.claimChunk(player, chunk.getX(), chunk.getZ(), com.example.plugin.territory.model.ChunkType.PRODUCTION);
-                if (success) {
-                    nodeService.createNode(player.getUniqueId(), type, chunk.getX(), chunk.getZ());
+                if (isResidential) {
+                    territoryService.claimChunk(player, chunk.getX(), chunk.getZ(), com.example.plugin.territory.model.ChunkType.RESIDENTIAL);
+                } else {
+                    boolean success = territoryService.claimChunk(player, chunk.getX(), chunk.getZ(), com.example.plugin.territory.model.ChunkType.PRODUCTION);
+                    if (success && type != null) {
+                        nodeService.createNode(player.getUniqueId(), type, chunk.getX(), chunk.getZ());
+                    }
                 }
             }
             case "unclaim" -> {
@@ -96,6 +114,18 @@ public class IdleCommand extends BaseCommand {
                 if (claimOpt.isEmpty() || (!claimOpt.get().getOwnerId().equals(player.getUniqueId()) && !player.hasPermission("branzidle.admin"))) {
                     player.sendMessage("§cYou do not own the territory at your current location!");
                     return true;
+                }
+                com.example.plugin.territory.model.ChunkClaim claim = claimOpt.get();
+                if (claim.getChunkType() == com.example.plugin.territory.model.ChunkType.RESIDENTIAL) {
+                    economyService.setOnboardingCompleted(player.getUniqueId(), false);
+                    player.sendMessage("§eYour Residential Base Hub has been unclaimed. Onboarding reset.");
+                } else if (claim.getNodeId() != null) {
+                    UUID nodeId = claim.getNodeId();
+                    for (WorkerInstance w : workerService.getNodeWorkers(nodeId)) {
+                        w.setAssignedNodeId(null);
+                        workerService.updateWorker(w);
+                    }
+                    nodeService.deleteNode(nodeId);
                 }
                 territoryService.unclaimChunk(player, chunk.getX(), chunk.getZ());
             }
@@ -147,6 +177,45 @@ public class IdleCommand extends BaseCommand {
                 visualService.clearAllVisuals();
                 player.sendMessage("§aBranz.Idle registries and visuals reloaded successfully!");
             }
+            case "fuse" -> {
+                if (!player.hasPermission("branzidle.admin")) {
+                    player.sendMessage("§cYou do not have permission to use the debug fusion command!");
+                    return true;
+                }
+                if (args.length < 4) {
+                    player.sendMessage("§cUsage: /idle fuse <targetSerial> <ingredientSerial1> <ingredientSerial2>");
+                    return true;
+                }
+                try {
+                    int targetSerial = Integer.parseInt(args[1]);
+                    int ing1Serial = Integer.parseInt(args[2]);
+                    int ing2Serial = Integer.parseInt(args[3]);
+
+                    List<WorkerInstance> workers = workerService.getPlayerWorkers(player.getUniqueId());
+                    WorkerInstance target = null;
+                    WorkerInstance w1 = null;
+                    WorkerInstance w2 = null;
+
+                    for (WorkerInstance w : workers) {
+                        if (w.getSerialId() == targetSerial) {
+                            target = w;
+                        } else if (w.getSerialId() == ing1Serial) {
+                            w1 = w;
+                        } else if (w.getSerialId() == ing2Serial) {
+                            w2 = w;
+                        }
+                    }
+
+                    if (target == null || w1 == null || w2 == null) {
+                        player.sendMessage("§cCould not find one or more workers with those serial IDs!");
+                        return true;
+                    }
+
+                    workerService.fuseWorkers(player, target.getWorkerId(), w1.getWorkerId(), w2.getWorkerId());
+                } catch (NumberFormatException e) {
+                    player.sendMessage("§cInvalid serial IDs! They must be integers.");
+                }
+            }
             default -> player.sendMessage("§cUnknown subcommand! Use §6/idle help §cfor a list of commands.");
         }
         return true;
@@ -159,13 +228,29 @@ public class IdleCommand extends BaseCommand {
             if (player.hasPermission("branzidle.admin")) {
                 subs.add("reload");
                 subs.add("admin");
+                subs.add("fuse");
             }
             String prefix = args[0].toLowerCase();
             return subs.stream().filter(s -> s.startsWith(prefix)).collect(Collectors.toList());
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("claim")) {
             String prefix = args[1].toUpperCase();
-            return Arrays.stream(NodeType.values()).map(Enum::name).filter(s -> s.startsWith(prefix)).collect(Collectors.toList());
+            List<String> types = new ArrayList<>();
+            for (NodeType t : NodeType.values()) {
+                types.add(t.name());
+            }
+            types.add("RESIDENTIAL");
+            return types.stream().filter(s -> s.startsWith(prefix)).collect(Collectors.toList());
+        }
+        if (args.length >= 2 && args.length <= 4 && args[0].equalsIgnoreCase("fuse")) {
+            if (!player.hasPermission("branzidle.admin")) {
+                return Collections.emptyList();
+            }
+            String prefix = args[args.length - 1];
+            return workerService.getPlayerWorkers(player.getUniqueId()).stream()
+                .map(w -> String.valueOf(w.getSerialId()))
+                .filter(s -> s.startsWith(prefix))
+                .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }

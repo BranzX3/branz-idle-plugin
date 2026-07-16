@@ -195,6 +195,16 @@ public class NodeServiceImpl implements NodeService {
     public void deleteNode(UUID nodeId) {
         nodeCache.remove(nodeId);
         saveQueue.queueTask(() -> repository.deleteById(nodeId));
+
+        // Lazily clean up associated exploration and storage data to avoid circular initialization dependencies
+        com.example.plugin.bootstrap.BranzIdlePlugin idlePlugin = org.bukkit.plugin.java.JavaPlugin.getPlugin(com.example.plugin.bootstrap.BranzIdlePlugin.class);
+        com.example.plugin.bootstrap.ServiceRegistry registry = idlePlugin.getServiceRegistry();
+        if (registry != null) {
+            registry.getService(com.example.plugin.exploration.service.ExplorationService.class)
+                .ifPresent(service -> service.deleteExploration(nodeId));
+            registry.getService(com.example.plugin.storage.service.StorageService.class)
+                .ifPresent(service -> service.deleteNodeStorage(nodeId));
+        }
     }
 
     private boolean check2x2Ownership(UUID playerId, int ox, int oz) {

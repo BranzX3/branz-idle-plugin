@@ -121,6 +121,9 @@ public class AdminPlayerEditorGUI implements InventoryProvider {
         // Slot 45: Back to Player List
         inventory.setItem(45, new ItemBuilder(Material.ARROW)
             .name("§c§lBack to Player List").build());
+
+        // Slot 49: Close
+        inventory.setItem(49, new ItemBuilder(Material.BARRIER).name("§c§lClose Menu").build());
     }
 
     @Override
@@ -186,6 +189,9 @@ public class AdminPlayerEditorGUI implements InventoryProvider {
             case 45 -> {
                 // Back to Player List
                 player.openInventory(new AdminPlayerSelectorGUI(player).getInventory());
+            }
+            case 49 -> {
+                player.closeInventory();
             }
         }
     }

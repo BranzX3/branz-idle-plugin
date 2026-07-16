@@ -71,6 +71,13 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder customModelData(int customModelData) {
+        if (itemMeta != null) {
+            itemMeta.setCustomModelData(customModelData);
+        }
+        return this;
+    }
+
     public ItemStack build() {
         if (itemMeta != null) {
             itemStack.setItemMeta(itemMeta);

@@ -1,77 +1,416 @@
-# Branz.Idle Exploration Drop Tables
+# Branz.Idle Default Exploration Drop Tables
+# Maps progression unlock tiers (Level 1 to 1000) to corresponding drop pools.
 
-mining_surface_drops:
+# ==========================================
+#              MINING NODES
+# ==========================================
+
+mining_lv_1:
   min_exploration_level: 1
   entries:
-    - resource_key: "iron_ore"
+    - resource_key: "stone"
       min_qty: 10
-      max_qty: 30
+      max_qty: 25
       weight: 100
     - resource_key: "coal"
-      min_qty: 15
-      max_qty: 40
-      weight: 80
-
-mining_deep_drops:
-  min_exploration_level: 50
-  entries:
-    - resource_key: "iron_ore"
-      min_qty: 50
-      max_qty: 150
-      weight: 100
-    - resource_key: "mithril_crystal"
-      min_qty: 1
-      max_qty: 5
-      weight: 15
-    - resource_key: "adamantite_core"
-      min_qty: 1
-      max_qty: 1
-      weight: 2
-
-lumber_surface_drops:
-  min_exploration_level: 1
-  entries:
-    - resource_key: "oak_log"
-      min_qty: 10
-      max_qty: 30
-      weight: 100
-    - resource_key: "hardwood"
+      min_qty: 5
+      max_qty: 15
+      weight: 50
+    - resource_key: "raw_copper"
+      min_qty: 4
+      max_qty: 10
+      weight: 30
+    - resource_key: "raw_iron"
       min_qty: 2
       max_qty: 8
-      weight: 25
-
-lumber_deep_drops:
-  min_exploration_level: 50
-  entries:
-    - resource_key: "oak_log"
-      min_qty: 50
-      max_qty: 150
-      weight: 100
-    - resource_key: "ancient_bark"
+      weight: 15
+    - resource_key: "flint"
       min_qty: 1
       max_qty: 5
-      weight: 15
+      weight: 10
 
-fishing_surface_drops:
-  min_exploration_level: 1
+mining_lv_50:
+  min_exploration_level: 50
   entries:
-    - resource_key: "golden_fish"
+    - resource_key: "deepslate"
       min_qty: 10
-      max_qty: 30
+      max_qty: 25
       weight: 100
-    - resource_key: "pearl"
+    - resource_key: "deepslate_iron"
+      min_qty: 5
+      max_qty: 15
+      weight: 50
+    - resource_key: "raw_gold"
+      min_qty: 4
+      max_qty: 12
+      weight: 30
+    - resource_key: "lapis_lazuli"
+      min_qty: 4
+      max_qty: 10
+      weight: 25
+    - resource_key: "redstone"
+      min_qty: 5
+      max_qty: 12
+      weight: 25
+    - resource_key: "calcite"
+      min_qty: 2
+      max_qty: 8
+      weight: 15
+    - resource_key: "tuff"
+      min_qty: 2
+      max_qty: 6
+      weight: 10
+
+mining_lv_150:
+  min_exploration_level: 150
+  entries:
+    - resource_key: "emerald"
+      min_qty: 2
+      max_qty: 6
+      weight: 80
+    - resource_key: "diamond"
+      min_qty: 2
+      max_qty: 5
+      weight: 60
+    - resource_key: "amethyst_shard"
+      min_qty: 4
+      max_qty: 10
+      weight: 40
+    - resource_key: "amethyst_cluster"
       min_qty: 1
       max_qty: 3
       weight: 20
+    - resource_key: "obsidian"
+      min_qty: 2
+      max_qty: 5
+      weight: 15
 
-fishing_deep_drops:
-  min_exploration_level: 50
+mining_lv_250:
+  min_exploration_level: 250
   entries:
-    - resource_key: "golden_fish"
-      min_qty: 50
-      max_qty: 150
-      weight: 100
-    - resource_key: "sunken_relic"
+    - resource_key: "echo_shard"
+      min_qty: 1
+      max_qty: 3
+      weight: 80
+    - resource_key: "sculk"
+      min_qty: 5
+      max_qty: 15
+      weight: 60
+    - resource_key: "sculk_catalyst"
       min_qty: 1
       max_qty: 2
-      weight: 5
+      weight: 30
+    - resource_key: "sculk_sensor"
+      min_qty: 1
+      max_qty: 2
+      weight: 20
+
+mining_lv_400:
+  min_exploration_level: 400
+  entries:
+    - resource_key: "nether_quartz"
+      min_qty: 8
+      max_qty: 20
+      weight: 100
+    - resource_key: "blackstone"
+      min_qty: 6
+      max_qty: 18
+      weight: 80
+    - resource_key: "basalt"
+      min_qty: 5
+      max_qty: 15
+      weight: 60
+    - resource_key: "glowstone_dust"
+      min_qty: 8
+      max_qty: 20
+      weight: 40
+    - resource_key: "ancient_debris"
+      min_qty: 1
+      max_qty: 2
+      weight: 10
+
+mining_lv_600:
+  min_exploration_level: 600
+  entries:
+    - resource_key: "end_stone"
+      min_qty: 10
+      max_qty: 30
+      weight: 100
+    - resource_key: "chorus_fruit"
+      min_qty: 5
+      max_qty: 15
+      weight: 80
+    - resource_key: "purpur_block"
+      min_qty: 4
+      max_qty: 12
+      weight: 60
+    - resource_key: "netherite_scrap"
+      min_qty: 1
+      max_qty: 2
+      weight: 20
+    - resource_key: "dragon_breath"
+      min_qty: 1
+      max_qty: 2
+      weight: 15
+
+mining_lv_800:
+  min_exploration_level: 800
+  entries:
+    - resource_key: "nether_star"
+      min_qty: 1
+      max_qty: 1
+      weight: 30
+    - resource_key: "heart_of_the_sea"
+      min_qty: 1
+      max_qty: 1
+      weight: 25
+    - resource_key: "ominous_bottle"
+      min_qty: 1
+      max_qty: 2
+      weight: 20
+    - resource_key: "heavy_core"
+      min_qty: 1
+      max_qty: 1
+      weight: 15
+    - resource_key: "echo_core"
+      min_qty: 1
+      max_qty: 1
+      weight: 10
+
+
+# ==========================================
+#              LUMBER NODES
+# ==========================================
+
+lumber_lv_1:
+  min_exploration_level: 1
+  entries:
+    - resource_key: "oak_log"
+      min_qty: 10
+      max_qty: 25
+      weight: 100
+    - resource_key: "birch_log"
+      min_qty: 6
+      max_qty: 15
+      weight: 60
+    - resource_key: "spruce_log"
+      min_qty: 4
+      max_qty: 10
+      weight: 40
+
+lumber_lv_50:
+  min_exploration_level: 50
+  entries:
+    - resource_key: "jungle_log"
+      min_qty: 10
+      max_qty: 25
+      weight: 100
+    - resource_key: "acacia_log"
+      min_qty: 6
+      max_qty: 15
+      weight: 60
+    - resource_key: "dark_oak_log"
+      min_qty: 4
+      max_qty: 10
+      weight: 40
+
+lumber_lv_150:
+  min_exploration_level: 150
+  entries:
+    - resource_key: "mangrove_log"
+      min_qty: 8
+      max_qty: 20
+      weight: 100
+    - resource_key: "cherry_log"
+      min_qty: 5
+      max_qty: 15
+      weight: 60
+    - resource_key: "bamboo"
+      min_qty: 4
+      max_qty: 10
+      weight: 40
+
+lumber_lv_250:
+  min_exploration_level: 250
+  entries:
+    - resource_key: "crimson_stem"
+      min_qty: 6
+      max_qty: 18
+      weight: 100
+    - resource_key: "warped_stem"
+      min_qty: 6
+      max_qty: 18
+      weight: 60
+    - resource_key: "shroomlight"
+      min_qty: 2
+      max_qty: 6
+      weight: 40
+
+lumber_lv_400:
+  min_exploration_level: 400
+  entries:
+    - resource_key: "glow_lichen"
+      min_qty: 8
+      max_qty: 20
+      weight: 100
+    - resource_key: "moss_block"
+      min_qty: 5
+      max_qty: 15
+      weight: 60
+    - resource_key: "moss_carpet"
+      min_qty: 4
+      max_qty: 12
+      weight: 40
+
+lumber_lv_600:
+  min_exploration_level: 600
+  entries:
+    - resource_key: "azalea"
+      min_qty: 8
+      max_qty: 20
+      weight: 100
+    - resource_key: "flowering_azalea"
+      min_qty: 5
+      max_qty: 15
+      weight: 60
+    - resource_key: "spore_blossom"
+      min_qty: 2
+      max_qty: 6
+      weight: 40
+
+lumber_lv_800:
+  min_exploration_level: 800
+  entries:
+    - resource_key: "creaking_heart"
+      min_qty: 1
+      max_qty: 2
+      weight: 100
+    - resource_key: "resin_brick"
+      min_qty: 4
+      max_qty: 12
+      weight: 60
+    - resource_key: "resin_clump"
+      min_qty: 3
+      max_qty: 8
+      weight: 45
+    - resource_key: "pale_oak_log"
+      min_qty: 5
+      max_qty: 15
+      weight: 30
+
+
+# ==========================================
+#              FISHING NODES
+# ==========================================
+
+fishing_lv_1:
+  min_exploration_level: 1
+  entries:
+    - resource_key: "cod"
+      min_qty: 10
+      max_qty: 25
+      weight: 100
+    - resource_key: "salmon"
+      min_qty: 6
+      max_qty: 15
+      weight: 60
+    - resource_key: "tropical_fish"
+      min_qty: 4
+      max_qty: 10
+      weight: 40
+    - resource_key: "pufferfish"
+      min_qty: 2
+      max_qty: 6
+      weight: 20
+
+fishing_lv_50:
+  min_exploration_level: 50
+  entries:
+    - resource_key: "kelp"
+      min_qty: 8
+      max_qty: 20
+      weight: 100
+    - resource_key: "seagrass"
+      min_qty: 5
+      max_qty: 15
+      weight: 60
+    - resource_key: "sea_pickle"
+      min_qty: 3
+      max_qty: 10
+      weight: 40
+    - resource_key: "clay_ball"
+      min_qty: 4
+      max_qty: 12
+      weight: 30
+
+fishing_lv_150:
+  min_exploration_level: 150
+  entries:
+    - resource_key: "prismarine_shard"
+      min_qty: 5
+      max_qty: 15
+      weight: 100
+    - resource_key: "prismarine_crystals"
+      min_qty: 3
+      max_qty: 8
+      weight: 60
+    - resource_key: "sponge"
+      min_qty: 1
+      max_qty: 3
+      weight: 40
+
+fishing_lv_250:
+  min_exploration_level: 250
+  entries:
+    - resource_key: "nautilus_shell"
+      min_qty: 2
+      max_qty: 5
+      weight: 100
+    - resource_key: "ender_pearl"
+      min_qty: 1
+      max_qty: 3
+      weight: 60
+    - resource_key: "ink_sac"
+      min_qty: 4
+      max_qty: 12
+      weight: 40
+    - resource_key: "glow_ink_sac"
+      min_qty: 3
+      max_qty: 8
+      weight: 30
+
+fishing_lv_400:
+  min_exploration_level: 400
+  entries:
+    - resource_key: "heart_of_the_sea_fishing"
+      min_qty: 1
+      max_qty: 1
+      weight: 100
+    - resource_key: "trident_fragment"
+      min_qty: 1
+      max_qty: 2
+      weight: 40
+
+fishing_lv_600:
+  min_exploration_level: 600
+  entries:
+    - resource_key: "saddle"
+      min_qty: 1
+      max_qty: 1
+      weight: 50
+    - resource_key: "name_tag"
+      min_qty: 1
+      max_qty: 2
+      weight: 40
+    - resource_key: "enchanted_book"
+      min_qty: 1
+      max_qty: 1
+      weight: 30
+    - resource_key: "music_disc"
+      min_qty: 1
+      max_qty: 1
+      weight: 20
+    - resource_key: "armor_trim"
+      min_qty: 1
+      max_qty: 1
+      weight: 10

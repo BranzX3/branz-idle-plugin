@@ -26,6 +26,7 @@ public class EventDropRegistry implements ConfigRegistry {
         private final String eventKey;
         private String displayName;
         private int minExplorationLevel;
+        private int maxExplorationLevel;
         private double eventChance;
         private int durationCycles;
         private final List<EventDropEntry> entries;
@@ -34,6 +35,7 @@ public class EventDropRegistry implements ConfigRegistry {
             String eventKey,
             String displayName,
             int minExplorationLevel,
+            int maxExplorationLevel,
             double eventChance,
             int durationCycles,
             List<EventDropEntry> entries
@@ -41,6 +43,7 @@ public class EventDropRegistry implements ConfigRegistry {
             this.eventKey = eventKey;
             this.displayName = displayName;
             this.minExplorationLevel = minExplorationLevel;
+            this.maxExplorationLevel = maxExplorationLevel;
             this.eventChance = eventChance;
             this.durationCycles = durationCycles;
             this.entries = entries;
@@ -64,6 +67,14 @@ public class EventDropRegistry implements ConfigRegistry {
 
         public void setMinExplorationLevel(int minExplorationLevel) {
             this.minExplorationLevel = minExplorationLevel;
+        }
+
+        public int maxExplorationLevel() {
+            return maxExplorationLevel;
+        }
+
+        public void setMaxExplorationLevel(int maxExplorationLevel) {
+            this.maxExplorationLevel = maxExplorationLevel;
         }
 
         public double eventChance() {
@@ -122,6 +133,7 @@ public class EventDropRegistry implements ConfigRegistry {
 
                     String displayName = eventSec.getString("display_name", eventKey);
                     int minLvl = eventSec.getInt("min_exploration_level", 1);
+                    int maxLvl = eventSec.getInt("max_exploration_level", 100);
                     double chance = eventSec.getDouble("event_chance", 0.05);
                     int duration = eventSec.getInt("duration_cycles", 50);
 
@@ -144,7 +156,7 @@ public class EventDropRegistry implements ConfigRegistry {
                     }
 
                     EventDefinition eventDef = new EventDefinition(
-                        eventKey, displayName, minLvl, chance, duration, entries
+                        eventKey, displayName, minLvl, maxLvl, chance, duration, entries
                     );
                     category.events().put(eventKey, eventDef);
                 }
@@ -156,6 +168,17 @@ public class EventDropRegistry implements ConfigRegistry {
     @Override
     public void clear() {
         categories.clear();
+    }
+
+    public List<EventDropEntry> getEntries(String nodeTypeKey) {
+        List<EventDropEntry> allEntries = new ArrayList<>();
+        EventCategory category = categories.get(nodeTypeKey.toLowerCase());
+        if (category != null) {
+            for (EventDefinition def : category.events().values()) {
+                allEntries.addAll(def.entries());
+            }
+        }
+        return allEntries;
     }
 
     public List<EventDefinition> getEvents(String nodeTypeKey) {
