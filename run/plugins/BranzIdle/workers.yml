@@ -1,5 +1,10 @@
 # Branz.Idle Worker Templates
 # Professions: MINING, LUMBER, FISHING
+# Rarity: COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
+
+# ==========================================
+#              MINING WORKERS
+# ==========================================
 
 miner_common_1:
   display_name: "&aApprentice Miner"
@@ -10,7 +15,56 @@ miner_common_1:
     speed_bonus: 0.10
     yield_bonus: 0.15
     rare_drop_bonus: 0.05
+  growth_per_level: 0.03
+
+miner_uncommon_1:
+  display_name: "&2Ironbound Driller"
+  profession: MINING
+  rarity: UNCOMMON
+  citizens_skin: "MinerBob"
+  base_stats:
+    speed_bonus: 0.20
+    yield_bonus: 0.30
+    rare_drop_bonus: 0.10
   growth_per_level: 0.05
+
+miner_rare_1:
+  display_name: "&3Deep Cavern Prospector"
+  profession: MINING
+  rarity: RARE
+  citizens_skin: "MinerGoran"
+  base_stats:
+    speed_bonus: 0.35
+    yield_bonus: 0.50
+    rare_drop_bonus: 0.20
+  growth_per_level: 0.07
+
+miner_epic_1:
+  display_name: "&dDeep Earth Excavator"
+  profession: MINING
+  rarity: EPIC
+  citizens_skin: "DwarvenKing"
+  base_stats:
+    speed_bonus: 0.50
+    yield_bonus: 0.75
+    rare_drop_bonus: 0.40
+  growth_per_level: 0.10
+
+miner_legendary_1:
+  display_name: "&6Aegis Core Breaker"
+  profession: MINING
+  rarity: LEGENDARY
+  citizens_skin: "MinerGold"
+  base_stats:
+    speed_bonus: 1.00
+    yield_bonus: 1.50
+    rare_drop_bonus: 1.00
+  growth_per_level: 0.15
+
+
+# ==========================================
+#             LUMBERJACK WORKERS
+# ==========================================
 
 lumberjack_common_1:
   display_name: "&aNovice Lumberjack"
@@ -21,7 +75,56 @@ lumberjack_common_1:
     speed_bonus: 0.10
     yield_bonus: 0.15
     rare_drop_bonus: 0.05
+  growth_per_level: 0.03
+
+lumberjack_uncommon_1:
+  display_name: "&2Forestry Ranger"
+  profession: LUMBER
+  rarity: UNCOMMON
+  citizens_skin: "LumberjackBen"
+  base_stats:
+    speed_bonus: 0.20
+    yield_bonus: 0.30
+    rare_drop_bonus: 0.10
   growth_per_level: 0.05
+
+lumberjack_rare_1:
+  display_name: "&3Elderwood Logger"
+  profession: LUMBER
+  rarity: RARE
+  citizens_skin: "LumberjackGrizz"
+  base_stats:
+    speed_bonus: 0.35
+    yield_bonus: 0.50
+    rare_drop_bonus: 0.20
+  growth_per_level: 0.07
+
+lumberjack_epic_1:
+  display_name: "&dWildwood Timberlord"
+  profession: LUMBER
+  rarity: EPIC
+  citizens_skin: "LumberjackThor"
+  base_stats:
+    speed_bonus: 0.50
+    yield_bonus: 0.75
+    rare_drop_bonus: 0.40
+  growth_per_level: 0.10
+
+lumberjack_legendary_1:
+  display_name: "&6Yggdrasil Harbinger"
+  profession: LUMBER
+  rarity: LEGENDARY
+  citizens_skin: "LumberjackOdin"
+  base_stats:
+    speed_bonus: 1.00
+    yield_bonus: 1.50
+    rare_drop_bonus: 1.00
+  growth_per_level: 0.15
+
+
+# ==========================================
+#             FISHING WORKERS
+# ==========================================
 
 fisher_common_1:
   display_name: "&aDockhand Fisher"
@@ -32,13 +135,35 @@ fisher_common_1:
     speed_bonus: 0.10
     yield_bonus: 0.15
     rare_drop_bonus: 0.05
+  growth_per_level: 0.03
+
+fisher_uncommon_1:
+  display_name: "&2Tidal Angler"
+  profession: FISHING
+  rarity: UNCOMMON
+  citizens_skin: "FisherCap"
+  base_stats:
+    speed_bonus: 0.20
+    yield_bonus: 0.30
+    rare_drop_bonus: 0.10
   growth_per_level: 0.05
 
-miner_epic_1:
-  display_name: "&dDeep Earth Excavator"
-  profession: MINING
+fisher_rare_1:
+  display_name: "&3Harpoon Reefhunter"
+  profession: FISHING
+  rarity: RARE
+  citizens_skin: "FisherKai"
+  base_stats:
+    speed_bonus: 0.35
+    yield_bonus: 0.50
+    rare_drop_bonus: 0.20
+  growth_per_level: 0.07
+
+fisher_epic_1:
+  display_name: "&dAbyssal Harvester"
+  profession: FISHING
   rarity: EPIC
-  citizens_skin: "DwarvenKing"
+  citizens_skin: "FisherDavy"
   base_stats:
     speed_bonus: 0.50
     yield_bonus: 0.75
