@@ -15,6 +15,7 @@ public class ProviderManager {
     private boolean faweEnabled;
     private boolean worldEditEnabled;
     private boolean vaultEnabled;
+    private boolean playerPointsEnabled;
 
     public ProviderManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -28,10 +29,11 @@ public class ProviderManager {
         this.faweEnabled = checkPlugin("FastAsyncWorldEdit");
         this.worldEditEnabled = checkPlugin("WorldEdit");
         this.vaultEnabled = checkPlugin("Vault");
+        this.playerPointsEnabled = checkPlugin("PlayerPoints");
 
         plugin.getLogger().info(String.format(
-            "[ProviderManager] Detected Providers -> Citizens: %b | FAWE: %b | WorldEdit: %b | Vault: %b",
-            citizensEnabled, faweEnabled, worldEditEnabled, vaultEnabled
+            "[ProviderManager] Detected Providers -> Citizens: %b | FAWE: %b | WorldEdit: %b | Vault: %b | PlayerPoints: %b",
+            citizensEnabled, faweEnabled, worldEditEnabled, vaultEnabled, playerPointsEnabled
         ));
     }
 
@@ -54,5 +56,9 @@ public class ProviderManager {
 
     public boolean hasVault() {
         return vaultEnabled;
+    }
+
+    public boolean hasPlayerPoints() {
+        return playerPointsEnabled;
     }
 }

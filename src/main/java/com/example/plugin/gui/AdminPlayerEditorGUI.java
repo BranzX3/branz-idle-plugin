@@ -66,25 +66,29 @@ public class AdminPlayerEditorGUI implements InventoryProvider {
         int nodeCount = nodeService.getPlayerNodes(target.getUniqueId()).size();
         int workerCount = workerService.getPlayerWorkers(target.getUniqueId()).size();
 
+        var config = JavaPlugin.getPlugin(BranzIdlePlugin.class).getConfig();
+        String coinsName = config.getString("economy.currency_name", "Coins");
+        String diamondsName = config.getString("economy.diamonds_name", "Diamonds");
+
         inventory.setItem(4, new ItemBuilder(Material.PLAYER_HEAD)
             .name("§6§lTarget: §e§l" + target.getName())
             .lore(
                 "§7UUID: §8" + target.getUniqueId(),
-                "§7Coins: §6" + coins,
-                "§7Diamonds: §b" + diamonds,
+                "§7" + coinsName + ": §6" + coins,
+                "§7" + diamondsName + ": §b" + diamonds,
                 "§7Nodes Owned: §a" + nodeCount,
                 "§7Workers Hired: §d" + workerCount
             ).build());
 
         // Slot 11: Add 10,000 Coins
         inventory.setItem(11, new ItemBuilder(Material.GOLD_INGOT)
-            .name("§a§lAdd 10,000 Coins")
-            .lore("§7Grant 10,000 Coins directly to", "§7this player's account.", "", "§eClick to grant!").build());
+            .name("§a§lAdd 10,000 " + coinsName)
+            .lore("§7Grant 10,000 " + coinsName + " directly to", "§7this player's account.", "", "§eClick to grant!").build());
 
         // Slot 13: Add 1,000 Diamonds
         inventory.setItem(13, new ItemBuilder(Material.DIAMOND)
-            .name("§a§lAdd 1,000 Diamonds")
-            .lore("§7Grant 1,000 Diamonds directly to", "§7this player's account.", "", "§eClick to grant!").build());
+            .name("§a§lAdd 1,000 " + diamondsName)
+            .lore("§7Grant 1,000 " + diamondsName + " directly to", "§7this player's account.", "", "§eClick to grant!").build());
 
         // Slot 15: Spawn Random Worker
         inventory.setItem(15, new ItemBuilder(Material.IRON_AXE)
@@ -142,15 +146,19 @@ public class AdminPlayerEditorGUI implements InventoryProvider {
 
         int slot = event.getRawSlot();
 
+        var config = JavaPlugin.getPlugin(BranzIdlePlugin.class).getConfig();
+        String coinsName = config.getString("economy.currency_name", "Coins");
+        String diamondsName = config.getString("economy.diamonds_name", "Diamonds");
+
         switch (slot) {
             case 11 -> {
                 economyService.addCoins(target.getUniqueId(), 10000.0);
-                player.sendMessage("§aGranted 10,000 Coins to " + target.getName() + "!");
+                player.sendMessage("§aGranted 10,000 " + coinsName + " to " + target.getName() + "!");
                 populate();
             }
             case 13 -> {
                 economyService.addDiamonds(target.getUniqueId(), 1000L);
-                player.sendMessage("§aGranted 1,000 Diamonds to " + target.getName() + "!");
+                player.sendMessage("§aGranted 1,000 " + diamondsName + " to " + target.getName() + "!");
                 populate();
             }
             case 15 -> {

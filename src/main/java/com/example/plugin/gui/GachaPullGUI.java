@@ -62,11 +62,12 @@ public class GachaPullGUI implements InventoryProvider {
         ItemStack glass = new ItemBuilder(Material.PURPLE_STAINED_GLASS_PANE).name("§r").build();
         for (int i = 0; i < 27; i++) inventory.setItem(i, glass);
 
+        String gemsName = registryManager.getPlugin().getConfig().getString("economy.diamonds_name", "Gems");
         long gems = economyService.getProfile(player.getUniqueId()).map(com.example.plugin.economy.model.PlayerProfile::getDiamonds).orElse(0L);
         inventory.setItem(4, new ItemBuilder(Material.EMERALD)
             .name("§d§lStandard Worker Banner")
             .lore(
-                "§7Your Gems: §a" + gems,
+                "§7Your " + gemsName + ": §a" + gems,
                 "§7Pity Counter: §e0/90",
                 "§dRecruit powerful workers to boost production!"
             ).build());
@@ -74,14 +75,14 @@ public class GachaPullGUI implements InventoryProvider {
         inventory.setItem(11, new ItemBuilder(Material.GOLD_INGOT)
             .name("§e§l1x Worker Pull")
             .lore(
-                "§7Cost: §b100 Gems",
+                "§7Cost: §b100 " + gemsName,
                 "§eClick to perform a single pull!"
             ).build());
 
         inventory.setItem(15, new ItemBuilder(Material.GOLD_BLOCK)
             .name("§6§l10x Worker Pull")
             .lore(
-                "§7Cost: §b1000 Gems",
+                "§7Cost: §b1000 " + gemsName,
                 "§6Guaranteed 1x Rare or higher!",
                 "§eClick to perform a 10x multi-pull!"
             ).build());
@@ -114,9 +115,10 @@ public class GachaPullGUI implements InventoryProvider {
                 populate();
             }
         } else if (slot == 15) {
+            String gemsName = registryManager.getPlugin().getConfig().getString("economy.diamonds_name", "Gems");
             long gems = economyService.getProfile(player.getUniqueId()).map(com.example.plugin.economy.model.PlayerProfile::getDiamonds).orElse(0L);
             if (gems < 1000) {
-                player.sendMessage("§cYou need 1000 gems for a 10x pull! You have " + gems + ".");
+                player.sendMessage("§cYou need 1000 " + gemsName.toLowerCase() + " for a 10x pull! You have " + gems + ".");
                 return;
             }
             int pulledCount = 0;
@@ -142,10 +144,11 @@ public class GachaPullGUI implements InventoryProvider {
         com.example.plugin.config.GachaRegistry.GachaPoolDefinition pool = poolOpt.get();
         double cost = pool.costPerPull();
 
+        String gemsName = registryManager.getPlugin().getConfig().getString("economy.diamonds_name", "Gems");
         if (pool.currencyType().equalsIgnoreCase("DIAMONDS")) {
             long currentGems = economyService.getProfile(player.getUniqueId()).map(com.example.plugin.economy.model.PlayerProfile::getDiamonds).orElse(0L);
             if (currentGems < (long) cost) {
-                player.sendMessage("§cInsufficient Gems! Need " + (long) cost + ".");
+                player.sendMessage("§cInsufficient " + gemsName + "! Need " + (long) cost + ".");
                 return Optional.empty();
             }
             economyService.removeDiamonds(player.getUniqueId(), (long) cost);

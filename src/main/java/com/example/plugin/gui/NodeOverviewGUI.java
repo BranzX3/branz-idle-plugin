@@ -281,11 +281,14 @@ public class NodeOverviewGUI implements InventoryProvider {
         // Slot 26: Upgrade Node
         long upgradeCostCoins = defOpt.map(d -> d.upgradeCost().getOrDefault("coins", 0L)).orElse(1000L);
         long upgradeCostDiamonds = defOpt.map(d -> d.upgradeCost().getOrDefault("diamonds", 0L)).orElse(0L);
+        String coinsName = registryManager.getPlugin().getConfig().getString("economy.currency_name", "Coins");
+        String diamondsName = registryManager.getPlugin().getConfig().getString("economy.diamonds_name", "Diamonds");
+
         inventory.setItem(26, new ItemBuilder(Material.ANVIL)
             .name("§a§lUpgrade Production Node")
             .lore(
                 "§7Current Level: §f" + node.getLevel(),
-                "§7Upgrade Cost: §6" + upgradeCostCoins + " Coins §7/ §b" + upgradeCostDiamonds + " Diamonds",
+                "§7Upgrade Cost: §6" + upgradeCostCoins + " " + coinsName + " §7/ §b" + upgradeCostDiamonds + " " + diamondsName,
                 "§eClick to attempt node upgrade!"
             ).build());
 
@@ -344,12 +347,15 @@ public class NodeOverviewGUI implements InventoryProvider {
             long coins = (long) coinsVal;
             long diamonds = economyService.getProfile(player.getUniqueId()).map(com.example.plugin.economy.model.PlayerProfile::getDiamonds).orElse(0L);
 
+            String coinsName = registryManager.getPlugin().getConfig().getString("economy.currency_name", "Coins");
+            String diamondsName = registryManager.getPlugin().getConfig().getString("economy.diamonds_name", "Diamonds");
+
             if (coins < coinsCost) {
-                player.sendMessage("§cYou need " + coinsCost + " coins to upgrade! You currently have " + coins + ".");
+                player.sendMessage("§cYou need " + coinsCost + " " + coinsName.toLowerCase() + " to upgrade! You currently have " + coins + ".");
                 return;
             }
             if (diamonds < diamondsCost) {
-                player.sendMessage("§cYou need " + diamondsCost + " diamonds to upgrade! You currently have " + diamonds + ".");
+                player.sendMessage("§cYou need " + diamondsCost + " " + diamondsName.toLowerCase() + " to upgrade! You currently have " + diamonds + ".");
                 return;
             }
 
@@ -358,7 +364,7 @@ public class NodeOverviewGUI implements InventoryProvider {
                 "Upgrade Node",
                 List.of(
                     "§7Node: §e" + node.getNodeType().name() + " (Lv." + node.getLevel() + ")",
-                    "§7Cost: §6" + coinsCost + " Coins §7/ §b" + diamondsCost + " Diamonds",
+                    "§7Cost: §6" + coinsCost + " " + coinsName + " §7/ §b" + diamondsCost + " " + diamondsName,
                     "",
                     "§7This will upgrade the node to the next level."
                 ),

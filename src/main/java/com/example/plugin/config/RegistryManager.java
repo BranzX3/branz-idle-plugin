@@ -131,4 +131,8 @@ public class RegistryManager {
     public EventDropRegistry getEventDropRegistry() {
         return eventDropRegistry;
     }
+
+    public JavaPlugin getPlugin() {
+        return plugin;
+    }
 }

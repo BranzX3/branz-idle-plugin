@@ -35,6 +35,7 @@ import com.example.plugin.production.task.ProductionTickerTask;
 import com.example.plugin.command.IdleCommand;
 import com.example.plugin.gui.GUIController;
 import com.example.plugin.integration.vault.VaultBridge;
+import com.example.plugin.integration.points.PlayerPointsBridge;
 import com.example.plugin.visual.service.VisualService;
 import com.example.plugin.visual.service.VisualServiceImpl;
 import com.example.plugin.onboarding.listener.OnboardingCompletedListener;
@@ -90,11 +91,17 @@ public final class BranzIdlePlugin extends JavaPlugin {
 
         // 7. Initialize & Wire Domain Services
         PlayerRepository playerRepository = new PlayerRepository(this, databaseManager);
-        EconomyService economyService = new EconomyServiceImpl(this, playerRepository, saveQueueService);
+        EconomyServiceImpl economyServiceImpl = new EconomyServiceImpl(this, playerRepository, saveQueueService);
+        EconomyService economyService = economyServiceImpl;
         serviceRegistry.registerService(EconomyService.class, economyService);
 
         VaultBridge vaultBridge = new VaultBridge(this, providerManager, economyService);
         vaultBridge.initialize();
+        economyServiceImpl.setVaultBridge(vaultBridge);
+
+        PlayerPointsBridge playerPointsBridge = new PlayerPointsBridge(this, providerManager, economyService);
+        playerPointsBridge.initialize();
+        economyServiceImpl.setPlayerPointsBridge(playerPointsBridge);
 
         TerritoryRepository territoryRepository = new TerritoryRepository(this, databaseManager);
         TerritoryService territoryService = new TerritoryServiceImpl(this, territoryRepository, saveQueueService);

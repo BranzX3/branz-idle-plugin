@@ -85,11 +85,14 @@ public class MainHubGUI implements InventoryProvider {
         int nodeCount = nodeService.getPlayerNodes(player.getUniqueId()).size();
         int workerCount = workerService.getPlayerWorkers(player.getUniqueId()).size();
 
+        String coinsName = registryManager.getPlugin().getConfig().getString("economy.currency_name", "Coins");
+        String diamondsName = registryManager.getPlugin().getConfig().getString("economy.diamonds_name", "Diamonds");
+
         inventory.setItem(8, new ItemBuilder(Material.PLAYER_HEAD)
             .name("§e§l" + player.getName() + "'s Profile")
             .lore(
-                "§7Coins: §6" + coins,
-                "§7Diamonds: §b" + diamonds,
+                "§7" + coinsName + ": §6" + coins,
+                "§7" + diamondsName + ": §b" + diamonds,
                 "§7Nodes: §a" + nodeCount,
                 "§7Workers: §d" + workerCount
             ).build());

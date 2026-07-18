@@ -9,6 +9,7 @@ softdepend:
   - FastAsyncWorldEdit
   - WorldEdit
   - Vault
+  - PlayerPoints
 
 commands:
   idle:

@@ -37,7 +37,9 @@ onboarding:
 
 economy:
   vault_sync: true
+  playerpoints_sync: true
   currency_name: "Coins"
+  diamonds_name: "Diamonds"
 
 exploration:
   max_level: 1000
