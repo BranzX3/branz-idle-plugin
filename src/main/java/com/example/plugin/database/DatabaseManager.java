@@ -101,7 +101,8 @@ public class DatabaseManager {
                 diamonds BIGINT DEFAULT 0,
                 onboarding_completed BOOLEAN DEFAULT FALSE,
                 created_at BIGINT NOT NULL,
-                updated_at BIGINT NOT NULL
+                updated_at BIGINT NOT NULL,
+                unlocked_slots INT DEFAULT 4
             );
             """,
             // 2. Territory Chunks Table
@@ -131,6 +132,7 @@ public class DatabaseManager {
                 created_at BIGINT NOT NULL,
                 active_event VARCHAR(64) NULL,
                 event_progress INT DEFAULT 0,
+                storage_level INT DEFAULT 1,
                 CONSTRAINT fk_nodes_owner FOREIGN KEY (owner_id) REFERENCES players(player_id) ON DELETE CASCADE
             );
             """,
@@ -210,6 +212,12 @@ public class DatabaseManager {
             } catch (SQLException ignored) {}
             try {
                 stmt.execute("ALTER TABLE production_nodes ADD COLUMN event_progress INT DEFAULT 0;");
+            } catch (SQLException ignored) {}
+            try {
+                stmt.execute("ALTER TABLE production_nodes ADD COLUMN storage_level INT DEFAULT 1;");
+            } catch (SQLException ignored) {}
+            try {
+                stmt.execute("ALTER TABLE players ADD COLUMN unlocked_slots INT DEFAULT 4;");
             } catch (SQLException ignored) {}
 
             // Auto-migration check for worker_instances table to have id INTEGER PRIMARY KEY AUTOINCREMENT

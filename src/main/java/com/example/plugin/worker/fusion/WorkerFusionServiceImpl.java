@@ -106,6 +106,12 @@ public class WorkerFusionServiceImpl implements WorkerFusionService {
         // Save target updates
         workerService.updateWorker(target);
 
+        try {
+            com.example.plugin.bootstrap.BranzIdlePlugin.getPlugin(com.example.plugin.bootstrap.BranzIdlePlugin.class)
+                .getServiceRegistry().getService(com.example.plugin.analytics.service.AnalyticsService.class)
+                .ifPresent(com.example.plugin.analytics.service.AnalyticsService::trackFusion);
+        } catch (Exception ignored) {}
+
         player.sendMessage("§a§l[FUSION SUCCESS] §fYour worker has been upgraded to a §b" + nextTpl.displayName() + "§f!");
         player.sendMessage("§aInherited Potentials: §fSpeed: §e" + String.format("%.2f", speedPotential) + "§f, Yield: §e" + String.format("%.2f", yieldPotential) + "§f, Rare: §e" + String.format("%.2f", rarePotential));
         if (target.getCustomTitle() != null) {

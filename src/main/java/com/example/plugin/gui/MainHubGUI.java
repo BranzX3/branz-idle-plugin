@@ -177,6 +177,41 @@ public class MainHubGUI implements InventoryProvider {
                     "§eClick to claim and establish base here!"
                 ).build());
         }
+        
+        // Row 4: Unlock Node Slot (Slot 29)
+        Optional<PlayerProfile> profOpt = economyService.getProfile(player.getUniqueId());
+        if (profOpt.isPresent()) {
+            PlayerProfile profile = profOpt.get();
+            int currentLimit = profile.getUnlockedSlots();
+            int maxLimit = getMaxSlotLimit(player);
+            
+            ItemBuilder slotBtn = new ItemBuilder(Material.GOLD_BLOCK)
+                .name("§e§lUnlock Node Slot");
+            
+            if (currentLimit >= 40) {
+                slotBtn.lore(
+                    "§7Current Capacity: §a" + currentLimit + " / 40",
+                    "",
+                    "§aMaximum capacity reached!"
+                );
+            } else {
+                int nextSlot = currentLimit + 1;
+                long costCoins = getNodeSlotCost(nextSlot);
+                long costDiamonds = costCoins / 100;
+                
+                slotBtn.lore(
+                    "§7Current Capacity: §a" + currentLimit + " / 40",
+                    "§7Your Rank Max Limit: §e" + maxLimit,
+                    "",
+                    "§aLeft-Click to Unlock next slot:",
+                    "§7Cost: §6" + costCoins + " Coins",
+                    "",
+                    "§bRight-Click to Unlock next slot:",
+                    "§7Cost: §b" + costDiamonds + " Diamonds"
+                );
+            }
+            inventory.setItem(29, slotBtn.build());
+        }
 
         // Row 6: Close
         inventory.setItem(49, new ItemBuilder(Material.BARRIER).name("§c§lClose Menu").build());
@@ -246,6 +281,49 @@ public class MainHubGUI implements InventoryProvider {
                     }
                 }
             }
+            case 29 -> {
+                Optional<PlayerProfile> profOpt = economyService.getProfile(player.getUniqueId());
+                if (profOpt.isEmpty()) return;
+                PlayerProfile profile = profOpt.get();
+                int currentLimit = profile.getUnlockedSlots();
+                int maxLimit = getMaxSlotLimit(player);
+
+                if (currentLimit >= 40) {
+                    player.sendMessage("§cYou have reached the maximum capacity of 40 node slots!");
+                    return;
+                }
+
+                if (currentLimit >= maxLimit) {
+                    player.sendMessage("§cYou have reached your Rank's Max Limit (" + currentLimit + "/" + maxLimit + ")!");
+                    player.sendMessage("§ePurchase a higher premium rank to unlock up to 40 slots!");
+                    return;
+                }
+
+                int nextSlot = currentLimit + 1;
+                long costCoins = getNodeSlotCost(nextSlot);
+                long costDiamonds = costCoins / 100;
+
+                boolean isRightClick = event.isRightClick();
+                if (isRightClick) {
+                    if (economyService.removeDiamonds(player.getUniqueId(), costDiamonds)) {
+                        profile.setUnlockedSlots(nextSlot);
+                        economyService.saveProfile(profile);
+                        player.sendMessage("§a§l[Expansion] §7Unlocked Node Slot #" + nextSlot + " with Diamonds!");
+                        populate();
+                    } else {
+                        player.sendMessage("§cYou do not have enough Diamonds!");
+                    }
+                } else {
+                    if (economyService.removeCoins(player.getUniqueId(), costCoins)) {
+                        profile.setUnlockedSlots(nextSlot);
+                        economyService.saveProfile(profile);
+                        player.sendMessage("§a§l[Expansion] §7Unlocked Node Slot #" + nextSlot + " with Coins!");
+                        populate();
+                    } else {
+                        player.sendMessage("§cYou do not have enough Coins!");
+                    }
+                }
+            }
             case 49 -> player.closeInventory();
             default -> {
                 // Ignore clicks on glass/border slots
@@ -256,5 +334,25 @@ public class MainHubGUI implements InventoryProvider {
     @Override
     public Inventory getInventory() {
         return inventory;
+    }
+
+    public static int getMaxSlotLimit(Player player) {
+        if (player.hasPermission("branzidle.rank.elite") || player.hasPermission("branzidle.rank.legend")) {
+            return 40;
+        }
+        if (player.hasPermission("branzidle.rank.vip")) {
+            return 30;
+        }
+        return 20;
+    }
+
+    public static long getNodeSlotCost(int nextSlotNumber) {
+        if (nextSlotNumber <= 4) return 0;
+        if (nextSlotNumber == 5) return 10000;
+        if (nextSlotNumber == 6) return 25000;
+        if (nextSlotNumber == 7) return 50000;
+        if (nextSlotNumber == 8) return 100000;
+        long diff = nextSlotNumber - 8;
+        return 100000L + (diff * 50000L);
     }
 }

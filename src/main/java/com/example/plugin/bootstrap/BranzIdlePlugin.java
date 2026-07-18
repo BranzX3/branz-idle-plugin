@@ -95,6 +95,9 @@ public final class BranzIdlePlugin extends JavaPlugin {
         EconomyService economyService = economyServiceImpl;
         serviceRegistry.registerService(EconomyService.class, economyService);
 
+        com.example.plugin.analytics.service.AnalyticsService analyticsService = new com.example.plugin.analytics.service.AnalyticsServiceImpl();
+        serviceRegistry.registerService(com.example.plugin.analytics.service.AnalyticsService.class, analyticsService);
+
         VaultBridge vaultBridge = new VaultBridge(this, providerManager, economyService);
         vaultBridge.initialize();
         economyServiceImpl.setVaultBridge(vaultBridge);
@@ -143,6 +146,22 @@ public final class BranzIdlePlugin extends JavaPlugin {
         visualService.initialize();
         serviceRegistry.registerService(VisualService.class, visualService);
 
+        com.example.plugin.visual.service.WorkshopBlueprintManager workshopBlueprintManager = new com.example.plugin.visual.service.WorkshopBlueprintManager(this);
+        serviceRegistry.registerService(com.example.plugin.visual.service.WorkshopBlueprintManager.class, workshopBlueprintManager);
+
+        com.example.plugin.visual.service.OccupationManager occupationManager = new com.example.plugin.visual.service.OccupationManager();
+        serviceRegistry.registerService(com.example.plugin.visual.service.OccupationManager.class, occupationManager);
+
+        com.example.plugin.integration.provider.StructureProvider structureProvider;
+        if (providerManager.hasFAWE()) {
+            structureProvider = new com.example.plugin.integration.provider.FAWEStructureProvider(this);
+            getLogger().info("[Structure] Detected FAWE; using FAWE schematic paster.");
+        } else {
+            structureProvider = new com.example.plugin.integration.provider.NoOpStructureProvider();
+            getLogger().info("[Structure] FAWE not detected; running with NoOp fallback.");
+        }
+        serviceRegistry.registerService(com.example.plugin.integration.provider.StructureProvider.class, structureProvider);
+
         // 8. Schedule Production Ticker Task (100 ticks = 5 seconds)
         Bukkit.getScheduler().runTaskTimer(this, new ProductionTickerTask(productionService), 100L, 100L);
 
@@ -153,6 +172,8 @@ public final class BranzIdlePlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerJoinOfflineSyncListener(this, productionService), this);
         Bukkit.getPluginManager().registerEvents(new GUIController(), this);
         Bukkit.getPluginManager().registerEvents(new OnboardingCompletedListener(nodeService, workerService), this);
+        Bukkit.getPluginManager().registerEvents(new com.example.plugin.visual.VisualListener(this, visualService, nodeService, workerService, territoryService), this);
+        Bukkit.getPluginManager().registerEvents(new com.example.plugin.visual.listener.VisualEditListener(), this);
 
         // 10. Register Commands
         IdleCommand idleCommand = new IdleCommand(
@@ -181,7 +202,11 @@ public final class BranzIdlePlugin extends JavaPlugin {
 
         // 1. Clear spawned visual NPCs
         if (serviceRegistry != null) {
-            serviceRegistry.getService(VisualService.class).ifPresent(VisualService::clearAllVisuals);
+            serviceRegistry.getService(VisualService.class).ifPresent(VisualService::despawnAll);
+            serviceRegistry.getService(com.example.plugin.visual.service.WorkshopBlueprintManager.class)
+                .ifPresent(com.example.plugin.visual.service.WorkshopBlueprintManager::clearCache);
+            serviceRegistry.getService(com.example.plugin.visual.service.OccupationManager.class)
+                .ifPresent(com.example.plugin.visual.service.OccupationManager::clear);
             serviceRegistry.getService(EconomyService.class).ifPresent(EconomyService::flushAll);
             serviceRegistry.getService(WorkerService.class).ifPresent(WorkerService::shutdown);
         }

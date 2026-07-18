@@ -269,6 +269,22 @@ public class NodeOverviewGUI implements InventoryProvider {
             }
         }
 
+        // Slot 20: Upgrade Storage
+        int storageLvl = node.getStorageLevel();
+        long storageUpgradeCost = 1000L * storageLvl;
+        long currentCapacity = defOpt.map(NodeRegistry.NodeDefinition::maxStorageCapacity).orElse(5000L) * storageLvl;
+        long nextCapacity = defOpt.map(NodeRegistry.NodeDefinition::maxStorageCapacity).orElse(5000L) * (storageLvl + 1);
+
+        inventory.setItem(20, new ItemBuilder(Material.BARREL)
+            .name("§d§lUpgrade Node Storage")
+            .lore(
+                "§7Current Storage Level: §f" + storageLvl,
+                "§7Capacity: §b" + currentCapacity + " §7➔ §a" + nextCapacity + " items",
+                "§7Upgrade Cost: §6" + storageUpgradeCost + " " + coinsName,
+                "",
+                "§eClick to upgrade storage capacity!"
+            ).build());
+
         // Slot 22: Collect Yields
         inventory.setItem(22, new ItemBuilder(Material.CHEST)
             .name("§b§lCollect Yields")
@@ -327,6 +343,42 @@ public class NodeOverviewGUI implements InventoryProvider {
             if (collected) {
                 populate();
             }
+            return;
+        }
+
+        if (slot == 20) {
+            int storageLvl = node.getStorageLevel();
+            long cost = 1000L * storageLvl;
+            double coinsVal = economyService.getProfile(player.getUniqueId()).map(com.example.plugin.economy.model.PlayerProfile::getCoins).orElse(0.0);
+            String coinsName = registryManager.getPlugin().getConfig().getString("economy.currency_name", "Coins");
+
+            if ((long) coinsVal < cost) {
+                player.sendMessage("§cYou need " + cost + " " + coinsName.toLowerCase() + " to upgrade storage! You currently have " + (long) coinsVal + ".");
+                return;
+            }
+
+            player.openInventory(new ConfirmationGUI(
+                player,
+                "Upgrade Storage",
+                List.of(
+                    "§7Node: §e" + node.getNodeType().name(),
+                    "§7Cost: §6" + cost + " " + coinsName,
+                    "",
+                    "§7This will increase storage capacity."
+                ),
+                () -> {
+                    boolean upgraded = nodeService.upgradeNodeStorage(player, node.getNodeId());
+                    if (upgraded) {
+                        nodeService.getNode(node.getNodeId()).ifPresentOrElse(
+                            updatedNode -> player.openInventory(new NodeOverviewGUI(player, updatedNode, nodeService, workerService, storageService, economyService, registryManager, territoryService, onboardingService).getInventory()),
+                            () -> player.openInventory(new MainHubGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory())
+                        );
+                    } else {
+                        player.openInventory(new NodeOverviewGUI(player, node, nodeService, workerService, storageService, economyService, registryManager, territoryService, onboardingService).getInventory());
+                    }
+                },
+                () -> player.openInventory(new NodeOverviewGUI(player, node, nodeService, workerService, storageService, economyService, registryManager, territoryService, onboardingService).getInventory())
+            ).getInventory());
             return;
         }
 

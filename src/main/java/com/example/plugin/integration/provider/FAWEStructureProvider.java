@@ -28,13 +28,19 @@ public class FAWEStructureProvider implements StructureProvider {
     public boolean pasteSchematic(String styleId, int level, Location targetLocation) {
         if (targetLocation == null || targetLocation.getWorld() == null) return false;
 
-        String filename = styleId + "_lv" + level + ".schem";
+        String filename = level < 0 ? styleId : (styleId + "_lv" + level + ".schem");
         File schemFile = new File(schematicsDir, filename);
         if (!schemFile.exists()) {
-            // Check fallback .schematic
-            schemFile = new File(schematicsDir, styleId + "_lv" + level + ".schematic");
+            if (level >= 0) {
+                // Check fallback .schematic
+                schemFile = new File(schematicsDir, styleId + "_lv" + level + ".schematic");
+            }
             if (!schemFile.exists()) {
-                return false;
+                // Fallback to exact styleId string as filename match
+                schemFile = new File(schematicsDir, styleId);
+                if (!schemFile.exists()) {
+                    return false;
+                }
             }
         }
 

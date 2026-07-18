@@ -145,7 +145,7 @@ public class ProductionServiceImpl implements ProductionService {
         cycles = Math.min(cycles, 5000L);
 
         boolean anyAdded = false;
-        long maxCap = def.maxStorageCapacity();
+        long maxCap = def.maxStorageCapacity() * node.getStorageLevel();
         double scaleExponent = plugin.getConfig().getDouble("production.yield_scale_exponent", 1.2);
         double scaleMultiplier = plugin.getConfig().getDouble("production.yield_scale_multiplier", 0.05);
 
@@ -248,6 +248,7 @@ public class ProductionServiceImpl implements ProductionService {
                                 long added = storageService.addResourceToNode(node.getNodeId(), selected.resourceKey(), amount, maxCap);
                                 if (added > 0) {
                                     anyAdded = true;
+                                    trackResource(selected.resourceKey(), added);
                                 }
                             }
                         }
@@ -281,6 +282,7 @@ public class ProductionServiceImpl implements ProductionService {
                         long added = storageService.addResourceToNode(node.getNodeId(), defaultItem, amount, maxCap);
                         if (added > 0) {
                             anyAdded = true;
+                            trackResource(defaultItem, added);
                         }
                     }
                 } else {
@@ -318,6 +320,7 @@ public class ProductionServiceImpl implements ProductionService {
                         long added = storageService.addResourceToNode(node.getNodeId(), selected.resourceKey(), amount, maxCap);
                         if (added > 0) {
                             anyAdded = true;
+                            trackResource(selected.resourceKey(), added);
                         }
                     }
                 }
@@ -368,5 +371,13 @@ public class ProductionServiceImpl implements ProductionService {
         node.setLastCalculatedTime(node.getLastCalculatedTime() + simulatedMillis);
         nodeService.updateNode(node);
         return anyAdded;
+    }
+
+    private void trackResource(String resourceKey, long amount) {
+        try {
+            com.example.plugin.bootstrap.BranzIdlePlugin.getPlugin(com.example.plugin.bootstrap.BranzIdlePlugin.class)
+                .getServiceRegistry().getService(com.example.plugin.analytics.service.AnalyticsService.class)
+                .ifPresent(as -> as.trackProduction(resourceKey, amount));
+        } catch (Exception ignored) {}
     }
 }

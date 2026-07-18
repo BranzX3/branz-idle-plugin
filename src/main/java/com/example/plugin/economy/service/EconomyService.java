@@ -62,6 +62,11 @@ public interface EconomyService {
     void unloadProfile(UUID playerId);
 
     /**
+     * Queues an asynchronous save for the given player profile.
+     */
+    void saveProfile(PlayerProfile profile);
+
+    /**
      * Flushes all cached profiles to database on shutdown.
      */
     void flushAll();

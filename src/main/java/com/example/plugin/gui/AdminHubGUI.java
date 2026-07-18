@@ -229,7 +229,9 @@ public class AdminHubGUI implements InventoryProvider {
             case 15 -> player.openInventory(new AdminProductionEditorGUI(player).getInventory());
 
             // Phase 3 placeholders — no-op with feedback
-            case 22, 23, 24 -> player.sendMessage("§7§oThis module is not yet available.");
+            case 22 -> player.sendMessage("§7§oThis module is not yet available.");
+            case 23 -> player.openInventory(new AdminAnalyticsGUI(player).getInventory());
+            case 24 -> player.openInventory(new AdminSimulatorGUI(player).getInventory());
 
             // ── Utility Actions ──
             case 37 -> {

@@ -42,7 +42,8 @@ public class PlayerRepository implements Repository<PlayerProfile, UUID> {
                         rs.getLong("diamonds"),
                         rs.getBoolean("onboarding_completed"),
                         rs.getLong("created_at"),
-                        rs.getLong("updated_at")
+                        rs.getLong("updated_at"),
+                        rs.getInt("unlocked_slots")
                     );
                     return Optional.of(profile);
                 }
@@ -58,24 +59,26 @@ public class PlayerRepository implements Repository<PlayerProfile, UUID> {
     public void save(PlayerProfile entity) {
         String sql = isMySql
             ? """
-              INSERT INTO players (player_id, username, coins, diamonds, onboarding_completed, created_at, updated_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?)
+              INSERT INTO players (player_id, username, coins, diamonds, onboarding_completed, created_at, updated_at, unlocked_slots)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
               ON DUPLICATE KEY UPDATE
                 username = VALUES(username),
                 coins = VALUES(coins),
                 diamonds = VALUES(diamonds),
                 onboarding_completed = VALUES(onboarding_completed),
-                updated_at = VALUES(updated_at)
+                updated_at = VALUES(updated_at),
+                unlocked_slots = VALUES(unlocked_slots)
               """
             : """
-              INSERT INTO players (player_id, username, coins, diamonds, onboarding_completed, created_at, updated_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?)
+              INSERT INTO players (player_id, username, coins, diamonds, onboarding_completed, created_at, updated_at, unlocked_slots)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
               ON CONFLICT(player_id) DO UPDATE SET
                 username = excluded.username,
                 coins = excluded.coins,
                 diamonds = excluded.diamonds,
                 onboarding_completed = excluded.onboarding_completed,
-                updated_at = excluded.updated_at
+                updated_at = excluded.updated_at,
+                unlocked_slots = excluded.unlocked_slots
               """;
 
         try (Connection conn = dbManager.getConnection();
@@ -87,6 +90,7 @@ public class PlayerRepository implements Repository<PlayerProfile, UUID> {
             ps.setBoolean(5, entity.isOnboardingCompleted());
             ps.setLong(6, entity.getCreatedAt());
             ps.setLong(7, entity.getUpdatedAt());
+            ps.setInt(8, entity.getUnlockedSlots());
             ps.executeUpdate();
         } catch (SQLException e) {
             plugin.getLogger().severe("[PlayerRepository] Error saving player profile: " + e.getMessage());

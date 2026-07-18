@@ -18,6 +18,9 @@ public class ProductionNode {
 
     private String activeEventKey;
     private int eventProgress;
+    
+    // Decoupled storage level
+    private int storageLevel;
 
     public ProductionNode(
         UUID nodeId,
@@ -39,6 +42,7 @@ public class ProductionNode {
         this.createdAt = createdAt;
         this.activeEventKey = null;
         this.eventProgress = 0;
+        this.storageLevel = 1;
     }
 
     public ProductionNode(
@@ -51,7 +55,8 @@ public class ProductionNode {
         long lastCalculatedTime,
         long createdAt,
         String activeEventKey,
-        int eventProgress
+        int eventProgress,
+        int storageLevel
     ) {
         this.nodeId = nodeId;
         this.ownerId = ownerId;
@@ -63,6 +68,7 @@ public class ProductionNode {
         this.createdAt = createdAt;
         this.activeEventKey = activeEventKey;
         this.eventProgress = eventProgress;
+        this.storageLevel = storageLevel > 0 ? storageLevel : 1;
     }
 
     public UUID getNodeId() {
@@ -131,5 +137,13 @@ public class ProductionNode {
 
     public void setEventProgress(int eventProgress) {
         this.eventProgress = eventProgress;
+    }
+
+    public int getStorageLevel() {
+        return storageLevel;
+    }
+
+    public void setStorageLevel(int storageLevel) {
+        this.storageLevel = storageLevel;
     }
 }

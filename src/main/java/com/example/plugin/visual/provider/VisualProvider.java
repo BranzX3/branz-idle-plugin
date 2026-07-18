@@ -20,6 +20,11 @@ public interface VisualProvider {
     void despawnWorkerNPC(UUID workerId);
 
     /**
+     * Spawns a temporary dummy worker to preview a schematic's blueprint navigation paths.
+     */
+    default void spawnDummyPreview(org.bukkit.entity.Player player, String schematicName) {}
+
+    /**
      * Removes all visual NPCs spawned by this provider.
      */
     void despawnAll();

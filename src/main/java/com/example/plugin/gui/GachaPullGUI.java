@@ -188,6 +188,11 @@ public class GachaPullGUI implements InventoryProvider {
         }
 
         WorkerInstance worker = workerService.spawnWorker(player.getUniqueId(), rolledTemplate);
+        try {
+            com.example.plugin.bootstrap.BranzIdlePlugin.getPlugin(com.example.plugin.bootstrap.BranzIdlePlugin.class)
+                .getServiceRegistry().getService(com.example.plugin.analytics.service.AnalyticsService.class)
+                .ifPresent(com.example.plugin.analytics.service.AnalyticsService::trackGachaPull);
+        } catch (Exception ignored) {}
         player.sendMessage("§a§lRecruited worker: §e" + rolledTemplate + "§a!");
         return Optional.of(worker);
     }

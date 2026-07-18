@@ -50,6 +50,12 @@ public interface NodeService {
     void updateNode(ProductionNode node);
 
     /**
+     * Attempts to upgrade a node's storage capacity separately.
+     * Cost scales: 1000 * currentStorageLevel.
+     */
+    boolean upgradeNodeStorage(Player player, UUID nodeId);
+
+    /**
      * Deletes an existing production node.
      */
     void deleteNode(UUID nodeId);

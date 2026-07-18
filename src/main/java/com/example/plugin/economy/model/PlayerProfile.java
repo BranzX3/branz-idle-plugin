@@ -14,6 +14,9 @@ public class PlayerProfile {
     private boolean onboardingCompleted;
     private final long createdAt;
     private long updatedAt;
+    
+    // Decoupled node slots limit
+    private int unlockedSlots;
 
     public PlayerProfile(
         UUID playerId,
@@ -31,6 +34,27 @@ public class PlayerProfile {
         this.onboardingCompleted = onboardingCompleted;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.unlockedSlots = 4;
+    }
+
+    public PlayerProfile(
+        UUID playerId,
+        String username,
+        double coins,
+        long diamonds,
+        boolean onboardingCompleted,
+        long createdAt,
+        long updatedAt,
+        int unlockedSlots
+    ) {
+        this.playerId = playerId;
+        this.username = username;
+        this.coins = coins;
+        this.diamonds = diamonds;
+        this.onboardingCompleted = onboardingCompleted;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.unlockedSlots = unlockedSlots > 0 ? unlockedSlots : 4;
     }
 
     public UUID getPlayerId() {
@@ -111,6 +135,15 @@ public class PlayerProfile {
 
     public long getUpdatedAt() {
         return updatedAt;
+    }
+
+    public int getUnlockedSlots() {
+        return unlockedSlots;
+    }
+
+    public void setUnlockedSlots(int unlockedSlots) {
+        this.unlockedSlots = unlockedSlots;
+        touch();
     }
 
     private void touch() {

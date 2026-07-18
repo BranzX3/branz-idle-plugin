@@ -96,6 +96,9 @@ public class NodeServiceImpl implements NodeService {
             territoryService.updateClaim(claim);
         }
 
+        // Paste schematic for the new node
+        triggerSchematicPaste(node, originChunkX, originChunkZ);
+
         return node;
     }
 
@@ -179,6 +182,18 @@ public class NodeServiceImpl implements NodeService {
         }
         updateNode(node);
 
+        // Paste schematic for the upgraded level
+        ChunkClaim originClaim = null;
+        for (ChunkClaim c : territoryService.getPlayerClaims(player.getUniqueId())) {
+            if (node.getNodeId().equals(c.getNodeId())) {
+                originClaim = c;
+                break;
+            }
+        }
+        if (originClaim != null) {
+            triggerSchematicPaste(node, originClaim.getChunkX(), originClaim.getChunkZ());
+        }
+
         player.sendMessage("§aSuccessfully upgraded production node to Level " + nextLevel + "!");
         return true;
     }
@@ -189,6 +204,36 @@ public class NodeServiceImpl implements NodeService {
             nodeCache.put(node.getNodeId(), node);
             saveQueue.queueTask(() -> repository.save(node));
         }
+    }
+
+    @Override
+    public boolean upgradeNodeStorage(Player player, UUID nodeId) {
+        ProductionNode node = nodeCache.get(nodeId);
+        if (node == null) {
+            player.sendMessage("§cProduction node not found!");
+            return false;
+        }
+
+        if (!node.getOwnerId().equals(player.getUniqueId()) && !player.hasPermission("branzidle.admin")) {
+            player.sendMessage("§cYou do not own this production node!");
+            return false;
+        }
+
+        int currentStorageLvl = node.getStorageLevel();
+        long cost = 1000L * currentStorageLvl;
+
+        double coinsVal = economyService.getProfile(player.getUniqueId()).map(com.example.plugin.economy.model.PlayerProfile::getCoins).orElse(0.0);
+        if ((long) coinsVal < cost) {
+            player.sendMessage("§cInsufficient Coins to upgrade storage! Need: " + cost);
+            return false;
+        }
+
+        economyService.removeCoins(player.getUniqueId(), cost);
+        node.setStorageLevel(currentStorageLvl + 1);
+        updateNode(node);
+
+        player.sendMessage("§aSuccessfully upgraded node storage to Level " + (currentStorageLvl + 1) + "!");
+        return true;
     }
 
     @Override
@@ -217,5 +262,41 @@ public class NodeServiceImpl implements NodeService {
             }
         }
         return true;
+    }
+
+    private void triggerSchematicPaste(ProductionNode node, int chunkX, int chunkZ) {
+        String tierKey = node.getTierKey();
+        Optional<NodeRegistry.NodeDefinition> defOpt = registryManager.getNodeRegistry().getNodeDefinition(tierKey);
+        if (defOpt.isEmpty()) return;
+        String schematicFile = defOpt.get().schematic();
+
+        try {
+            com.example.plugin.bootstrap.BranzIdlePlugin idlePlugin = org.bukkit.plugin.java.JavaPlugin.getPlugin(com.example.plugin.bootstrap.BranzIdlePlugin.class);
+            Optional<com.example.plugin.integration.provider.StructureProvider> spOpt = idlePlugin.getServiceRegistry().getService(com.example.plugin.integration.provider.StructureProvider.class);
+            if (spOpt.isPresent()) {
+                org.bukkit.World world = org.bukkit.Bukkit.getWorld(plugin.getConfig().getString("territory.dedicated_world_name", "idle_world"));
+                if (world != null) {
+                    double cx = (chunkX * 16) + 8.0;
+                    double cz = (chunkZ * 16) + 8.0;
+                    double cy = world.getHighestBlockYAt((int) cx, (int) cz);
+                    if (cy <= 0) {
+                        cy = 64; // default Y level
+                    }
+                    org.bukkit.Location loc = new org.bukkit.Location(world, cx, cy, cz);
+
+                    // Paste schematic asynchronously to prevent lag
+                    org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                        boolean success = spOpt.get().pasteSchematic(schematicFile, -1, loc);
+                        if (success) {
+                            plugin.getLogger().info("[NodeService] Pasted schematic " + schematicFile + " for node " + node.getNodeId() + " (Level " + node.getLevel() + ") at " + loc);
+                        } else {
+                            plugin.getLogger().warning("[NodeService] Failed to paste schematic " + schematicFile + " for node " + node.getNodeId() + " (Level " + node.getLevel() + ")");
+                        }
+                    });
+                }
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("[NodeService] Exception while triggering schematic paste: " + e.getMessage());
+        }
     }
 }

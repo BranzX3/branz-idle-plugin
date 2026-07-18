@@ -109,6 +109,7 @@ public class EconomyServiceImpl implements EconomyService {
 
     @Override
     public void addCoins(UUID playerId, double amount) {
+        trackCoin(amount, true);
         if (vaultSyncEnabled && vaultBridge != null && vaultBridge.hasVaultHook()) {
             vaultBridge.depositVault(playerId, amount);
             getProfile(playerId).ifPresent(profile -> {
@@ -128,6 +129,7 @@ public class EconomyServiceImpl implements EconomyService {
         if (vaultSyncEnabled && vaultBridge != null && vaultBridge.hasVaultHook()) {
             boolean success = vaultBridge.withdrawVault(playerId, amount);
             if (success) {
+                trackCoin(amount, false);
                 getProfile(playerId).ifPresent(profile -> {
                     profile.setCoins(vaultBridge.getVaultBalance(playerId));
                     queueSave(profile);
@@ -139,6 +141,7 @@ public class EconomyServiceImpl implements EconomyService {
             if (opt.isPresent()) {
                 PlayerProfile profile = opt.get();
                 if (profile.removeCoins(amount)) {
+                    trackCoin(amount, false);
                     queueSave(profile);
                     return true;
                 }
@@ -149,6 +152,7 @@ public class EconomyServiceImpl implements EconomyService {
 
     @Override
     public void addDiamonds(UUID playerId, long amount) {
+        trackDiamond(amount, true);
         if (playerPointsSyncEnabled && playerPointsBridge != null && playerPointsBridge.hasHook()) {
             playerPointsBridge.givePoints(playerId, amount);
             getProfile(playerId).ifPresent(profile -> {
@@ -168,6 +172,7 @@ public class EconomyServiceImpl implements EconomyService {
         if (playerPointsSyncEnabled && playerPointsBridge != null && playerPointsBridge.hasHook()) {
             boolean success = playerPointsBridge.takePoints(playerId, amount);
             if (success) {
+                trackDiamond(amount, false);
                 getProfile(playerId).ifPresent(profile -> {
                     profile.setDiamonds(playerPointsBridge.getPoints(playerId));
                     queueSave(profile);
@@ -179,12 +184,29 @@ public class EconomyServiceImpl implements EconomyService {
             if (opt.isPresent()) {
                 PlayerProfile profile = opt.get();
                 if (profile.removeDiamonds(amount)) {
+                    trackDiamond(amount, false);
                     queueSave(profile);
                     return true;
                 }
             }
             return false;
         }
+    }
+
+    private void trackCoin(double amount, boolean isGain) {
+        try {
+            com.example.plugin.bootstrap.BranzIdlePlugin.getPlugin(com.example.plugin.bootstrap.BranzIdlePlugin.class)
+                .getServiceRegistry().getService(com.example.plugin.analytics.service.AnalyticsService.class)
+                .ifPresent(as -> as.trackCoinTransaction(amount, isGain));
+        } catch (Exception ignored) {}
+    }
+
+    private void trackDiamond(long amount, boolean isGain) {
+        try {
+            com.example.plugin.bootstrap.BranzIdlePlugin.getPlugin(com.example.plugin.bootstrap.BranzIdlePlugin.class)
+                .getServiceRegistry().getService(com.example.plugin.analytics.service.AnalyticsService.class)
+                .ifPresent(as -> as.trackDiamondTransaction(amount, isGain));
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -202,6 +224,13 @@ public class EconomyServiceImpl implements EconomyService {
             // Save synchronously or ensure final queue before unloading from cache
             repository.save(cached);
             profileCache.invalidate(playerId);
+        }
+    }
+
+    @Override
+    public void saveProfile(PlayerProfile profile) {
+        if (profile != null) {
+            queueSave(profile);
         }
     }
 

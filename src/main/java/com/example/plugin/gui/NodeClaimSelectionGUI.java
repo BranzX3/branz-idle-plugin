@@ -113,6 +113,14 @@ public class NodeClaimSelectionGUI implements InventoryProvider {
         }
 
         if (type != null) {
+            int currentNodes = nodeService.getPlayerNodes(player.getUniqueId()).size();
+            int unlockedLimit = economyService.getProfile(player.getUniqueId()).map(com.example.plugin.economy.model.PlayerProfile::getUnlockedSlots).orElse(4);
+            if (currentNodes >= unlockedLimit) {
+                player.sendMessage("§cYou have reached your active node slot limit (" + currentNodes + "/" + unlockedLimit + ")!");
+                player.sendMessage("§eUnlock more node slots in the Hub menu to build more nodes.");
+                player.openInventory(new TerritoryMapGUI(player, territoryService, nodeService, workerService, storageService, economyService, onboardingService, registryManager).getInventory());
+                return;
+            }
             boolean success = territoryService.claimChunk(player, chunkX, chunkZ, com.example.plugin.territory.model.ChunkType.PRODUCTION);
             if (success) {
                 nodeService.createNode(player.getUniqueId(), type, chunkX, chunkZ);
